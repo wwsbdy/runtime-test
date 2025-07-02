@@ -20,9 +20,10 @@ public class NoSpringBeanInfo extends BeanInfo {
     public Object getBean() {
         if (!isInit) {
             synchronized (this) {
-                if (!isInit) {
-                    isInit = true;
+                if (isInit) {
+                    return super.getBean();
                 }
+                isInit = true;
                 try {
                     Object instanceSmart = createInstanceSmart(Class.forName(super.getClassName(), true, super.getClassLoader()));
                     super.setBean(instanceSmart);
