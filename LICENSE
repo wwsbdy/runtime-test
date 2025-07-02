@@ -199,3 +199,32 @@
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
+
+
+---
+
+## Third-Party Code Notice
+
+This project includes portions of third-party code covered by the Apache License, Version 2.0:
+
+- Portions of code adapted from [any-door] (https://github.com/lgp547/any-door),
+  licensed under the Apache License, Version 2.0.
+
+  Copyright (c) [lgp547]
+
+  You may obtain a copy of the License at:
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  The original source code is available at:
+  https://github.com/lgp547/any-door/blob/main/any-door-plugin/src/main/java/io/github/lgp547/anydoorplugin/action/AnyDoorOpenAction.java
+
+- Portions of code adapted from [pojo2json] (https://github.com/organics2016/pojo2json),
+  licensed under the Apache License, Version 2.0.
+
+  Copyright (c) [organics2016]
+
+  You may obtain a copy of the License at:
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  The original source code is available at:
+  https://github.com/organics2016/pojo2json/blob/master/src/main/java/ink/organics/pojo2json/parser/POJO2JSONParser.java
