@@ -1,11 +1,9 @@
-fun properties(key: String) = providers.gradleProperty(key)
-
 plugins {
     id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
 group = "com.zj"
-version = properties("runtime-test-core.version")
+version = "0.0.1"
 
 dependencies {
 //    implementation("net.bytebuddy:byte-buddy:1.16.1")

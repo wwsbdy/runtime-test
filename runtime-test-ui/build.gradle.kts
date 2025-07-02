@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "com.zj"
-version = properties("runtime-test-ui.version")
+version = "0.0.1"
 
 intellij {
     version.set(properties("intellij.version"))
@@ -45,4 +45,5 @@ tasks.runIde {
 
 tasks.clean {
     delete(tasks.buildPlugin.get().archiveFile)
+    delete(project.rootProject.file("dist"))
 }

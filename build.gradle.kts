@@ -1,11 +1,9 @@
-fun properties(key: String) = providers.gradleProperty(key)
-
 plugins {
     id("java")
 }
 
 group = "com.zj"
-version = properties("runtime-test.version")
+version = "0.0.1"
 
 subprojects {
     apply {
