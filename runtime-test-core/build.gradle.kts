@@ -1,21 +1,11 @@
+fun properties(key: String) = providers.gradleProperty(key)
+
 plugins {
     id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
 group = "com.zj"
-version = "0.0.1"
-
-tasks {
-    jar {
-        manifest {
-            attributes["Premain-Class"] = "com.zj.runtimetest.RuntimeTestAttach"
-            attributes["Agent-Class"] = "com.zj.runtimetest.RuntimeTestAttach"
-//            attributes["Class-Path"] = "byte-buddy-1.16.1.jar byte-buddy-agent-1.16.1.jar"
-            attributes["Can-Redefine-Classes"] = "true"
-            attributes["Can-Retransform-Classes"] = "true"
-        }
-    }
-}
+version = properties("runtime-test-core.version")
 
 dependencies {
 //    implementation("net.bytebuddy:byte-buddy:1.16.1")
@@ -38,9 +28,6 @@ tasks.shadowJar {
     destinationDirectory.set(distDir)
     archiveFileName.set(agentArchive)
     relocate("org.objectweb.asm", "com.zj.runtimetest.renamed.asm")
-//    dependencies {
-//        exclude(dependency("org.springframework:.*"))
-//    }
     manifest {
         attributes(
             mapOf(

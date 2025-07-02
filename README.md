@@ -29,7 +29,7 @@ ps:<br>
 ## 配置环境：
 - jdk： 17
 - gradle：8.1
-- org.jetbrains.intellij：1.14.0
+- org.jetbrains.intellij：1.14.1
 - idea： 2024.3
 
 ## 部分代码改编自
