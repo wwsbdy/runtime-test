@@ -17,20 +17,19 @@ import com.intellij.psi.*;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.sun.tools.attach.AgentLoadException;
 import com.sun.tools.attach.VirtualMachine;
-import com.zj.runtimetest.utils.JsonUtil;
 import com.zj.runtimetest.test.language.PluginBundle;
 import com.zj.runtimetest.test.utils.CacheUtil;
 import com.zj.runtimetest.test.utils.MethodUtil;
 import com.zj.runtimetest.test.utils.NoticeUtil;
 import com.zj.runtimetest.test.utils.ParamUtil;
 import com.zj.runtimetest.test.vo.CacheVo;
+import com.zj.runtimetest.utils.JsonUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
 
 
 
@@ -94,7 +93,7 @@ public class RuntimeTestAction extends AnAction implements Disposable {
             if (!runtimeTestDialog.isOK()) {
                 return;
             }
-            CompletableFuture.runAsync(() -> run(project, cacheVo));
+            run(project, cacheVo);
         } catch (Exception exception) {
             log.error("invoke exception", exception);
         }

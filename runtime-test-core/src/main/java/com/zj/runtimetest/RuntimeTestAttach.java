@@ -4,6 +4,7 @@ import com.zj.runtimetest.utils.JsonUtil;
 import com.zj.runtimetest.vo.RequestInfo;
 
 import java.lang.instrument.Instrumentation;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * @author : jie.zhou
@@ -37,6 +38,6 @@ public class RuntimeTestAttach {
     public static void agentmain(String args, Instrumentation inst) {
         System.out.println("[Agent] agentmain invoked with args: " + args);
         RequestInfo requestInfo = JsonUtil.toJavaBean(args, RequestInfo.class);
-        AgentContextHolder.invoke(requestInfo);
+        CompletableFuture.runAsync(() -> AgentContextHolder.invoke(requestInfo));
     }
 }
