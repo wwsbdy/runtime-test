@@ -47,6 +47,7 @@ public class RuntimeTestDialog extends DialogWrapper {
 
     private ComboBox<Long> pidComboBox;
     private JButton resetButton;
+    private ComboBox<String> historyComboBox;
 
     public RuntimeTestDialog(Project project, String cacheKey, CacheVo cache, String defaultJson) {
         super(true);
@@ -94,6 +95,18 @@ public class RuntimeTestDialog extends DialogWrapper {
         pidComboBox.setToolTipText(PluginBundle.get("dialog.pid.title"));
         jPanel.add(pidComboBox);
 
+        this.historyComboBox = new ComboBox<>();
+
+        cache.forEachHistory(historyComboBox::addItem);
+        historyComboBox.setToolTipText(PluginBundle.get("dialog.history.title"));
+        historyComboBox.addActionListener(event -> {
+            if (Objects.isNull(historyComboBox.getSelectedItem())) {
+                return;
+            }
+            jsonContent.setText(historyComboBox.getSelectedItem().toString());
+        });
+        jPanel.add(historyComboBox);
+
         this.resetButton = new JButton(AllIcons.General.Reset);
         resetButton.setToolTipText(PluginBundle.get("dialog.reset.title"));
         resetButton.addActionListener(event -> jsonContent.setText(defaultJson));
@@ -132,8 +145,10 @@ public class RuntimeTestDialog extends DialogWrapper {
             Messages.showErrorDialog(PluginBundle.get("notice.error.no-such-process") + " " + pid, PluginBundle.get("notice.error"));
             return;
         }
+        String jsonContentText = jsonContent.getText();
         cache.setPid(pid);
-        cache.setRequestJson(jsonContent.getText());
+        cache.setRequestJson(jsonContentText);
+        cache.addHistory(jsonContentText);
         RuntimeTestState.getInstance(project).putCache(cacheKey, cache);
         super.doOKAction();
     }
@@ -144,8 +159,10 @@ public class RuntimeTestDialog extends DialogWrapper {
             disposed = true;
             ExecutorUtil.removeListener(pidComboBox);
             ExecutorUtil.removeListener(resetButton);
+            ExecutorUtil.removeListener(historyComboBox);
             pidComboBox = null;
             resetButton = null;
+            historyComboBox = null;
             cacheKey = null;
             cache = null;
             defaultJson = null;

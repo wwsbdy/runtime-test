@@ -10,7 +10,6 @@ import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.CaretModel;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.util.Disposer;
 import com.intellij.openapi.util.Key;
 import com.intellij.openapi.util.UserDataHolder;
 import com.intellij.psi.*;
@@ -18,10 +17,10 @@ import com.intellij.psi.util.PsiTreeUtil;
 import com.sun.tools.attach.AgentLoadException;
 import com.sun.tools.attach.VirtualMachine;
 import com.zj.runtimetest.test.language.PluginBundle;
-import com.zj.runtimetest.test.utils.PluginCacheUtil;
 import com.zj.runtimetest.test.utils.MethodUtil;
 import com.zj.runtimetest.test.utils.NoticeUtil;
 import com.zj.runtimetest.test.utils.ParamUtil;
+import com.zj.runtimetest.test.utils.PluginCacheUtil;
 import com.zj.runtimetest.test.vo.CacheVo;
 import com.zj.runtimetest.utils.JsonUtil;
 import org.jetbrains.annotations.NotNull;
@@ -88,7 +87,7 @@ public class RuntimeTestAction extends AnAction implements Disposable {
             }
             CacheVo cacheVo = cache;
             RuntimeTestDialog runtimeTestDialog = new RuntimeTestDialog(project, cacheKey, cacheVo, defaultJson);
-            Disposer.register(this, runtimeTestDialog.getDisposable());
+//            Disposer.register(this, runtimeTestDialog.getDisposable());
             runtimeTestDialog.show();
             if (!runtimeTestDialog.isOK()) {
                 return;

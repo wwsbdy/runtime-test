@@ -29,25 +29,29 @@ public class AgentContextHolder {
     public static void invoke(RequestInfo requestInfo) {
         String className = requestInfo.getClassName();
         String methodName = requestInfo.getMethodName();
-        ClassLoader classLoader;
-        Object bean = null;
-        if (requestInfo.isStaticMethod()) {
-            System.out.println("[Agent] " + className + "." + methodName + "() is static.");
-            classLoader = DEFAULT_CLASS_LOADER;
-        } else {
-            BeanInfo beanInfo = getBean(className);
-            bean = beanInfo.getBean();
-            if (Objects.isNull(bean)) {
-                System.out.println("[Agent] Bean not found: " + className);
-                return;
+        String cacheKey = CacheUtil.genCacheKey(className, methodName, requestInfo.getParameterTypeList());
+        MethodInvokeInfo methodInvokeInfo = METHOD_CACHE.get(cacheKey);
+        if (Objects.isNull(methodInvokeInfo)) {
+            ClassLoader classLoader;
+            Object bean = null;
+            if (requestInfo.isStaticMethod()) {
+                System.out.println("[Agent] " + className + "." + methodName + "() is static.");
+                classLoader = DEFAULT_CLASS_LOADER;
+            } else {
+                BeanInfo beanInfo = getBean(className);
+                bean = beanInfo.getBean();
+                if (Objects.isNull(bean)) {
+                    System.out.println("[Agent] Bean not found: " + className);
+                    return;
+                }
+                classLoader = beanInfo.getClassLoader();
+                System.out.println("[Agent] Bean from: " + bean);
             }
-            classLoader = beanInfo.getClassLoader();
-            System.out.println("[Agent] Bean from: " + bean);
+            methodInvokeInfo = new MethodInvokeInfo(requestInfo, classLoader, bean);
+            METHOD_CACHE.put(cacheKey, methodInvokeInfo);
         }
         try {
-            MethodInvokeInfo methodInvokeInfo = new MethodInvokeInfo(requestInfo, classLoader, bean);
-            METHOD_CACHE.put(CacheUtil.genCacheKey(className, methodName, requestInfo.getParameterTypeList()), methodInvokeInfo);
-            Object result = new MethodInvokeInfo(requestInfo, classLoader, bean).invoke();
+            Object result = methodInvokeInfo.invoke();
             System.out.println("[Agent] " + methodName + "() invoked successfully. result: " + JsonUtil.toJsonString(result));
         } catch (Exception e) {
             e.printStackTrace();
