@@ -1,4 +1,4 @@
-package com.zj.runtimetest.test;
+package com.zj.runtimetest.ui;
 
 import com.intellij.icons.AllIcons;
 import com.intellij.json.JsonLanguage;
@@ -11,11 +11,11 @@ import com.intellij.openapi.util.Disposer;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.util.ui.JBUI;
-import com.zj.runtimetest.test.cache.RuntimeTestState;
-import com.zj.runtimetest.test.json.JsonEditorField;
-import com.zj.runtimetest.test.language.PluginBundle;
-import com.zj.runtimetest.test.utils.ExecutorUtil;
-import com.zj.runtimetest.test.vo.CacheVo;
+import com.zj.runtimetest.cache.RuntimeTestState;
+import com.zj.runtimetest.json.JsonEditorField;
+import com.zj.runtimetest.language.PluginBundle;
+import com.zj.runtimetest.utils.ExecutorUtil;
+import com.zj.runtimetest.vo.CacheVo;
 import lombok.Getter;
 import lombok.Setter;
 

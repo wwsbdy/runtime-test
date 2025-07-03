@@ -36,20 +36,20 @@
     <depends>com.intellij.modules.json</depends>
 
     <extensions defaultExtensionNs="com.intellij">
-        <projectService serviceImplementation="com.zj.runtimetest.test.cache.RuntimeTestState"/>
-        <java.programPatcher implementation="com.zj.runtimetest.test.RuntimeTestJavaProgramPatcher"/>
+        <projectService serviceImplementation="com.zj.runtimetest.cache.RuntimeTestState"/>
+        <java.programPatcher implementation="com.zj.runtimetest.listener.RuntimeTestJavaProgramPatcher"/>
         <notificationGroup id="RuntimeTest" displayType="BALLOON"/>
     </extensions>
     <actions>
         <action id="RuntimeTest.RuntimeTestAction"
-                class="com.zj.runtimetest.test.RuntimeTestAction"
+                class="com.zj.runtimetest.ui.RuntimeTestAction"
                 text="Runtime Test"
                 description="The method will be called">
             <add-to-group group-id="EditorPopupMenu" anchor="first"/>
         </action>
     </actions>
     <projectListeners>
-        <listener class="com.zj.runtimetest.test.RuntimeTestExecutionListener"
+        <listener class="com.zj.runtimetest.listener.RuntimeTestExecutionListener"
                   topic="com.intellij.execution.ExecutionListener"/>
     </projectListeners>
 </idea-plugin>

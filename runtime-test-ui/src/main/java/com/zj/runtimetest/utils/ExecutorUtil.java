@@ -1,9 +1,9 @@
-package com.zj.runtimetest.test.utils;
+package com.zj.runtimetest.utils;
 
 import com.intellij.execution.Executor;
 import com.intellij.execution.ExecutorRegistry;
 import com.intellij.openapi.ui.ComboBox;
-import com.zj.runtimetest.test.json.JsonEditorField;
+import com.zj.runtimetest.json.JsonEditorField;
 
 import javax.swing.*;
 import javax.swing.event.AncestorListener;

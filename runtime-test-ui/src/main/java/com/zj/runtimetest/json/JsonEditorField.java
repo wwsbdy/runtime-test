@@ -1,4 +1,4 @@
-package com.zj.runtimetest.test.json;
+package com.zj.runtimetest.json;
 
 import com.intellij.lang.Language;
 import com.intellij.openapi.Disposable;
@@ -7,7 +7,7 @@ import com.intellij.openapi.editor.ex.EditorEx;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Disposer;
 import com.intellij.ui.LanguageTextField;
-import com.zj.runtimetest.test.utils.ExecutorUtil;
+import com.zj.runtimetest.utils.ExecutorUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

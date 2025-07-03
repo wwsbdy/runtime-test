@@ -1,4 +1,4 @@
-package com.zj.runtimetest.test.json.parser;
+package com.zj.runtimetest.json.parser;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.Sets;

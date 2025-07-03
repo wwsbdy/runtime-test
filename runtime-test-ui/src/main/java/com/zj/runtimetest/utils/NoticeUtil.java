@@ -1,4 +1,4 @@
-package com.zj.runtimetest.test.utils;
+package com.zj.runtimetest.utils;
 
 import com.intellij.notification.NotificationGroupManager;
 import com.intellij.notification.NotificationType;

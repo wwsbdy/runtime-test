@@ -1,10 +1,10 @@
-package com.zj.runtimetest.test.cache;
+package com.zj.runtimetest.cache;
 
 import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
 import com.intellij.openapi.project.Project;
-import com.zj.runtimetest.test.vo.CacheVo;
+import com.zj.runtimetest.vo.CacheVo;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

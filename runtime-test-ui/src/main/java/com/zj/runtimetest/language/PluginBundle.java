@@ -1,4 +1,4 @@
-package com.zj.runtimetest.test.language;
+package com.zj.runtimetest.language;
 
 import org.jetbrains.annotations.NotNull;
 

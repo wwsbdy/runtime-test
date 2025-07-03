@@ -1,4 +1,4 @@
-package com.zj.runtimetest.test.vo;
+package com.zj.runtimetest.vo;
 
 import org.apache.commons.collections.CollectionUtils;
 

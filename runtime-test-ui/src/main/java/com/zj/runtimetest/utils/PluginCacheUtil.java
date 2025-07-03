@@ -1,9 +1,9 @@
-package com.zj.runtimetest.test.utils;
+package com.zj.runtimetest.utils;
 
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiMethod;
-import com.zj.runtimetest.test.cache.RuntimeTestState;
-import com.zj.runtimetest.test.vo.CacheVo;
+import com.zj.runtimetest.cache.RuntimeTestState;
+import com.zj.runtimetest.vo.CacheVo;
 import com.zj.runtimetest.utils.CacheUtil;
 
 /**

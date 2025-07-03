@@ -1,4 +1,4 @@
-package com.zj.runtimetest.test.json;
+package com.zj.runtimetest.json;
 
 import com.intellij.ide.DataManager;
 import com.intellij.openapi.Disposable;
@@ -9,7 +9,7 @@ import com.intellij.openapi.editor.actions.IndentSelectionAction;
 import com.intellij.openapi.editor.actions.UnindentSelectionAction;
 import com.intellij.openapi.editor.ex.EditorEx;
 import com.intellij.ui.EditorTextField;
-import com.zj.runtimetest.test.utils.ExecutorUtil;
+import com.zj.runtimetest.utils.ExecutorUtil;
 import org.apache.commons.collections.CollectionUtils;
 
 import javax.swing.*;

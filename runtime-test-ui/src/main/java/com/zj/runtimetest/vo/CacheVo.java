@@ -1,4 +1,4 @@
-package com.zj.runtimetest.test.vo;
+package com.zj.runtimetest.vo;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.zj.runtimetest.vo.RequestInfo;

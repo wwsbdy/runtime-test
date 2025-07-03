@@ -1,4 +1,4 @@
-package com.zj.runtimetest.test;
+package com.zj.runtimetest.listener;
 
 import com.intellij.execution.Executor;
 import com.intellij.execution.configurations.JavaParameters;
