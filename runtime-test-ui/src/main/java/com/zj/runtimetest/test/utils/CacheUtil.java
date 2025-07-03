@@ -2,9 +2,9 @@ package com.zj.runtimetest.test.utils;
 
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiMethod;
-import com.zj.runtimetest.vo.MethodParamInfo;
 import com.zj.runtimetest.test.cache.RuntimeTestState;
 import com.zj.runtimetest.test.vo.CacheVo;
+import com.zj.runtimetest.vo.MethodParamInfo;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -15,9 +15,13 @@ import java.util.stream.Collectors;
 public class CacheUtil {
 
     public static String genCacheKey(PsiClass psiClass, PsiMethod psiMethod) {
-        return genCacheKey(psiClass.getQualifiedName(),
+        return genCacheKey(
+                psiClass.getQualifiedName(),
                 psiMethod.getName(),
-                ParamUtil.getParamTypeNameList(psiMethod.getParameterList()).stream().map(MethodParamInfo::getParamType).collect(Collectors.toList()));
+                ParamUtil.getParamGenericsTypeNameList(psiMethod.getParameterList()).stream()
+                        .map(MethodParamInfo::getParamType)
+                        .collect(Collectors.toList())
+        );
     }
 
     public static String genCacheKey(String className, String methodName, List<String> paramTypeNameList) {

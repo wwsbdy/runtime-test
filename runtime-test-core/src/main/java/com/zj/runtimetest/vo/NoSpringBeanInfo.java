@@ -1,5 +1,6 @@
 package com.zj.runtimetest.vo;
 
+import com.zj.runtimetest.utils.ClassUtil;
 import com.zj.runtimetest.utils.FiledUtil;
 
 import java.lang.reflect.Constructor;
@@ -25,7 +26,7 @@ public class NoSpringBeanInfo extends BeanInfo {
                 }
                 isInit = true;
                 try {
-                    Object instanceSmart = createInstanceSmart(Class.forName(super.getClassName(), true, super.getClassLoader()));
+                    Object instanceSmart = createInstanceSmart(ClassUtil.getClass(super.getClassName(), super.getClassLoader()));
                     super.setBean(instanceSmart);
                     return instanceSmart;
                 } catch (Exception e) {

@@ -1,5 +1,6 @@
 package com.zj.runtimetest;
 
+import com.zj.runtimetest.utils.ClassUtil;
 import com.zj.runtimetest.utils.JsonUtil;
 import com.zj.runtimetest.vo.*;
 
@@ -77,7 +78,7 @@ public class AgentContextHolder {
                 Object context = entry.getKey();
                 Object bean;
                 try {
-                    Class<?> clazz = Class.forName(className, true, classLoader);
+                    Class<?> clazz = ClassUtil.getClass(className, classLoader);
                     bean = context.getClass().getMethod("getBean", Class.class).invoke(context, clazz);
                 } catch (Exception e) {
                     continue;

@@ -1,5 +1,6 @@
 package com.zj.runtimetest.vo;
 
+import com.zj.runtimetest.utils.ClassUtil;
 import com.zj.runtimetest.utils.FiledUtil;
 import com.zj.runtimetest.utils.JsonUtil;
 
@@ -23,7 +24,7 @@ public class MethodInvokeInfo {
         if (Objects.nonNull(requestInfo.getParameterTypeList()) && !requestInfo.getParameterTypeList().isEmpty()) {
             paramClazzArr = requestInfo.getParameterTypeList().stream().map(MethodParamInfo::getParamType).map(clsStr -> {
                         try {
-                            return Class.forName(clsStr, true, classLoader);
+                            return ClassUtil.getClass(clsStr, classLoader);
                         } catch (ClassNotFoundException e) {
                             throw new RuntimeException(e);
                         }
@@ -68,7 +69,7 @@ public class MethodInvokeInfo {
         String methodName = requestInfo.getMethodName();
         Method method;
         if (staticMethod) {
-            method = Class.forName(className, true, classLoader).getDeclaredMethod(methodName, paramClazzArr);
+            method = ClassUtil.getClass(className, classLoader).getDeclaredMethod(methodName, paramClazzArr);
         } else {
             method = bean.getClass().getDeclaredMethod(methodName, paramClazzArr);
         }

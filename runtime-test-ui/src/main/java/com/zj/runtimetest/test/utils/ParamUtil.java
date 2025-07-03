@@ -19,6 +19,10 @@ import java.util.Objects;
  */
 public class ParamUtil {
 
+    /**
+     * 获取参数类型列表（去掉范型）
+     *
+     */
     public static List<MethodParamInfo> getParamTypeNameList(PsiParameterList parameterList) {
         if (parameterList == null) {
             return Collections.emptyList();
@@ -32,6 +36,26 @@ public class ParamUtil {
             String canonicalText = parameter.getType().getCanonicalText();
             String classType = StringUtils.substringBefore(canonicalText, "<");
             parameterTypeList.add(new MethodParamInfo(parameter.getName(), classType));
+        }
+        return parameterTypeList;
+    }
+
+    /**
+     * 获取参数类型列表（包含范型）
+     *
+     */
+    public static List<MethodParamInfo> getParamGenericsTypeNameList(PsiParameterList parameterList) {
+        if (parameterList == null) {
+            return Collections.emptyList();
+        }
+        if (parameterList.getParametersCount() == 0) {
+            return Collections.emptyList();
+        }
+        List<MethodParamInfo> parameterTypeList = new ArrayList<>();
+        for (int i = 0; i < parameterList.getParametersCount(); i++) {
+            PsiParameter parameter = Objects.requireNonNull(parameterList.getParameter(i));
+            String canonicalText = parameter.getType().getCanonicalText();
+            parameterTypeList.add(new MethodParamInfo(parameter.getName(), canonicalText));
         }
         return parameterTypeList;
     }
