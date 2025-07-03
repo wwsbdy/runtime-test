@@ -16,6 +16,8 @@ public class ObjCache<K, V> {
      */
     public ObjCache(int size) {
         map = new LinkedHashMap<K, V>(16, 0.75f, true) {
+            private static final long serialVersionUID = 4250833893593797814L;
+
             /**
              * 当缓存大小超出时，会调用此方法，将前面的缓存项删除
              */
