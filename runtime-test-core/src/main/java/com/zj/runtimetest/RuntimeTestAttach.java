@@ -38,6 +38,10 @@ public class RuntimeTestAttach {
     public static void agentmain(String args, Instrumentation inst) {
         System.out.println("[Agent] agentmain invoked with args: " + args);
         RequestInfo requestInfo = JsonUtil.toJavaBean(args, RequestInfo.class);
-        CompletableFuture.runAsync(() -> AgentContextHolder.invoke(requestInfo));
+        CompletableFuture.runAsync(() -> AgentContextHolder.invoke(requestInfo))
+                .exceptionally(throwable -> {
+                    throwable.printStackTrace();
+                    return null;
+                });
     }
 }

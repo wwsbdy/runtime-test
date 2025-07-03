@@ -17,7 +17,7 @@ public class ObjCache<K, V> {
     public ObjCache(int size) {
         map = new LinkedHashMap<K, V>(16, 0.75f, true) {
             /**
-                 * 当缓存大小超出时，会调用此方法，将前面的缓存项删除
+             * 当缓存大小超出时，会调用此方法，将前面的缓存项删除
              */
             @Override
             protected boolean removeEldestEntry(java.util.Map.Entry eldest) {
