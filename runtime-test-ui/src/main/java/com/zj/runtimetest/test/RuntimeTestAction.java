@@ -18,7 +18,7 @@ import com.intellij.psi.util.PsiTreeUtil;
 import com.sun.tools.attach.AgentLoadException;
 import com.sun.tools.attach.VirtualMachine;
 import com.zj.runtimetest.test.language.PluginBundle;
-import com.zj.runtimetest.test.utils.CacheUtil;
+import com.zj.runtimetest.test.utils.PluginCacheUtil;
 import com.zj.runtimetest.test.utils.MethodUtil;
 import com.zj.runtimetest.test.utils.NoticeUtil;
 import com.zj.runtimetest.test.utils.ParamUtil;
@@ -73,9 +73,9 @@ public class RuntimeTestAction extends AnAction implements Disposable {
 //                NoticeUtil.error(project, PluginBundle.get("notice.error.method-not-public"));
 //                return;
 //            }
-            String cacheKey = CacheUtil.genCacheKey(psiMethod);
+            String cacheKey = PluginCacheUtil.genCacheKey(psiMethod);
             String defaultJson = ParamUtil.getDefaultJson(psiMethod.getParameterList());
-            CacheVo cache = CacheUtil.getCache(psiMethod);
+            CacheVo cache = PluginCacheUtil.getCache(psiMethod);
             if (Objects.isNull(cache)) {
                 cache = new CacheVo();
                 PsiParameterList parameterList = psiMethod.getParameterList();

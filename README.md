@@ -6,7 +6,6 @@ Getting Started:<br>
     <li>run project</li>
     <li>select method and right-click and choose 'Runtime Test'</li>
     <li>fill parameters, execute method</li>
-    <li>not support enum class</li>
 </ul>
 ps:<br>
 <ul>
@@ -25,7 +24,6 @@ ps:<br>
 <ul>
     <li>确认方法在指定的进程下</li>
     <li>通过构造器创建对象时，会选择传参最少的，参数会传入NULL</li>
-    <li>不支持枚举类</li>
 </ul>
 
 ## 配置环境：

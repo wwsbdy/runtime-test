@@ -4,28 +4,19 @@ import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiMethod;
 import com.zj.runtimetest.test.cache.RuntimeTestState;
 import com.zj.runtimetest.test.vo.CacheVo;
-import com.zj.runtimetest.vo.MethodParamInfo;
-
-import java.util.List;
-import java.util.stream.Collectors;
+import com.zj.runtimetest.utils.CacheUtil;
 
 /**
  * @author jie.zhou
  */
-public class CacheUtil {
+public class PluginCacheUtil extends CacheUtil {
 
     public static String genCacheKey(PsiClass psiClass, PsiMethod psiMethod) {
         return genCacheKey(
                 psiClass.getQualifiedName(),
                 psiMethod.getName(),
-                ParamUtil.getParamGenericsTypeNameList(psiMethod.getParameterList()).stream()
-                        .map(MethodParamInfo::getParamType)
-                        .collect(Collectors.toList())
+                ParamUtil.getParamGenericsTypeNameList(psiMethod.getParameterList())
         );
-    }
-
-    public static String genCacheKey(String className, String methodName, List<String> paramTypeNameList) {
-        return className + "#" + methodName + "#" + String.join(",", paramTypeNameList);
     }
 
     public static String genCacheKey(PsiMethod psiMethod) {

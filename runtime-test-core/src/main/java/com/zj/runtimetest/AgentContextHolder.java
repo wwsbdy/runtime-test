@@ -1,5 +1,6 @@
 package com.zj.runtimetest;
 
+import com.zj.runtimetest.utils.CacheUtil;
 import com.zj.runtimetest.utils.ClassUtil;
 import com.zj.runtimetest.utils.JsonUtil;
 import com.zj.runtimetest.vo.*;
@@ -16,7 +17,8 @@ public class AgentContextHolder {
 
     private static boolean isInit = false;
     private static final Map<Object, Set<ClassLoader>> CONTEXT_CLASS_LOADER_MAP = new HashMap<>();
-    private static final BeanCache BEAN_CACHE = new BeanCache(10);
+    private static final ObjCache<String, BeanInfo> BEAN_CACHE = new ObjCache<>(10);
+    private static final ObjCache<String, MethodInvokeInfo> METHOD_CACHE = new ObjCache<>(10);
     private static final ClassLoader DEFAULT_CLASS_LOADER = Thread.currentThread().getContextClassLoader();
 
     public static void setContext(Object ctx) {
@@ -43,6 +45,8 @@ public class AgentContextHolder {
             System.out.println("[Agent] Bean from: " + bean);
         }
         try {
+            MethodInvokeInfo methodInvokeInfo = new MethodInvokeInfo(requestInfo, classLoader, bean);
+            METHOD_CACHE.put(CacheUtil.genCacheKey(className, methodName, requestInfo.getParameterTypeList()), methodInvokeInfo);
             Object result = new MethodInvokeInfo(requestInfo, classLoader, bean).invoke();
             System.out.println("[Agent] " + methodName + "() invoked successfully. result: " + JsonUtil.toJsonString(result));
         } catch (Exception e) {

@@ -4,6 +4,8 @@ import com.zj.runtimetest.utils.ClassUtil;
 import com.zj.runtimetest.utils.FiledUtil;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Modifier;
+import java.util.Objects;
 
 /**
  * @author : jie.zhou
@@ -39,6 +41,28 @@ public class NoSpringBeanInfo extends BeanInfo {
     }
 
     public Object createInstanceSmart(Class<?> clazz) throws Exception {
+        if (clazz.isPrimitive()) {
+            throw new InstantiationException("Primitive type can not create instance");
+        }
+        if (clazz.isInterface()) {
+            throw new InstantiationException("Interface can not create instance");
+        }
+        if (clazz.isArray()) {
+            throw new InstantiationException("Array type can not create instance");
+        }
+        if (clazz.isAnnotation()) {
+            throw new InstantiationException("Annotation can not create instance");
+        }
+        if (Modifier.isAbstract(clazz.getModifiers())) {
+            throw new InstantiationException("Abstract type can not create instance");
+        }
+        if (clazz.isEnum()) {
+            Object[] enumConstants = clazz.getEnumConstants();
+            if (Objects.isNull(enumConstants) || enumConstants.length == 0) {
+                throw new InstantiationException("Enum type can not create instance");
+            }
+            return clazz.getEnumConstants()[0];
+        }
         Constructor<?> bestConstructor = getConstructor(clazz);
         // 构造参数
         Class<?>[] paramTypes = bestConstructor.getParameterTypes();

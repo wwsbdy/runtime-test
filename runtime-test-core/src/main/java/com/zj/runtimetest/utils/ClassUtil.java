@@ -1,5 +1,6 @@
 package com.zj.runtimetest.utils;
 
+import java.lang.reflect.Array;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -26,6 +27,12 @@ public class ClassUtil {
         Class<?> clazz = PRIMITIVE_TYPE_MAP.get(className);
         if (clazz != null) {
             return clazz;
+        }
+        if (className.endsWith("...")) {
+            return Array.newInstance(Class.forName(className.substring(0, className.length() - 3), true, classLoader), 0).getClass();
+        }
+        if (className.endsWith("[]")) {
+            return Array.newInstance(Class.forName(className.substring(0, className.length() - 2), true, classLoader), 0).getClass();
         }
         return Class.forName(className, true, classLoader);
     }
