@@ -48,9 +48,13 @@ public class JsonUtil {
         objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
     }
 
-    public static <T> T toJavaBean(String content, Type valueType) {
+    @SuppressWarnings("unchecked")
+    public static <T> T toJavaBean(String content, Class<?> clazz) {
+        if (Objects.isNull(content) || content.isEmpty()) {
+            return (T) FiledUtil.getFieldNullValue(clazz);
+        }
         try {
-            JavaType javaType = JsonUtil.objectMapper.getTypeFactory().constructType(valueType);
+            JavaType javaType = JsonUtil.objectMapper.getTypeFactory().constructType(clazz);
             if (javaType.isTypeOrSubTypeOf(Temporal.class)) {
                 content = "\"" + content + "\"";
             }
@@ -74,6 +78,18 @@ public class JsonUtil {
         }
         try {
             return objectMapper.convertValue(content, clazz);
+        } catch (Exception e) {
+            throw new IllegalArgumentException(e);
+        }
+    }
+
+    public static Object convertValue(Object content, Type type) {
+        if (content == null) {
+            return null;
+        }
+        try {
+            JavaType javaType = JsonUtil.objectMapper.getTypeFactory().constructType(type);
+            return objectMapper.convertValue(content, javaType);
         } catch (Exception e) {
             throw new IllegalArgumentException(e);
         }
@@ -122,7 +138,7 @@ public class JsonUtil {
             try {
                 return objectMapper.writeValueAsString(value);
             } catch (Throwable e) {
-                return null;
+                throw new IllegalArgumentException(e);
             }
         }
     }

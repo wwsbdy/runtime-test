@@ -3,7 +3,6 @@ package com.zj.runtimetest.utils;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.intellij.psi.PsiParameter;
 import com.intellij.psi.PsiParameterList;
-import com.zj.runtimetest.utils.JsonUtil;
 import com.zj.runtimetest.vo.MethodParamInfo;
 import com.zj.runtimetest.json.parser.POJO2JSONParser;
 import org.apache.commons.lang3.StringUtils;

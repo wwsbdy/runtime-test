@@ -50,3 +50,11 @@ tasks.clean {
     delete(distDir.resolve(agentArchive))
 }
 
+tasks.test {
+    dependsOn(tasks.jar)
+    jvmArgs = listOf(
+        "-Djdk.attach.allowAttachSelf=true",
+//        "-javaagent:${distDir}${File.separator}${agentArchive}"
+    )
+}
+

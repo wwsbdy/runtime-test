@@ -4,9 +4,11 @@ import com.zj.runtimetest.utils.ClassUtil;
 import com.zj.runtimetest.utils.FiledUtil;
 import com.zj.runtimetest.utils.JsonUtil;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.*;
+import java.lang.reflect.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * @author : jie.zhou
@@ -14,11 +16,14 @@ import java.util.*;
  */
 public class MethodInvokeInfo {
 
-    private final RequestInfo requestInfo;
+    private final boolean staticMethod;
+    private final String className;
+    private final String methodName;
     private final ClassLoader classLoader;
     private final Object bean;
     private Class<?>[] paramClazzArr;
-    private Object[] args;
+    private Method method;
+    private final List<MethodParamInfo> parameterTypeList;
 
     public MethodInvokeInfo(RequestInfo requestInfo, ClassLoader classLoader, Object bean) {
         if (Objects.nonNull(requestInfo.getParameterTypeList()) && !requestInfo.getParameterTypeList().isEmpty()) {
@@ -30,50 +35,60 @@ public class MethodInvokeInfo {
                         }
                     })
                     .toArray(Class[]::new);
-            args = getArgs(requestInfo.getRequestJson(), requestInfo.getParameterTypeList(), paramClazzArr);
         }
-        this.requestInfo = requestInfo;
+        this.staticMethod = requestInfo.isStaticMethod();
+        this.className = requestInfo.getClassName();
+        this.methodName = requestInfo.getMethodName();
+        this.parameterTypeList = requestInfo.getParameterTypeList();
         this.classLoader = classLoader;
         this.bean = bean;
     }
 
-    private Object[] getArgs(String content, List<MethodParamInfo> parameterTypeList, Class<?>[] paramClazzArr) {
-        if (Objects.isNull(parameterTypeList) || parameterTypeList.isEmpty()
-                || Objects.isNull(paramClazzArr) || paramClazzArr.length == 0
-                || paramClazzArr.length != parameterTypeList.size()) {
-            return null;
-        }
-        Map<String, Object> map;
-        if (Objects.isNull(content) || content.isEmpty()) {
-            map = Collections.emptyMap();
-        } else {
-            map = JsonUtil.toMap(content);
-        }
-        Object[] args = new Object[parameterTypeList.size()];
-        for (int i = 0; i < paramClazzArr.length; i++) {
-            Object arg = map.get(parameterTypeList.get(i).getParamName());
-            Class<?> argClazz = paramClazzArr[i];
-            if (arg == null) {
-                args[i] = FiledUtil.getFieldNullValue(argClazz);
-                continue;
+
+
+    public Object invoke(String requestJson) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, ClassNotFoundException {
+        if (Objects.isNull(method)) {
+            synchronized (this) {
+                if (Objects.nonNull(method)) {
+                    return method.invoke(bean, getArgs(method, requestJson));
+                }
+                if (staticMethod) {
+                    method = ClassUtil.getClass(className, classLoader).getDeclaredMethod(methodName, paramClazzArr);
+                } else {
+                    method = bean.getClass().getDeclaredMethod(methodName, paramClazzArr);
+                }
+                method.setAccessible(true);
+                return method.invoke(bean, getArgs(method, requestJson));
             }
-            args[i] = JsonUtil.convertValue(arg, paramClazzArr[i]);
         }
-        return args;
+        return method.invoke(bean, getArgs(method, requestJson));
     }
 
-
-    public Object invoke() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, ClassNotFoundException {
-        boolean staticMethod = requestInfo.isStaticMethod();
-        String className = requestInfo.getClassName();
-        String methodName = requestInfo.getMethodName();
-        Method method;
-        if (staticMethod) {
-            method = ClassUtil.getClass(className, classLoader).getDeclaredMethod(methodName, paramClazzArr);
-        } else {
-            method = bean.getClass().getDeclaredMethod(methodName, paramClazzArr);
+    private Object[] getArgs(Method method, String requestJson) {
+        Type[] parameterTypes = method.getGenericParameterTypes();
+        if (parameterTypes.length == 0) {
+            return null;
         }
-        method.setAccessible(true);
-        return method.invoke(bean, args);
+        if (parameterTypeList.size() != parameterTypes.length
+                && parameterTypeList.size() != paramClazzArr.length) {
+            throw new RuntimeException("method params size different");
+        }
+        Map<String, Object> map;
+        if (Objects.isNull(requestJson) || requestJson.isEmpty()) {
+            map = Collections.emptyMap();
+        } else {
+            map = JsonUtil.toMap(requestJson);
+        }
+        Object[] args = new Object[parameterTypes.length];
+        for (int i = 0; i < parameterTypes.length; i++) {
+            Object arg = map.get(parameterTypeList.get(i).getParamName());
+            Type argType = parameterTypes[i];
+            if (arg == null) {
+                args[i] = FiledUtil.getFieldNullValue(paramClazzArr[i]);
+                continue;
+            }
+            args[i] = JsonUtil.convertValue(arg, argType);
+        }
+        return args;
     }
 }

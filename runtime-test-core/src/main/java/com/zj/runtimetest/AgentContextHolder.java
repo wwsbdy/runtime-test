@@ -49,9 +49,11 @@ public class AgentContextHolder {
             }
             methodInvokeInfo = new MethodInvokeInfo(requestInfo, classLoader, bean);
             METHOD_CACHE.put(cacheKey, methodInvokeInfo);
+        } else {
+            System.out.println("[Agent] " + className + "." + methodName + "() is cached.");
         }
         try {
-            Object result = methodInvokeInfo.invoke();
+            Object result = methodInvokeInfo.invoke(requestInfo.getRequestJson());
             System.out.println("[Agent] " + methodName + "() invoked successfully. result: " + JsonUtil.toJsonString(result));
         } catch (Exception e) {
             e.printStackTrace();

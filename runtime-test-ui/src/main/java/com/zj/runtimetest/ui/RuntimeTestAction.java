@@ -16,7 +16,9 @@ import com.intellij.psi.*;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.sun.tools.attach.AgentLoadException;
 import com.sun.tools.attach.VirtualMachine;
-import com.zj.runtimetest.utils.JsonUtil;
+import com.zj.runtimetest.language.PluginBundle;
+import com.zj.runtimetest.utils.*;
+import com.zj.runtimetest.vo.CacheVo;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -66,20 +68,20 @@ public class RuntimeTestAction extends AnAction implements Disposable {
 //                NoticeUtil.error(project, PluginBundle.get("notice.error.method-not-public"));
 //                return;
 //            }
-            String cacheKey = com.zj.runtimetest.utils.PluginCacheUtil.genCacheKey(psiMethod);
-            String defaultJson = com.zj.runtimetest.utils.ParamUtil.getDefaultJson(psiMethod.getParameterList());
-            com.zj.runtimetest.vo.CacheVo cache = com.zj.runtimetest.utils.PluginCacheUtil.getCache(psiMethod);
+            String cacheKey = PluginCacheUtil.genCacheKey(psiMethod);
+            String defaultJson = ParamUtil.getDefaultJson(psiMethod.getParameterList());
+            CacheVo cache = PluginCacheUtil.getCache(psiMethod);
             if (Objects.isNull(cache)) {
-                cache = new com.zj.runtimetest.vo.CacheVo();
+                cache = new CacheVo();
                 PsiParameterList parameterList = psiMethod.getParameterList();
                 cache.setClassName(((PsiClass) psiMethod.getParent()).getQualifiedName());
                 cache.setMethodName(psiMethod.getName());
-                cache.setParameterTypeList(com.zj.runtimetest.utils.ParamUtil.getParamTypeNameList(parameterList));
+                cache.setParameterTypeList(ParamUtil.getParamTypeNameList(parameterList));
                 cache.setProjectBasePath(project.getBasePath());
-                cache.setStaticMethod(com.zj.runtimetest.utils.MethodUtil.isStaticMethod(psiMethod));
+                cache.setStaticMethod(MethodUtil.isStaticMethod(psiMethod));
                 cache.setRequestJson(defaultJson);
             }
-            com.zj.runtimetest.vo.CacheVo cacheVo = cache;
+            CacheVo cacheVo = cache;
             RuntimeTestDialog runtimeTestDialog = new RuntimeTestDialog(project, cacheKey, cacheVo, defaultJson);
 //            Disposer.register(this, runtimeTestDialog.getDisposable());
             runtimeTestDialog.show();
@@ -92,7 +94,7 @@ public class RuntimeTestAction extends AnAction implements Disposable {
         }
     }
 
-    private void run(Project project, com.zj.runtimetest.vo.CacheVo cache) {
+    private void run(Project project, CacheVo cache) {
         String coreJarPath = PathManager.getPluginsPath() + File.separator + "runtime-test-ui" + File.separator + "lib" + File.separator + "runtime-test-core.jar";
         String pid = cache.getPid().toString();
         VirtualMachine vm = null;
@@ -104,10 +106,10 @@ public class RuntimeTestAction extends AnAction implements Disposable {
                 log.warn("jdk lower version attach higher version, can ignore");
             } else {
                 if (Objects.equals(e.getMessage(), "No such process")) {
-                    com.zj.runtimetest.utils.NoticeUtil.error(project, com.zj.runtimetest.language.PluginBundle.get("notice.error.no-such-process") + " " + pid);
+                    NoticeUtil.error(project, PluginBundle.get("notice.error.no-such-process") + " " + pid);
                 } else {
                     log.error("e: ", e);
-                    com.zj.runtimetest.utils.NoticeUtil.error(project, e.getMessage());
+                    NoticeUtil.error(project, e.getMessage());
                 }
             }
         } catch (AgentLoadException e) {
@@ -115,11 +117,11 @@ public class RuntimeTestAction extends AnAction implements Disposable {
                 log.warn("jdk higher version attach lower version, can ignore");
             } else {
                 log.error("e: ", e);
-                com.zj.runtimetest.utils.NoticeUtil.error(project, e.getMessage());
+                NoticeUtil.error(project, e.getMessage());
             }
         } catch (Exception e) {
             log.error("e: ", e);
-            com.zj.runtimetest.utils.NoticeUtil.error(project, e.getMessage());
+            NoticeUtil.error(project, e.getMessage());
         } finally {
             if (null != vm) {
                 try {

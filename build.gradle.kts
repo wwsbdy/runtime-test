@@ -22,5 +22,8 @@ subprojects {
     dependencies {
         compileOnly("org.projectlombok:lombok:1.18.34")
         annotationProcessor("org.projectlombok:lombok:1.18.34")
+        testImplementation("junit:junit:4.13.1")
+        testCompileOnly("org.projectlombok:lombok:1.18.34")
+        testAnnotationProcessor("org.projectlombok:lombok:1.18.34")
     }
 }
