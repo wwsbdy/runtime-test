@@ -91,7 +91,7 @@ public class AgentContextHolder {
             try {
                 clazz = ClassUtil.getClass(className, classLoader);
             } catch (Exception e) {
-                e.printStackTrace();
+//                e.printStackTrace();
                 continue;
             }
             if (Objects.isNull(contextCache) || contextCache.isEmpty()) {
@@ -102,7 +102,7 @@ public class AgentContextHolder {
                 try {
                     bean = context.getClass().getMethod("getBean", Class.class).invoke(context, clazz);
                 } catch (Exception e) {
-                    e.printStackTrace();
+//                    e.printStackTrace();
                     continue;
                 }
                 if (Objects.nonNull(bean)) {
