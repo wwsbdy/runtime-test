@@ -3,6 +3,7 @@ package com.zj.runtimetest.vo;
 import com.zj.runtimetest.utils.ClassUtil;
 import com.zj.runtimetest.utils.FiledUtil;
 import com.zj.runtimetest.utils.JsonUtil;
+import lombok.Getter;
 
 import java.lang.reflect.*;
 import java.util.Collections;
@@ -24,6 +25,8 @@ public class MethodInvokeInfo {
     private Class<?>[] paramClazzArr;
     private Method method;
     private final List<MethodParamInfo> parameterTypeList;
+    @Getter
+    private boolean returnValue;
 
     public MethodInvokeInfo(RequestInfo requestInfo, ClassLoader classLoader, Object bean) {
         if (Objects.nonNull(requestInfo.getParameterTypeList()) && !requestInfo.getParameterTypeList().isEmpty()) {
@@ -58,6 +61,7 @@ public class MethodInvokeInfo {
                     method = bean.getClass().getDeclaredMethod(methodName, paramClazzArr);
                 }
                 method.setAccessible(true);
+                returnValue = method.getReturnType() != void.class;
                 return method.invoke(bean, getArgs(method, requestJson));
             }
         }

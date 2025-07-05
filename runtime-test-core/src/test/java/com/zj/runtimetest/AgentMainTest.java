@@ -5,6 +5,7 @@ import com.zj.runtimetest.utils.JsonUtil;
 import com.zj.runtimetest.vo.MethodParamInfo;
 import com.zj.runtimetest.vo.OneVo;
 import com.zj.runtimetest.vo.Person;
+import org.junit.After;
 import org.junit.Test;
 
 import java.lang.reflect.Method;
@@ -20,6 +21,11 @@ import java.util.stream.Stream;
  * @date : 2025/7/2
  */
 public class AgentMainTest {
+
+    @After
+    public void after() throws InterruptedException {
+        Thread.sleep(1000000);
+    }
 
     @Test
     public void testLoadAgentAtRuntime() throws Exception {

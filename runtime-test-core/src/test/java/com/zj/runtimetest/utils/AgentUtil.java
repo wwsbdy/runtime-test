@@ -3,6 +3,7 @@ package com.zj.runtimetest.utils;
 import com.zj.runtimetest.vo.MethodParamInfo;
 import com.zj.runtimetest.vo.RequestInfo;
 
+import java.io.File;
 import java.lang.management.ManagementFactory;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -24,7 +25,7 @@ public class AgentUtil {
         // 1. 获取当前 JVM 的 PID
         String pid = ManagementFactory.getRuntimeMXBean().getName().split("@")[0];
 
-        String agentJarPath = "/Users/jie.zhou/IdeaProjects/runtime-test/dist/runtime-test-core.jar";
+        String agentJarPath = System.getProperty("user.dir").replace("runtime-test-core", "") + "dist" + File.separator + "runtime-test-core.jar";
 
         String agentArgs = JsonUtil.toJsonString(requestInfo);
         // 3. 动态加载 Agent

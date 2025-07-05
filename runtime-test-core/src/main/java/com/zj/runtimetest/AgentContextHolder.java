@@ -16,14 +16,15 @@ public class AgentContextHolder {
 
 
     private static boolean isInit = false;
-    private static final Map<Object, Set<ClassLoader>> CONTEXT_CLASS_LOADER_MAP = new HashMap<>();
+    private static final Set<Object> CONTEXT_CLASS_LOADER_SET = new HashSet<>();
+    private static final ObjCache<ClassLoader, ObjCache<Object, Integer>> CLASS_LOADER_CONTEXT_MAP = new ObjCache<>();
     private static final ObjCache<String, BeanInfo> BEAN_CACHE = new ObjCache<>(10);
     private static final ObjCache<String, MethodInvokeInfo> METHOD_CACHE = new ObjCache<>(10);
     private static final ClassLoader DEFAULT_CLASS_LOADER = Thread.currentThread().getContextClassLoader();
 
     public static void setContext(Object ctx) {
         System.out.println("[Agent] ApplicationContext injected." + ctx.getClass().getName());
-        CONTEXT_CLASS_LOADER_MAP.put(ctx, new LinkedHashSet<>());
+        CONTEXT_CLASS_LOADER_SET.add(ctx);
     }
 
     public static void invoke(RequestInfo requestInfo) {
@@ -54,7 +55,7 @@ public class AgentContextHolder {
         }
         try {
             Object result = methodInvokeInfo.invoke(requestInfo.getRequestJson());
-            System.out.println("[Agent] " + methodName + "() invoked successfully. result: " + JsonUtil.toJsonString(result));
+            System.out.println("[Agent] " + methodName + "() invoked successfully." + (methodInvokeInfo.isReturnValue() ? " result: " + JsonUtil.toJsonString(result) : ""));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -70,7 +71,7 @@ public class AgentContextHolder {
             System.out.println("[Agent] getBean from cache: " + className);
             return o;
         }
-        if (CONTEXT_CLASS_LOADER_MAP.isEmpty()) {
+        if (CONTEXT_CLASS_LOADER_SET.isEmpty()) {
             System.out.println("[Agent] init context classLoader map is empty.");
             NoSpringBeanInfo noSpringBeanInfo = new NoSpringBeanInfo(className, DEFAULT_CLASS_LOADER);
             BEAN_CACHE.put(className, noSpringBeanInfo);
@@ -83,14 +84,31 @@ public class AgentContextHolder {
                 e.printStackTrace();
             }
         }
-        for (Map.Entry<Object, Set<ClassLoader>> entry : CONTEXT_CLASS_LOADER_MAP.entrySet()) {
-            for (ClassLoader classLoader : entry.getValue()) {
-                Object context = entry.getKey();
+        if (CLASS_LOADER_CONTEXT_MAP.isEmpty()) {
+            System.out.println("[Agent] init context classLoader map is empty.");
+            NoSpringBeanInfo noSpringBeanInfo = new NoSpringBeanInfo(className, DEFAULT_CLASS_LOADER);
+            BEAN_CACHE.put(className, noSpringBeanInfo);
+            return noSpringBeanInfo;
+        }
+        // accessOrder=true，表示最近访问的元素会排在最后，将能正常获取bean的类加载器和spring上下文放最后
+        for (ClassLoader classLoader : CLASS_LOADER_CONTEXT_MAP.getKeys()) {
+            ObjCache<Object, Integer> contextCache = CLASS_LOADER_CONTEXT_MAP.get(classLoader);
+            Class<?> clazz;
+            try {
+                clazz = ClassUtil.getClass(className, classLoader);
+            } catch (Exception e) {
+                e.printStackTrace();
+                continue;
+            }
+            if (Objects.isNull(contextCache) || contextCache.isEmpty()) {
+                continue;
+            }
+            for (Object context : contextCache.getKeys()) {
                 Object bean;
                 try {
-                    Class<?> clazz = ClassUtil.getClass(className, classLoader);
                     bean = context.getClass().getMethod("getBean", Class.class).invoke(context, clazz);
                 } catch (Exception e) {
+                    e.printStackTrace();
                     continue;
                 }
                 if (Objects.nonNull(bean)) {
@@ -114,25 +132,28 @@ public class AgentContextHolder {
                 return;
             }
             isInit = true;
-            if (CONTEXT_CLASS_LOADER_MAP.isEmpty()) {
+            if (CONTEXT_CLASS_LOADER_SET.isEmpty()) {
                 System.out.println("[Agent] init context classLoader map is empty.");
                 return;
             }
-            for (Map.Entry<Object, Set<ClassLoader>> entry : CONTEXT_CLASS_LOADER_MAP.entrySet()) {
-                Object context = entry.getKey();
+            for (Object context : CONTEXT_CLASS_LOADER_SET) {
                 Map<ClassLoader, Integer> classLoaderCountMap = new HashMap<>();
-                Set<ClassLoader> classLoaders;
+                List<ClassLoader> classLoaders;
                 for (String beanDefinitionName : (String[]) context.getClass().getMethod("getBeanDefinitionNames").invoke(context)) {
                     Object bean = context.getClass().getMethod("getBean", String.class).invoke(context, beanDefinitionName);
                     classLoaderCountMap.compute(bean.getClass().getClassLoader(), (k, v) -> v == null ? 1 : v + 1);
                 }
                 classLoaders = classLoaderCountMap.entrySet().stream()
-                        .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+                        .sorted(Map.Entry.comparingByValue())
                         .map(Map.Entry::getKey)
                         .filter(Objects::nonNull)
-                        .collect(Collectors.toSet());
-                entry.setValue(classLoaders);
-                System.out.println("[Agent] " + entry.getKey() + " init classLoaders: " + classLoaders);
+                        .collect(Collectors.toList());
+                if (classLoaders.size() > 1) {
+                    for (ClassLoader classLoader : classLoaders) {
+                        CLASS_LOADER_CONTEXT_MAP.computeIfAbsent(classLoader, k -> new ObjCache<>()).put(context, 1);
+                    }
+                }
+                System.out.println("[Agent] " + context + " init classLoaders: " + classLoaders);
             }
         }
     }

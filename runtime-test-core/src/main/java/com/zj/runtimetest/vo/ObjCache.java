@@ -1,7 +1,8 @@
 package com.zj.runtimetest.vo;
 
-import java.util.LinkedHashMap;
-import java.util.Objects;
+import java.util.*;
+import java.util.function.BiConsumer;
+import java.util.function.Function;
 
 /**
  * 缓存对象，先进先出
@@ -11,10 +12,14 @@ public class ObjCache<K, V> {
 
     private final LinkedHashMap<K, V> map;
 
+    public ObjCache() {
+        this(null);
+    }
+
     /**
      * @param size 缓存大小
      */
-    public ObjCache(int size) {
+    public ObjCache(Integer size) {
         map = new LinkedHashMap<K, V>(16, 0.75f, true) {
             private static final long serialVersionUID = 4250833893593797814L;
 
@@ -22,7 +27,10 @@ public class ObjCache<K, V> {
              * 当缓存大小超出时，会调用此方法，将前面的缓存项删除
              */
             @Override
-            protected boolean removeEldestEntry(java.util.Map.Entry eldest) {
+            protected boolean removeEldestEntry(Map.Entry eldest) {
+                if (size == null) {
+                    return false;
+                }
                 return size() > size;
             }
         };
@@ -45,6 +53,29 @@ public class ObjCache<K, V> {
     }
 
     public boolean isNotEmpty() {
-        return !map.isEmpty();
+        return !isEmpty();
+    }
+
+    public boolean isEmpty() {
+        return map.isEmpty();
+    }
+
+    public List<K> getKeys() {
+        if (map.isEmpty()) {
+            return Collections.emptyList();
+        }
+        ArrayList<K> cacheKeyList = new ArrayList<>(map.keySet());
+        Collections.reverse(cacheKeyList);
+        return cacheKeyList;
+    }
+
+    public void foreach(BiConsumer<K, V> consumer) {
+        for (K cacheKey : getKeys()) {
+            consumer.accept(cacheKey, get(cacheKey));
+        }
+    }
+
+    public V computeIfAbsent(K classLoader, Function<? super K, ? extends V> mappingFunction) {
+        return map.computeIfAbsent(classLoader, mappingFunction);
     }
 }
