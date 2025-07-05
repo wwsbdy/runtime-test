@@ -16,7 +16,7 @@ public class AgentContextHolder {
 
 
     private static boolean isInit = false;
-    private static final Set<Object> CONTEXT_CLASS_LOADER_SET = new HashSet<>();
+    private static Set<Object> CONTEXT_CLASS_LOADER_SET = new HashSet<>();
     private static final ObjCache<ClassLoader, ObjCache<Object, Integer>> CLASS_LOADER_CONTEXT_MAP = new ObjCache<>();
     private static final ObjCache<String, BeanInfo> BEAN_CACHE = new ObjCache<>(10);
     private static final ObjCache<String, MethodInvokeInfo> METHOD_CACHE = new ObjCache<>(10);
@@ -70,12 +70,6 @@ public class AgentContextHolder {
         if (Objects.nonNull(o)) {
             System.out.println("[Agent] getBean from cache: " + className);
             return o;
-        }
-        if (CONTEXT_CLASS_LOADER_SET.isEmpty()) {
-            System.out.println("[Agent] init context classLoader map is empty.");
-            NoSpringBeanInfo noSpringBeanInfo = new NoSpringBeanInfo(className, DEFAULT_CLASS_LOADER);
-            BEAN_CACHE.put(className, noSpringBeanInfo);
-            return noSpringBeanInfo;
         }
         if (!isInit) {
             try {
@@ -134,6 +128,7 @@ public class AgentContextHolder {
             isInit = true;
             if (CONTEXT_CLASS_LOADER_SET.isEmpty()) {
                 System.out.println("[Agent] init context classLoader map is empty.");
+                CONTEXT_CLASS_LOADER_SET = null;
                 return;
             }
             for (Object context : CONTEXT_CLASS_LOADER_SET) {
@@ -155,6 +150,8 @@ public class AgentContextHolder {
                 }
                 System.out.println("[Agent] " + context + " init classLoaders: " + classLoaders);
             }
+            CONTEXT_CLASS_LOADER_SET.clear();
+            CONTEXT_CLASS_LOADER_SET = null;
         }
     }
 }
