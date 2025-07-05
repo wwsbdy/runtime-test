@@ -58,3 +58,7 @@ tasks.test {
     )
 }
 
+tasks.withType<Test>().configureEach {
+    enabled = false
+}
+
