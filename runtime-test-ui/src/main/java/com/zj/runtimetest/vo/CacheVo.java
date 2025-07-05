@@ -1,14 +1,14 @@
 package com.zj.runtimetest.vo;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.zj.runtimetest.vo.RequestInfo;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
-import java.io.Serial;
 import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 /**
@@ -20,7 +20,6 @@ import java.util.function.Consumer;
 @Data
 public class CacheVo extends RequestInfo implements Serializable {
 
-    @Serial
     private static final long serialVersionUID = -574377082031667607L;
 
     @JsonIgnore

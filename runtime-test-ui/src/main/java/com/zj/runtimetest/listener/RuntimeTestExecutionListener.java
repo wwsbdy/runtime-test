@@ -16,7 +16,7 @@ import org.jetbrains.annotations.NotNull;
 public class RuntimeTestExecutionListener implements ExecutionListener {
 
     @Override
-    public void processStarting(@NotNull String executorId, @NotNull ExecutionEnvironment env, @NotNull ProcessHandler handler) {
+    public void processStarted(@NotNull String executorId, @NotNull ExecutionEnvironment env, @NotNull ProcessHandler handler) {
         Project project = env.getProject();
         try {
             if (handler instanceof KillableColoredProcessHandler.Silent) {

@@ -16,7 +16,9 @@ dependencies {
 }
 
 tasks.withType<JavaCompile>().configureEach {
-    options.release.set(8)
+//    options.release.set(8)
+    sourceCompatibility = "1.8"
+    targetCompatibility = "1.8"
 }
 
 val distDir = project.rootProject.file("dist")
@@ -53,7 +55,7 @@ tasks.clean {
 tasks.test {
     dependsOn(tasks.jar)
     jvmArgs = listOf(
-        "-Djdk.attach.allowAttachSelf=true",
+        "-Djdk.attach.allowAttachSelf=true"
 //        "-javaagent:${distDir}${File.separator}${agentArchive}"
     )
 }
