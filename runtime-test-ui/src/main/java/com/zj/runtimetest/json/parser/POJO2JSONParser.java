@@ -139,7 +139,7 @@ public class POJO2JSONParser {
                     if (isCharSequence(fieldTypeNames)) {
                         return "";
                     }
-                    if (isJavaObject(fieldTypeNames)) {
+                    if (isJavaObject(psiClass.getQualifiedName())) {
                         return null;
                     }
                     if (recursionLevel > MAX_RECURSION_LEVEL) {
@@ -155,19 +155,14 @@ public class POJO2JSONParser {
         }
     }
 
-    private static boolean isJavaObject(Set<String> fieldTypeNames) {
-        if (Objects.isNull(fieldTypeNames)) {
+    private static boolean isJavaObject(String className) {
+        if (Objects.isNull(className) || className.isEmpty()) {
             return false;
         }
-        for (String fieldTypeName : fieldTypeNames) {
-            if (!"java.lang.Object".equals(fieldTypeName)
-                    && fieldTypeName.startsWith("java.")
-                    || fieldTypeName.startsWith("sum.")
-                    || JAVA_OBJECT_TYPES.contains(fieldTypeName)) {
-                return true;
-            }
-        }
-        return false;
+        return !"java.lang.Object".equals(className)
+                && className.startsWith("java.")
+                || className.startsWith("sum.")
+                || JAVA_OBJECT_TYPES.contains(className);
     }
 
     private static boolean isCharSequence(Collection<String> fieldTypeNames) {

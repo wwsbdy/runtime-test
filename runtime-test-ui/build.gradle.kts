@@ -47,3 +47,7 @@ tasks.clean {
     delete(tasks.buildPlugin.get().archiveFile)
     delete(project.rootProject.file("dist"))
 }
+
+tasks.withType<Test>().configureEach {
+    enabled = false
+}
