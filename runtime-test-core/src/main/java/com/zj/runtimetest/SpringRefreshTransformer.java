@@ -55,7 +55,7 @@ public class SpringRefreshTransformer implements ClassFileTransformer {
             return cw.toByteArray();
 
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println("[Agent] Error: " + e.getMessage());
             return null;
         }
     }

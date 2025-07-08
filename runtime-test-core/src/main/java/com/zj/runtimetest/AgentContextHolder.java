@@ -27,7 +27,7 @@ public class AgentContextHolder {
         CONTEXT_CLASS_LOADER_SET.add(ctx);
     }
 
-    public static void invoke(RequestInfo requestInfo) {
+    public static void invoke(RequestInfo requestInfo) throws ClassNotFoundException, InvocationTargetException, NoSuchMethodException, IllegalAccessException {
         String className = requestInfo.getClassName();
         String methodName = requestInfo.getMethodName();
         String cacheKey = CacheUtil.genCacheKey(className, methodName, requestInfo.getParameterTypeList());
@@ -53,12 +53,8 @@ public class AgentContextHolder {
         } else {
             System.out.println("[Agent] " + className + "." + methodName + "() is cached.");
         }
-        try {
-            Object result = methodInvokeInfo.invoke(requestInfo.getRequestJson());
-            System.out.println("[Agent] " + methodName + "() invoked successfully." + (methodInvokeInfo.isReturnValue() ? " result: " + JsonUtil.toJsonString(result) : ""));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        Object result = methodInvokeInfo.invoke(requestInfo.getRequestJson());
+        System.out.println("[Agent] " + methodName + "() invoked successfully." + (methodInvokeInfo.isReturnValue() ? " result: " + JsonUtil.toJsonString(result) : ""));
     }
 
     public static BeanInfo getBean(String className) {
@@ -75,7 +71,7 @@ public class AgentContextHolder {
             try {
                 initContextClassLoaderMap();
             } catch (Exception e) {
-                e.printStackTrace();
+                System.err.println("[Agent] init context classLoader map failed: " + e.getMessage());
             }
         }
         if (CLASS_LOADER_CONTEXT_MAP.isEmpty()) {
@@ -91,7 +87,7 @@ public class AgentContextHolder {
             try {
                 clazz = ClassUtil.getClass(className, classLoader);
             } catch (Exception e) {
-//                e.printStackTrace();
+//                System.err.println("[Agent] find class fail: " + className);
                 continue;
             }
             if (Objects.isNull(contextCache) || contextCache.isEmpty()) {
@@ -102,7 +98,7 @@ public class AgentContextHolder {
                 try {
                     bean = context.getClass().getMethod("getBean", Class.class).invoke(context, clazz);
                 } catch (Exception e) {
-//                    e.printStackTrace();
+//                    System.err.println("[Agent] getBean fail: " + className);
                     continue;
                 }
                 if (Objects.nonNull(bean)) {
