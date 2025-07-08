@@ -1,5 +1,15 @@
 package com.zj.runtimetest.ui;
 
+import com.intellij.execution.Executor;
+import com.intellij.execution.RunManager;
+import com.intellij.execution.RunnerAndConfigurationSettings;
+import com.intellij.execution.executors.DefaultDebugExecutor;
+import com.intellij.execution.impl.ConsoleViewImpl;
+import com.intellij.execution.process.OSProcessHandler;
+import com.intellij.execution.process.ProcessHandler;
+import com.intellij.execution.ui.ExecutionConsole;
+import com.intellij.execution.ui.RunContentDescriptor;
+import com.intellij.execution.ui.RunContentManager;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnAction;
@@ -10,8 +20,11 @@ import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.CaretModel;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.util.Key;
 import com.intellij.openapi.util.UserDataHolder;
+import com.intellij.openapi.wm.ToolWindow;
+import com.intellij.openapi.wm.ToolWindowManager;
 import com.intellij.psi.*;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.sun.tools.attach.AgentLoadException;
@@ -22,6 +35,7 @@ import com.zj.runtimetest.vo.CacheVo;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import javax.swing.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.Objects;
@@ -85,12 +99,80 @@ public class RuntimeTestAction extends AnAction implements Disposable {
 //            Disposer.register(this, runtimeTestDialog.getDisposable());
             runtimeTestDialog.show();
             if (!runtimeTestDialog.isOK()) {
+                test(project);
                 return;
             }
             run(project, cacheVo);
         } catch (Exception exception) {
             log.error("invoke exception", exception);
         }
+    }
+
+    private void test(Project project) {
+// 1. 用户输入 Configuration 名称
+        String configName = Messages.showInputDialog(
+                project,
+                "Enter Run/Debug Configuration Name:",
+                "Jump to Log",
+                Messages.getQuestionIcon()
+        );
+        if (configName == null || configName.isEmpty()) return;
+
+        // 2. 查找匹配的 Configuration
+        RunManager runManager = RunManager.getInstance(project);
+        RunnerAndConfigurationSettings targetConfig = runManager.getAllSettings().stream()
+                .filter(config -> config.getName().equals(configName))
+                .findFirst()
+                .orElse(null);
+
+        if (targetConfig == null) {
+            Messages.showErrorDialog(project, "Configuration not found: " + configName, "Error");
+            return;
+        }
+//        long executionId = Long.parseLong(targetConfig.getUniqueID());
+        // 3. 查找对应的日志窗口
+        RunContentDescriptor descriptor = RunContentManager.getInstance(project).getAllDescriptors().stream()
+//                .filter(desc -> desc.getExecutionId() == executionId)
+                .findFirst()
+                .orElse(null);
+        ExecutionConsole console = descriptor.getExecutionConsole();
+
+        if (console instanceof ConsoleViewImpl) {
+            TransferHandler transferHandler = ((ConsoleViewImpl) console).getTransferHandler();
+            ProcessHandler processHandler = ((ConsoleViewImpl) console).getTransferHandler();
+            if (processHandler != null) {
+                // 获取进程 ID（仅适用于本地进程）
+                if (processHandler instanceof OSProcessHandler) {
+                    Process process = ((OSProcessHandler) processHandler).getProcess();
+                    long pid = process.pid(); // Java 9+ 方式获取 PID
+                    System.out.println("Process ID: " + pid);
+                }
+            }
+        }
+        if (descriptor == null) {
+            Messages.showInfoMessage(project, "No logs found for this configuration.", "Info");
+            return;
+        }
+
+        // 4. 获取 Executor（Run 或 Debug）
+//        Executor executor = targetConfig.getType().isDebug() ?
+//                DefaultDebugExecutor.getDebugExecutorInstance() :
+//                DefaultRunExecutor.getRunExecutorInstance();
+
+        Executor executor = DefaultDebugExecutor.getDebugExecutorInstance();
+
+        // 5. 跳转到 ToolWindow 并聚焦日志
+        ToolWindow toolWindow = ToolWindowManager.getInstance(project)
+                .getToolWindow(executor.getToolWindowId()); // 自动选择 Run/Debug ToolWindow
+
+        if (toolWindow == null) {
+            Messages.showErrorDialog(project, "ToolWindow not available.", "Error");
+            return;
+        }
+
+        toolWindow.activate(() -> {
+            RunContentManager.getInstance(project).toFrontRunContent(executor, descriptor);
+        }, true);
     }
 
     private void run(Project project, CacheVo cache) {
