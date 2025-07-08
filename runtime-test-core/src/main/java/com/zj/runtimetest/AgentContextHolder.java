@@ -79,7 +79,7 @@ public class AgentContextHolder {
             }
         }
         if (CLASS_LOADER_CONTEXT_MAP.isEmpty()) {
-            System.out.println("[Agent] init context classLoader map is empty.");
+            System.out.println("[Agent] context classLoader map is empty.");
             NoSpringBeanInfo noSpringBeanInfo = new NoSpringBeanInfo(className, DEFAULT_CLASS_LOADER);
             BEAN_CACHE.put(className, noSpringBeanInfo);
             return noSpringBeanInfo;
@@ -143,7 +143,7 @@ public class AgentContextHolder {
                         .map(Map.Entry::getKey)
                         .filter(Objects::nonNull)
                         .collect(Collectors.toList());
-                if (classLoaders.size() > 1) {
+                if (!classLoaders.isEmpty()) {
                     for (ClassLoader classLoader : classLoaders) {
                         CLASS_LOADER_CONTEXT_MAP.computeIfAbsent(classLoader, k -> new ObjCache<>()).put(context, 1);
                     }
