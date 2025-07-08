@@ -27,7 +27,6 @@ import java.io.IOException;
 import java.util.Objects;
 
 
-
 /**
  * Original work: AnyDoorOpenAction - Copyright (c) 2025 [lgp547]
  * Modifications/adjustments made by [jie.zhou] on [2025/6/30].

@@ -1,5 +1,9 @@
 package com.zj.runtimetest.ui;
 
+import com.intellij.execution.Executor;
+import com.intellij.execution.ExecutorRegistry;
+import com.intellij.execution.ui.RunContentDescriptor;
+import com.intellij.execution.ui.RunContentManager;
 import com.intellij.icons.AllIcons;
 import com.intellij.json.JsonLanguage;
 import com.intellij.openapi.diagnostic.Logger;
@@ -16,12 +20,15 @@ import com.zj.runtimetest.json.JsonEditorField;
 import com.zj.runtimetest.language.PluginBundle;
 import com.zj.runtimetest.utils.ExecutorUtil;
 import com.zj.runtimetest.vo.CacheVo;
+import com.zj.runtimetest.vo.ProcessVo;
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * @author arthur_zhou
@@ -83,7 +90,12 @@ public class RuntimeTestDialog extends DialogWrapper {
             public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
                 JLabel label = new JLabel();
                 if (Objects.nonNull(value) && value instanceof Long) {
-                    label.setText(runtimeTestState.getProcessName((Long) value) + " - " + value);
+                    label.setText(
+                            Optional.ofNullable(runtimeTestState.getProcess((Long) value))
+                                    .map(ProcessVo::getEnv)
+                                    .orElse("")
+                                    + " - " + value
+                    );
                 }
                 return label;
             }
@@ -150,7 +162,38 @@ public class RuntimeTestDialog extends DialogWrapper {
         cache.setRequestJson(jsonContentText);
         cache.addHistory(jsonContentText);
         RuntimeTestState.getInstance(project).putCache(cacheKey, cache);
+        toFrontRunContent(pid);
         super.doOKAction();
+    }
+
+    /**
+     * 跳转指定的Run/Debug窗口
+     * @param pid 进程id
+     */
+    private void toFrontRunContent(Long pid) {
+        if (Objects.isNull(pid)) {
+            log.info("toFrontRunContent pid is null");
+            return;
+        }
+        ProcessVo process = RuntimeTestState.getInstance(project).getProcess(pid);
+        if (Objects.isNull(process) || Objects.isNull(process.getExecutionId()) || StringUtils.isEmpty(process.getExecutorId())) {
+            log.info("toFrontRunContent process is null");
+            return;
+        }
+        Executor executor = ExecutorRegistry.getInstance().getExecutorById(process.getExecutorId());
+        if (Objects.isNull(executor)) {
+            log.info("toFrontRunContent executor is null");
+            return;
+        }
+        RunContentDescriptor runContentDescriptor = RunContentManager.getInstance(project).getAllDescriptors().stream()
+                .filter(descriptor -> process.getExecutionId().equals(descriptor.getExecutionId()))
+                .findFirst()
+                .orElse(null);
+        if (Objects.isNull(runContentDescriptor)) {
+            log.info("toFrontRunContent runContentDescriptor is null");
+            return;
+        }
+        RunContentManager.getInstance(project).toFrontRunContent(executor, runContentDescriptor);
     }
 
     @Override

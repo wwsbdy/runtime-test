@@ -5,6 +5,7 @@ import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
 import com.intellij.openapi.project.Project;
 import com.zj.runtimetest.vo.CacheVo;
+import com.zj.runtimetest.vo.ProcessVo;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -26,7 +27,7 @@ public class RuntimeTestState implements PersistentStateComponent<RuntimeTestSta
      */
     public Map<String, CacheVo> cache = new ConcurrentHashMap<>();
 
-    private final Map<Long, String> pidProcessMap = new LinkedHashMap<>();
+    private final Map<Long, ProcessVo> pidProcessMap = new LinkedHashMap<>();
 
     public static RuntimeTestState getInstance(Project project) {
         return project.getService(RuntimeTestState.class);
@@ -53,11 +54,11 @@ public class RuntimeTestState implements PersistentStateComponent<RuntimeTestSta
         return cache.get(key);
     }
 
-    public void putPidProcessMap(Long pid, String processName) {
-        pidProcessMap.put(pid, processName);
+    public void putPidProcessMap(Long pid, ProcessVo process) {
+        pidProcessMap.put(pid, process);
     }
 
-    public String getProcessName(Long pid) {
+    public ProcessVo getProcess(Long pid) {
         return pidProcessMap.get(pid);
     }
 
