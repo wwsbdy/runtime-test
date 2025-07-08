@@ -148,7 +148,10 @@ public class RuntimeTestDialog extends DialogWrapper {
 
     @Override
     protected void doOKAction() {
-        Long pid = pidComboBox.getItem();
+        // org.jetbrains.intellij version 1.14.1
+//        Long pid = pidComboBox.getItem();
+        // org.jetbrains.intellij version 1.0
+        Long pid = (Long) pidComboBox.getSelectedItem();
         if (Objects.isNull(pid)) {
             Messages.showErrorDialog(PluginBundle.get("notice.error.no-process-selected"), PluginBundle.get("notice.error"));
             return;

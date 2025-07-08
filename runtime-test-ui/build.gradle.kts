@@ -1,17 +1,26 @@
 fun properties(key: String) = providers.gradleProperty(key)
 
 plugins {
-    id("org.jetbrains.intellij") version "1.14.1"
+    // org.jetbrains.intellij version 1.14.1
+//    id("org.jetbrains.intellij") version "1.14.1"
+    // org.jetbrains.intellij version 1.0
+    id("org.jetbrains.intellij") version "1.0"
 }
 
 group = "com.zj"
 version = "0.0.1"
 
 intellij {
-    version.set(properties("intellij.version"))
-    type.set(properties("intellij.type"))
+    // org.jetbrains.intellij version 1.14.1
+//    version.set(properties("intellij.version"))
+//    type.set(properties("intellij.type"))
+//
+//    plugins.set(listOf("com.intellij.java", "com.intellij.modules.json"))
+    // org.jetbrains.intellij version 1.0
+    version.set("2020.1.2")
+    type.set("IC")
 
-    plugins.set(listOf("com.intellij.java", "com.intellij.modules.json"))
+    plugins.set(listOf("com.intellij.java"))
 }
 
 tasks {
@@ -20,8 +29,12 @@ tasks {
     }
 
     patchPluginXml {
-        sinceBuild.set(properties("since.build"))
-        untilBuild.set(properties("until.build"))
+        // org.jetbrains.intellij version 1.14.1
+//        sinceBuild.set(properties("since.build"))
+//        untilBuild.set(properties("until.build"))
+        // org.jetbrains.intellij version 1.0
+        sinceBuild.set("201")
+        untilBuild.set("221.*")
     }
 
 }

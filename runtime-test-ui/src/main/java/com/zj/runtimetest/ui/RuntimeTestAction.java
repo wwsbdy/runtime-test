@@ -1,7 +1,6 @@
 package com.zj.runtimetest.ui;
 
 import com.intellij.openapi.Disposable;
-import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
@@ -154,10 +153,11 @@ public class RuntimeTestAction extends AnAction implements Disposable {
         return file.findElementAt(position);
     }
 
-    @Override
-    public @NotNull ActionUpdateThread getActionUpdateThread() {
-        return ActionUpdateThread.BGT;
-    }
+    // org.jetbrains.intellij version 1.14.1
+//    @Override
+//    public @NotNull ActionUpdateThread getActionUpdateThread() {
+//        return ActionUpdateThread.BGT;
+//    }
 
     @Override
     public void dispose() {

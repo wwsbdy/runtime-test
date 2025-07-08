@@ -33,12 +33,14 @@
   ]]></description>
 
     <depends>com.intellij.java</depends>
-    <depends>com.intellij.modules.json</depends>
+<!--    org.jetbrains.intellij version 1.14.1-->
+<!--    <depends>com.intellij.modules.json</depends>-->
 
     <extensions defaultExtensionNs="com.intellij">
         <projectService serviceImplementation="com.zj.runtimetest.cache.RuntimeTestState"/>
         <java.programPatcher implementation="com.zj.runtimetest.listener.RuntimeTestJavaProgramPatcher"/>
-        <notificationGroup id="RuntimeTest" displayType="BALLOON"/>
+<!--        org.jetbrains.intellij version 1.14.1-->
+<!--        <notificationGroup id="RuntimeTest" displayType="BALLOON"/>-->
     </extensions>
     <actions>
         <action id="RuntimeTest.RuntimeTestAction"
