@@ -9,6 +9,7 @@ import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.CaretModel;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.IconLoader;
 import com.intellij.openapi.util.Key;
 import com.intellij.openapi.util.UserDataHolder;
 import com.intellij.psi.*;
@@ -42,6 +43,10 @@ public class RuntimeTestAction extends AnAction implements Disposable {
     private static final Logger log = Logger.getInstance(RuntimeTestAction.class);
 
     private final static Key<PsiMethod> USER_DATE_ELEMENT_KEY = new Key<>("user.psi.Element");
+
+    public RuntimeTestAction() {
+        super(IconLoader.getIcon("/icons/logo.svg", RuntimeTestAction.class.getClassLoader()));
+    }
 
     @Override
     public void actionPerformed(@NotNull final AnActionEvent e) {
