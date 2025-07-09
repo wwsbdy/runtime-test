@@ -31,6 +31,7 @@ import java.util.List;
 @Data
 public class RequestInfo implements Serializable {
 
+    private static final long serialVersionUID = 4675988165854842908L;
     /**
      * 全链路名
      */

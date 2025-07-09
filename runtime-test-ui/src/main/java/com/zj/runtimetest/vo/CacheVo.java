@@ -1,6 +1,8 @@
 package com.zj.runtimetest.vo;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.intellij.xdebugger.XExpression;
+import com.intellij.xdebugger.impl.breakpoints.XExpressionImpl;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -25,10 +27,14 @@ public class CacheVo extends RequestInfo implements Serializable {
     @JsonIgnore
     private Long pid;
 
+    @JsonIgnore
     private final int size = 5;
 
     @JsonIgnore
     private List<String> history;
+
+    @JsonIgnore
+    private ExpressionVo expressionVo;
 
 
     public void addHistory(String s) {
@@ -56,4 +62,18 @@ public class CacheVo extends RequestInfo implements Serializable {
             action.accept(list.get(i));
         }
     }
+
+    public void setExpression(XExpression expression) {
+        this.expressionVo = ExpressionVo.fromExpression(expression);
+    }
+
+    @JsonIgnore
+    public XExpression getExpression() {
+        if (Objects.isNull(expressionVo)) {
+            return XExpressionImpl.fromText("");
+        }
+        return expressionVo.toExpression();
+    }
+
+
 }
