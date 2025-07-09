@@ -25,10 +25,14 @@ public class CacheVo extends RequestInfo implements Serializable {
     @JsonIgnore
     private Long pid;
 
+    @JsonIgnore
     private final int size = 5;
 
     @JsonIgnore
     private List<String> history;
+
+    @JsonIgnore
+    private String expression;
 
 
     public void addHistory(String s) {

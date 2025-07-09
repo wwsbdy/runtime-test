@@ -15,10 +15,14 @@ import com.intellij.openapi.util.Disposer;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.util.ui.JBUI;
+import com.intellij.xdebugger.breakpoints.XLineBreakpoint;
 import com.zj.runtimetest.cache.RuntimeTestState;
+import com.zj.runtimetest.debug.MyBreakpointProperties;
+import com.zj.runtimetest.debug.ui.PreMethodExpressionDialog;
 import com.zj.runtimetest.json.JsonEditorField;
 import com.zj.runtimetest.language.PluginBundle;
 import com.zj.runtimetest.utils.ExecutorUtil;
+import com.zj.runtimetest.utils.JsonUtil;
 import com.zj.runtimetest.vo.CacheVo;
 import com.zj.runtimetest.vo.ProcessVo;
 import lombok.Getter;
@@ -55,8 +59,11 @@ public class RuntimeTestDialog extends DialogWrapper {
     private ComboBox<Long> pidComboBox;
     private JButton resetButton;
     private ComboBox<String> historyComboBox;
+    private JButton preMethodButton;
 
-    public RuntimeTestDialog(Project project, String cacheKey, CacheVo cache, String defaultJson) {
+    private final XLineBreakpoint<MyBreakpointProperties> bp;
+
+    public RuntimeTestDialog(Project project, String cacheKey, CacheVo cache, String defaultJson, XLineBreakpoint<MyBreakpointProperties> bp) {
         super(true);
         // 是否允许拖拽的方式扩大或缩小
         setResizable(true);
@@ -71,6 +78,7 @@ public class RuntimeTestDialog extends DialogWrapper {
         this.cacheKey = cacheKey;
         this.cache = cache;
         this.defaultJson = defaultJson;
+        this.bp = bp;
         jsonContent = new JsonEditorField(JsonLanguage.INSTANCE, project, content);
         jsonContent.setPreferredSize(new Dimension(500, 700));
         // 触发一下init方法，否则swing样式将无法展示在会话框
@@ -124,6 +132,14 @@ public class RuntimeTestDialog extends DialogWrapper {
         resetButton.addActionListener(event -> jsonContent.setText(defaultJson));
         jPanel.add(resetButton);
 
+        this.preMethodButton = new JButton(AllIcons.Nodes.Function);
+        preMethodButton.setToolTipText(PluginBundle.get("dialog.preMethodFunction.title"));
+        preMethodButton.addActionListener(event -> {
+            PreMethodExpressionDialog expressionDialog = new PreMethodExpressionDialog(project, bp);
+            Disposer.register(getDisposable(), expressionDialog.getDisposable());
+            expressionDialog.show();
+        });
+        jPanel.add(preMethodButton);
         return jPanel;
     }
 
@@ -161,6 +177,7 @@ public class RuntimeTestDialog extends DialogWrapper {
         cache.setPid(pid);
         cache.setRequestJson(jsonContentText);
         cache.addHistory(jsonContentText);
+        cache.setExpression(JsonUtil.toJsonString(bp.getLogExpressionObject()));
         RuntimeTestState.getInstance(project).putCache(cacheKey, cache);
         toFrontRunContent(pid);
         super.doOKAction();
@@ -203,12 +220,14 @@ public class RuntimeTestDialog extends DialogWrapper {
             ExecutorUtil.removeListener(pidComboBox);
             ExecutorUtil.removeListener(resetButton);
             ExecutorUtil.removeListener(historyComboBox);
+            ExecutorUtil.removeListener(preMethodButton);
             pidComboBox = null;
             resetButton = null;
             historyComboBox = null;
             cacheKey = null;
             cache = null;
             defaultJson = null;
+            preMethodButton = null;
         }
         super.dispose();
     }
