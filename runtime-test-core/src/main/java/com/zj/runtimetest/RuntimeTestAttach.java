@@ -3,6 +3,9 @@ package com.zj.runtimetest;
 import com.zj.runtimetest.utils.JsonUtil;
 import com.zj.runtimetest.vo.RequestInfo;
 
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.lang.instrument.Instrumentation;
 import java.util.concurrent.CompletableFuture;
 
@@ -38,9 +41,21 @@ public class RuntimeTestAttach {
     public static void agentmain(String args, Instrumentation inst) {
         System.out.println("[Agent] agentmain invoked with args: " + args);
         RequestInfo requestInfo = JsonUtil.toJavaBean(args, RequestInfo.class);
-        CompletableFuture.runAsync(() -> AgentContextHolder.invoke(requestInfo))
+        CompletableFuture.runAsync(() -> {
+                    try {
+                        AgentContextHolder.invoke(requestInfo);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                })
                 .exceptionally(throwable -> {
-                    throwable.printStackTrace();
+                    try (StringWriter sw = new StringWriter();
+                         PrintWriter pw = new PrintWriter(sw)) {
+                        throwable.printStackTrace(pw);
+                        System.err.println(sw);
+                    } catch (IOException e) {
+                        System.err.println("[Agent] agentmain failed: " + throwable.getMessage());
+                    }
                     return null;
                 });
     }

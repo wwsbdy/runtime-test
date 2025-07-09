@@ -32,8 +32,7 @@ public class NoSpringBeanInfo extends BeanInfo {
                     super.setBean(instanceSmart);
                     return instanceSmart;
                 } catch (Exception e) {
-                    e.printStackTrace();
-                    System.err.println("[Agent] Create bean by constructor fail: " + super.getClassName());
+                    System.err.println("[Agent] Create bean by constructor fail: " + super.getClassName() + ", reason: " + e.getMessage());
                 }
             }
         }
