@@ -16,6 +16,7 @@
     <ul>
         <li>please confirm the method in the selected process</li>
         <li>not a Spring bean, it will choose the constructor with the least number of parameters to create the object, and the parameters will be passed as NULL</li>
+        <li>pre handle is only valid in Debug mode</li>
     </ul>
 
     执行 Java 项目的方法(包括类中的所有方法和静态方法)，获取到Spring容器里的Bean，没有会通过构造器创建<br>
@@ -29,6 +30,7 @@
     <ul>
         <li>确认方法在指定的进程下</li>
         <li>通过构造器创建对象时，会选择传参最少的，参数会传入NULL</li>
+        <li>前置处理仅Debug模式有效</li>
     </ul>
   ]]></description>
 

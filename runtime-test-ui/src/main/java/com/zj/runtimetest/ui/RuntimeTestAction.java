@@ -19,7 +19,6 @@ import com.intellij.psi.*;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.xdebugger.XDebuggerManager;
 import com.intellij.xdebugger.XDebuggerUtil;
-import com.intellij.xdebugger.XExpression;
 import com.intellij.xdebugger.breakpoints.SuspendPolicy;
 import com.intellij.xdebugger.breakpoints.XBreakpointManager;
 import com.intellij.xdebugger.breakpoints.XLineBreakpoint;
@@ -30,14 +29,12 @@ import com.zj.runtimetest.debug.MyDebugBreakpointType;
 import com.zj.runtimetest.language.PluginBundle;
 import com.zj.runtimetest.utils.*;
 import com.zj.runtimetest.vo.CacheVo;
-import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Objects;
-import java.util.Optional;
 
 
 /**
@@ -68,6 +65,7 @@ public class RuntimeTestAction extends AnAction implements Disposable {
         if (null == project || editor == null) {
             throw new IllegalArgumentException("idea arg error (project or editor is null)");
         }
+        XLineBreakpoint<MyBreakpointProperties> bp = null;
         try {
             PsiMethod psiMethod = null;
             if (e.getDataContext() instanceof UserDataHolder) {
@@ -97,24 +95,23 @@ public class RuntimeTestAction extends AnAction implements Disposable {
                 cache.setStaticMethod(MethodUtil.isStaticMethod(psiMethod));
                 cache.setRequestJson(defaultJson);
             }
-            XLineBreakpoint<MyBreakpointProperties> bp = addBreakpoint(e, project, psiMethod);
+            bp = addBreakpoint(e, project, psiMethod);
             if (Objects.nonNull(bp)) {
                 bp.setLogExpressionObject(cache.getExpression());
             }
-            CacheVo cacheVo = cache;
-            RuntimeTestDialog runtimeTestDialog = new RuntimeTestDialog(project, cacheKey, cacheVo, defaultJson, bp);
+            RuntimeTestDialog runtimeTestDialog = new RuntimeTestDialog(project, cacheKey, cache, defaultJson, bp);
 //            Disposer.register(this, runtimeTestDialog.getDisposable());
             runtimeTestDialog.show();
-            if (Objects.nonNull(bp)
-                    && Optional.ofNullable(bp.getLogExpressionObject()).map(XExpression::getExpression).filter(StringUtils::isNotBlank).isEmpty()) {
-                XDebuggerManager.getInstance(project).getBreakpointManager().removeBreakpoint(bp);
-            }
             if (!runtimeTestDialog.isOK()) {
                 return;
             }
-            run(project, cacheVo);
+            run(project, cache);
         } catch (Exception exception) {
             log.error("invoke exception", exception);
+        } finally {
+            if (Objects.nonNull(bp)) {
+                XDebuggerManager.getInstance(project).getBreakpointManager().removeBreakpoint(bp);
+            }
         }
     }
 

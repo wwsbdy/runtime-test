@@ -40,7 +40,7 @@ public class PreMethodExpressionDialog extends DialogWrapper {
         // 是否允许拖拽的方式扩大或缩小
         setResizable(true);
         // 设置会话框标题
-        setTitle(PluginBundle.get("dialog.title"));
+        setTitle(PluginBundle.get("dialog.preMethodFunction.title"));
         // 获取到当前项目的名称
         this.project = project;
         this.bp = bp;
