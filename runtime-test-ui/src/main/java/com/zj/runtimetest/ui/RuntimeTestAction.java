@@ -23,7 +23,6 @@ import com.intellij.xdebugger.XExpression;
 import com.intellij.xdebugger.breakpoints.SuspendPolicy;
 import com.intellij.xdebugger.breakpoints.XBreakpointManager;
 import com.intellij.xdebugger.breakpoints.XLineBreakpoint;
-import com.intellij.xdebugger.impl.breakpoints.XExpressionImpl;
 import com.sun.tools.attach.AgentLoadException;
 import com.sun.tools.attach.VirtualMachine;
 import com.zj.runtimetest.debug.MyBreakpointProperties;
@@ -97,11 +96,10 @@ public class RuntimeTestAction extends AnAction implements Disposable {
                 cache.setProjectBasePath(project.getBasePath());
                 cache.setStaticMethod(MethodUtil.isStaticMethod(psiMethod));
                 cache.setRequestJson(defaultJson);
-                cache.setExpression(JsonUtil.toJsonString(XExpressionImpl.fromText("")));
             }
             XLineBreakpoint<MyBreakpointProperties> bp = addBreakpoint(e, project, psiMethod);
             if (Objects.nonNull(bp)) {
-                bp.setLogExpressionObject(JsonUtil.convertValue(cache.getExpression(), XExpressionImpl.class));
+                bp.setLogExpressionObject(cache.getExpression());
             }
             CacheVo cacheVo = cache;
             RuntimeTestDialog runtimeTestDialog = new RuntimeTestDialog(project, cacheKey, cacheVo, defaultJson, bp);

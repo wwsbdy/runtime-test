@@ -22,7 +22,6 @@ import com.zj.runtimetest.debug.ui.PreMethodExpressionDialog;
 import com.zj.runtimetest.json.JsonEditorField;
 import com.zj.runtimetest.language.PluginBundle;
 import com.zj.runtimetest.utils.ExecutorUtil;
-import com.zj.runtimetest.utils.JsonUtil;
 import com.zj.runtimetest.vo.CacheVo;
 import com.zj.runtimetest.vo.ProcessVo;
 import lombok.Getter;
@@ -177,7 +176,7 @@ public class RuntimeTestDialog extends DialogWrapper {
         cache.setPid(pid);
         cache.setRequestJson(jsonContentText);
         cache.addHistory(jsonContentText);
-        cache.setExpression(JsonUtil.toJsonString(bp.getLogExpressionObject()));
+        cache.setExpression(bp.getLogExpressionObject());
         RuntimeTestState.getInstance(project).putCache(cacheKey, cache);
         toFrontRunContent(pid);
         super.doOKAction();
