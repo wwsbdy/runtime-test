@@ -44,3 +44,4 @@ ps:<br>
 - 支持Spring项目Bean对象方法调用
 - 支持静态方法
 - 支持spring-boot-devtools热部署场景
+- 点击ok后跳转指定Run/Debug进程窗口
