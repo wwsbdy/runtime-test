@@ -4,7 +4,6 @@ import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiMethod;
 import com.zj.runtimetest.cache.RuntimeTestState;
 import com.zj.runtimetest.vo.CacheVo;
-import com.zj.runtimetest.utils.CacheUtil;
 
 /**
  * @author jie.zhou

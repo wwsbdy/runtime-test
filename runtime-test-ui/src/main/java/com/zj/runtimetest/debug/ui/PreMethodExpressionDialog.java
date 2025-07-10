@@ -5,11 +5,13 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.util.ui.JBDimension;
 import com.intellij.xdebugger.XExpression;
+import com.intellij.xdebugger.XSourcePosition;
+import com.intellij.xdebugger.breakpoints.XBreakpointProperties;
 import com.intellij.xdebugger.breakpoints.XLineBreakpoint;
 import com.intellij.xdebugger.evaluation.XDebuggerEditorsProvider;
+import com.intellij.xdebugger.impl.XSourcePositionImpl;
 import com.intellij.xdebugger.impl.ui.XDebuggerEditorBase;
 import com.intellij.xdebugger.impl.ui.XDebuggerExpressionEditor;
-import com.zj.runtimetest.debug.RuntimeTestBreakpointProperties;
 import com.zj.runtimetest.language.PluginBundle;
 import com.zj.runtimetest.vo.ExpressionVo;
 import lombok.Getter;
@@ -25,7 +27,7 @@ import java.util.Objects;
  */
 @Setter
 @Getter
-public class PreMethodExpressionDialog extends DialogWrapper {
+public class PreMethodExpressionDialog<T extends XBreakpointProperties<?>> extends DialogWrapper {
 
     private static final Logger log = Logger.getInstance(PreMethodExpressionDialog.class);
 
@@ -35,9 +37,9 @@ public class PreMethodExpressionDialog extends DialogWrapper {
 
     private XDebuggerEditorBase expressionEditor;
 
-    private final @NotNull XLineBreakpoint<RuntimeTestBreakpointProperties> bp;
+    private final @NotNull XLineBreakpoint<T> bp;
 
-    public PreMethodExpressionDialog(Project project,@NotNull XLineBreakpoint<RuntimeTestBreakpointProperties> bp) {
+    public PreMethodExpressionDialog(Project project,@NotNull XLineBreakpoint<T> bp) {
         super(true);
         // 是否允许拖拽的方式扩大或缩小
         setResizable(true);
@@ -55,7 +57,12 @@ public class PreMethodExpressionDialog extends DialogWrapper {
         XDebuggerEditorsProvider debuggerEditorsProvider = bp.getType().getEditorsProvider(bp, project);
         if (Objects.nonNull(debuggerEditorsProvider)) {
             XExpression xExpression = Objects.isNull(bp.getConditionExpression()) ? ExpressionVo.EmptyXExpression.INSTANCE : bp.getConditionExpression();
-            expressionEditor = new XDebuggerExpressionEditor(project, debuggerEditorsProvider, "runtimeTestLogExpression", bp.getSourcePosition(), xExpression, true, true, false);
+            XSourcePosition sourcePosition = bp.getSourcePosition();
+            if (Objects.isNull(sourcePosition)) {
+                log.error("sourcePosition is null");
+                return null;
+            }
+            expressionEditor = new XDebuggerExpressionEditor(project, debuggerEditorsProvider, "runtimeTestLogExpression", XSourcePositionImpl.create(sourcePosition.getFile(), sourcePosition.getLine() + 1), xExpression, true, true, false);
 //            expressionEditor = new XDebuggerExpressionComboBox(project, debuggerEditorsProvider, "runtimeTestLogExpression", bp.getSourcePosition(), true, true);
             expressionEditor.setExpression(xExpression);
             JComponent component = expressionEditor.getComponent();

@@ -1,19 +1,17 @@
 package com.zj.runtimetest.debug;
 
 
+import com.intellij.debugger.ui.breakpoints.Breakpoint;
+import com.intellij.debugger.ui.breakpoints.JavaMethodBreakpointType;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.xdebugger.breakpoints.XLineBreakpoint;
-import com.intellij.xdebugger.breakpoints.XLineBreakpointType;
-import com.intellij.xdebugger.evaluation.XDebuggerEditorsProvider;
+import com.intellij.xdebugger.breakpoints.XBreakpoint;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.jetbrains.java.debugger.JavaDebuggerEditorsProvider;
+import org.jetbrains.java.debugger.breakpoints.properties.JavaMethodBreakpointProperties;
 
 /**
  * @author jie.zhou
  */
-public class RuntimeTestBreakpointType extends XLineBreakpointType<RuntimeTestBreakpointProperties> {
+public class RuntimeTestBreakpointType extends JavaMethodBreakpointType {
 
     public static final String ID = "runtime-test-breakpoint";
     public static final String TITLE = "Runtime Test Breakpoint";
@@ -23,23 +21,8 @@ public class RuntimeTestBreakpointType extends XLineBreakpointType<RuntimeTestBr
     }
 
     @Override
-    public @Nullable RuntimeTestBreakpointProperties createBreakpointProperties(@NotNull VirtualFile file, int line) {
-        return new RuntimeTestBreakpointProperties();
+    public @NotNull Breakpoint<JavaMethodBreakpointProperties> createJavaBreakpoint(Project project, XBreakpoint<JavaMethodBreakpointProperties> breakpoint) {
+        return new RuntimeTestBreakpoint(project, breakpoint);
+//        return super.createJavaBreakpoint(project, breakpoint);
     }
-
-    @Override
-    public boolean isSuspendThreadSupported() {
-        return true;
-    }
-
-    @Override
-    public @Nullable XDebuggerEditorsProvider getEditorsProvider(@NotNull XLineBreakpoint<RuntimeTestBreakpointProperties> breakpoint, @NotNull Project project) {
-        return new JavaDebuggerEditorsProvider();
-    }
-
-    @Override
-    public @Nullable RuntimeTestBreakpointProperties createProperties() {
-        return new RuntimeTestBreakpointProperties();
-    }
-
 }
