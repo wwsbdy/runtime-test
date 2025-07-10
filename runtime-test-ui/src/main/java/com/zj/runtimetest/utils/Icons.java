@@ -12,5 +12,8 @@ import javax.swing.*;
  */
 public interface Icons {
 
-    Icon LOGO = IconLoader.getIcon("/icons/logo.svg", Icons.class.getClassLoader());
+    // org.jetbrains.intellij version 1.14.1
+//    Icon LOGO = IconLoader.getIcon("/icons/logo.svg", Icons.class.getClassLoader());
+    // org.jetbrains.intellij version 1.0
+    Icon LOGO = IconLoader.getIcon("/icons/logo.svg", Icons.class);
 }

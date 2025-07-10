@@ -2,7 +2,6 @@ package com.zj.runtimetest.debug;
 
 import com.intellij.debugger.DebuggerInvocationUtil;
 import com.intellij.debugger.EvaluatingComputable;
-import com.intellij.debugger.JavaDebuggerBundle;
 import com.intellij.debugger.SourcePosition;
 import com.intellij.debugger.engine.ContextUtil;
 import com.intellij.debugger.engine.evaluation.EvaluateException;
@@ -95,7 +94,10 @@ public class RuntimeTestBreakpoint extends LineBreakpoint<MyBreakpointProperties
 
     private PsiCodeFragment createConditionCodeFragment(PsiElement context) {
         TextWithImports text = this.getCondition();
-        return DebuggerUtilsEx.findAppropriateCodeFragmentFactory(text, context).createPsiCodeFragment(text, context, getProject());
+        // org.jetbrains.intellij version 1.14.1
+//        return DebuggerUtilsEx.findAppropriateCodeFragmentFactory(text, context).createPsiCodeFragment(text, context, getProject());
+        // org.jetbrains.intellij version 1.0
+        return DebuggerUtilsEx.findAppropriateCodeFragmentFactory(text, context).createCodeFragment(text, context, getProject());
     }
 
     private static final class EvaluatorCache {
