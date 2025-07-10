@@ -23,6 +23,7 @@ import com.intellij.xdebugger.XDebuggerManager;
 import com.intellij.xdebugger.breakpoints.XBreakpoint;
 import com.sun.jdi.event.LocatableEvent;
 import com.sun.jdi.request.EventRequest;
+import com.zj.runtimetest.language.PluginBundle;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -88,7 +89,7 @@ public class RuntimeTestBreakpoint extends LineBreakpoint<MyBreakpointProperties
                 throw var7;
             }
         } catch (IndexNotReadyException var8) {
-            throw new EvaluateException(JavaDebuggerBundle.message("evaluation.error.during.indexing", new Object[0]), var8);
+            throw new EvaluateException(PluginBundle.get("evaluation.error.during.indexing"), var8);
         }
     }
 
