@@ -1,5 +1,6 @@
 package com.zj.runtimetest.ui;
 
+import com.google.common.base.Charsets;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
@@ -10,16 +11,14 @@ import com.intellij.openapi.editor.CaretModel;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.util.IconLoader;
 import com.intellij.openapi.util.Key;
 import com.intellij.openapi.util.UserDataHolder;
+import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.*;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.xdebugger.XDebuggerManager;
 import com.intellij.xdebugger.XDebuggerUtil;
-import com.intellij.xdebugger.XExpression;
-import com.intellij.xdebugger.breakpoints.SuspendPolicy;
 import com.intellij.xdebugger.breakpoints.XBreakpointManager;
 import com.intellij.xdebugger.breakpoints.XLineBreakpoint;
 import com.sun.tools.attach.AgentLoadException;
@@ -29,14 +28,13 @@ import com.zj.runtimetest.debug.MyDebugBreakpointType;
 import com.zj.runtimetest.language.PluginBundle;
 import com.zj.runtimetest.utils.*;
 import com.zj.runtimetest.vo.CacheVo;
-import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URLEncoder;
 import java.util.Objects;
-import java.util.Optional;
 
 
 /**
@@ -56,10 +54,6 @@ public class RuntimeTestAction extends AnAction implements Disposable {
 
     private final static Key<PsiMethod> USER_DATE_ELEMENT_KEY = new Key<>("user.psi.Element");
 
-    public RuntimeTestAction() {
-        super(IconLoader.getIcon("/icons/logo.svg", RuntimeTestAction.class.getClassLoader()));
-    }
-
     @Override
     public void actionPerformed(@NotNull final AnActionEvent e) {
         final Project project = e.getProject();
@@ -67,6 +61,7 @@ public class RuntimeTestAction extends AnAction implements Disposable {
         if (null == project || editor == null) {
             throw new IllegalArgumentException("idea arg error (project or editor is null)");
         }
+        XLineBreakpoint<MyBreakpointProperties> bp = null;
         try {
             PsiMethod psiMethod = null;
             if (e.getDataContext() instanceof UserDataHolder) {
@@ -79,10 +74,6 @@ public class RuntimeTestAction extends AnAction implements Disposable {
                     throw new IllegalArgumentException("idea arg error (method is null)");
                 }
             }
-//            if (!MethodUtil.isPublicMethod(psiMethod)) {
-//                NoticeUtil.error(project, PluginBundle.get("notice.error.method-not-public"));
-//                return;
-//            }
             String cacheKey = PluginCacheUtil.genCacheKey(psiMethod);
             String defaultJson = ParamUtil.getDefaultJson(psiMethod.getParameterList());
             CacheVo cache = PluginCacheUtil.getCache(psiMethod);
@@ -96,28 +87,28 @@ public class RuntimeTestAction extends AnAction implements Disposable {
                 cache.setStaticMethod(MethodUtil.isStaticMethod(psiMethod));
                 cache.setRequestJson(defaultJson);
             }
-            XLineBreakpoint<MyBreakpointProperties> bp = addBreakpoint(e, project, psiMethod);
-            if (Objects.nonNull(bp)) {
-                bp.setLogExpressionObject(cache.getExpression());
+            bp = addBreakpoint(e, project, psiMethod);
+            if (Objects.isNull(bp)) {
+                NoticeUtil.error(project, "[RuntimeTest] Add breakpoint failed");
+                return;
             }
-            CacheVo cacheVo = cache;
-            RuntimeTestDialog runtimeTestDialog = new RuntimeTestDialog(project, cacheKey, cacheVo, defaultJson, bp);
+            bp.setConditionExpression(cache.getExpression());
+            RuntimeTestDialog runtimeTestDialog = new RuntimeTestDialog(project, cacheKey, cache, defaultJson, bp);
 //            Disposer.register(this, runtimeTestDialog.getDisposable());
             runtimeTestDialog.show();
-            if (Objects.nonNull(bp)
-                    && Optional.ofNullable(bp.getLogExpressionObject()).map(XExpression::getExpression).filter(StringUtils::isNotBlank).isEmpty()) {
-                XDebuggerManager.getInstance(project).getBreakpointManager().removeBreakpoint(bp);
-            }
             if (!runtimeTestDialog.isOK()) {
                 return;
             }
-            run(project, cacheVo);
+            run(project, cache);
         } catch (Exception exception) {
+            if (Objects.nonNull(bp)) {
+                XDebuggerManager.getInstance(project).getBreakpointManager().removeBreakpoint(bp);
+            }
             log.error("invoke exception", exception);
         }
     }
 
-    private XLineBreakpoint<MyBreakpointProperties> addBreakpoint(AnActionEvent e, Project project, PsiMethod psiMethod) {
+    private @Nullable XLineBreakpoint<MyBreakpointProperties> addBreakpoint(AnActionEvent e, Project project, PsiMethod psiMethod) {
         PsiFile psiFile = e.getData(CommonDataKeys.PSI_FILE);
         if (psiFile == null) {
             return null;
@@ -141,26 +132,29 @@ public class RuntimeTestAction extends AnAction implements Disposable {
                 return bp;
             }
         }
-        XLineBreakpoint<MyBreakpointProperties> bp = manager.addLineBreakpoint(type, file.getUrl(), lineNumber, type.createProperties());
-        bp.setSuspendPolicy(SuspendPolicy.NONE);
-        return bp;
+        return manager.addLineBreakpoint(type, file.getUrl(), lineNumber, type.createProperties());
     }
     private void run(Project project, CacheVo cache) {
         String coreJarPath = PathManager.getPluginsPath() + File.separator + "runtime-test-ui" + File.separator + "lib" + File.separator + "runtime-test-core.jar";
         String pid = cache.getPid().toString();
+        String requestJson = JsonUtil.toJsonString(cache);
+        String jsonPath = project.getBasePath() + "/.idea/runtime-test/RequestInfo.json";
+        if (requestJson.length() > 600 && flushFile(jsonPath, requestJson)) {
+            requestJson = "file://" + URLEncoder.encode(jsonPath, Charsets.UTF_8);
+        }
         VirtualMachine vm = null;
         try {
             vm = VirtualMachine.attach(pid);
-            vm.loadAgent(coreJarPath, JsonUtil.toJsonString(cache));
+            vm.loadAgent(coreJarPath, requestJson);
         } catch (IOException e) {
             if (e.getMessage() != null && e.getMessage().contains("Non-numeric value found")) {
                 log.warn("jdk lower version attach higher version, can ignore");
             } else {
                 if (Objects.equals(e.getMessage(), "No such process")) {
-                    NoticeUtil.error(project, PluginBundle.get("notice.error.no-such-process") + " " + pid);
+                    NoticeUtil.error(project, PluginBundle.get("[RuntimeTest] notice.error.no-such-process") + " " + pid);
                 } else {
                     log.error("e: ", e);
-                    NoticeUtil.error(project, e.getMessage());
+                    NoticeUtil.error(project, "[RuntimeTest] " + ThrowUtil.printStackTrace(e));
                 }
             }
         } catch (AgentLoadException e) {
@@ -168,11 +162,11 @@ public class RuntimeTestAction extends AnAction implements Disposable {
                 log.warn("jdk higher version attach lower version, can ignore");
             } else {
                 log.error("e: ", e);
-                NoticeUtil.error(project, e.getMessage());
+                NoticeUtil.error(project, "[RuntimeTest] " + ThrowUtil.printStackTrace(e));
             }
         } catch (Exception e) {
             log.error("e: ", e);
-            NoticeUtil.error(project, e.getMessage());
+            NoticeUtil.error(project, "[RuntimeTest] " + ThrowUtil.printStackTrace(e));
         } finally {
             if (null != vm) {
                 try {
@@ -181,6 +175,21 @@ public class RuntimeTestAction extends AnAction implements Disposable {
                 }
             }
         }
+    }
+
+
+    /**
+     * rewrite content to file
+     */
+    public static boolean flushFile(String filePath, String content) {
+        File file = new File(filePath);
+        try {
+            FileUtil.writeToFile(file, content);
+            return true;
+        } catch (IOException e) {
+            log.error("flushFile error [filePath:{} content:{} errMsg:{}]", filePath, content, e.getMessage());
+        }
+        return false;
     }
 
     @Override

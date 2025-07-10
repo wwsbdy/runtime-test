@@ -22,6 +22,7 @@ public class RuntimeTestExecutionListener implements ExecutionListener {
 
     @Override
     public void processStarted(@NotNull String executorId, @NotNull ExecutionEnvironment env, @NotNull ProcessHandler handler) {
+        // TODO 是否可以在启动完成后再放入pid，防止启动未完成就点运行
         Project project = env.getProject();
         try {
             if (handler instanceof KillableColoredProcessHandler.Silent) {
