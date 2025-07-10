@@ -111,10 +111,6 @@ public class RuntimeTestAction extends AnAction implements Disposable {
             run(project, cache);
         } catch (Exception exception) {
             log.error("invoke exception", exception);
-        } finally {
-            if (Objects.nonNull(bp)) {
-                XDebuggerManager.getInstance(project).getBreakpointManager().removeBreakpoint(bp);
-            }
         }
     }
 

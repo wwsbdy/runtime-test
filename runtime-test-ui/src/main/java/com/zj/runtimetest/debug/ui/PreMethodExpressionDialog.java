@@ -3,11 +3,13 @@ package com.zj.runtimetest.debug.ui;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
+import com.intellij.util.ui.JBDimension;
 import com.intellij.xdebugger.XDebuggerManager;
 import com.intellij.xdebugger.XExpression;
 import com.intellij.xdebugger.breakpoints.XLineBreakpoint;
 import com.intellij.xdebugger.evaluation.XDebuggerEditorsProvider;
 import com.intellij.xdebugger.impl.breakpoints.XExpressionImpl;
+import com.intellij.xdebugger.impl.ui.XDebuggerEditorBase;
 import com.intellij.xdebugger.impl.ui.XDebuggerExpressionEditor;
 import com.zj.runtimetest.debug.MyBreakpointProperties;
 import com.zj.runtimetest.language.PluginBundle;
@@ -31,7 +33,7 @@ public class PreMethodExpressionDialog extends DialogWrapper {
 
     private boolean disposed = false;
 
-    private XDebuggerExpressionEditor expressionEditor;
+    private XDebuggerEditorBase expressionEditor;
 
     private final XLineBreakpoint<MyBreakpointProperties> bp;
 
@@ -50,12 +52,15 @@ public class PreMethodExpressionDialog extends DialogWrapper {
 
     @Override
     protected JComponent createCenterPanel() {
-        // TODO 前置函数窗口有点小，待优化
         XDebuggerEditorsProvider debuggerEditorsProvider = bp.getType().getEditorsProvider(bp, project);
         if (Objects.nonNull(debuggerEditorsProvider)) {
             XExpression xExpression = Objects.isNull(bp.getLogExpressionObject()) ? XExpressionImpl.fromText("") : bp.getLogExpressionObject();
             expressionEditor = new XDebuggerExpressionEditor(project, debuggerEditorsProvider, "runtimeTestLogExpression", bp.getSourcePosition(), xExpression, true, true, false);
-            return expressionEditor.getComponent();
+//            expressionEditor = new XDebuggerExpressionComboBox(project, debuggerEditorsProvider, "runtimeTestLogExpression", bp.getSourcePosition(), true, true);
+            expressionEditor.setExpression(xExpression);
+            JComponent component = expressionEditor.getComponent();
+            component.setPreferredSize(new JBDimension(450, 300));
+            return component;
         }
         return null;
     }
