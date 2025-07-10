@@ -35,7 +35,7 @@ import java.util.function.Function;
  * @author : jie.zhou
  * @date : 2025/7/10
  */
-public class RuntimeTestBreakpoint extends LineBreakpoint<MyBreakpointProperties> {
+public class RuntimeTestBreakpoint extends LineBreakpoint<RuntimeTestBreakpointProperties> {
     private static final Logger log = LoggerFactory.getLogger(RuntimeTestBreakpoint.class);
 
     protected RuntimeTestBreakpoint(Project project, XBreakpoint xBreakpoint) {
@@ -43,7 +43,7 @@ public class RuntimeTestBreakpoint extends LineBreakpoint<MyBreakpointProperties
     }
 
     @Override
-    protected @NotNull MyBreakpointProperties getProperties() {
+    protected @NotNull RuntimeTestBreakpointProperties getProperties() {
         return super.getProperties();
     }
 

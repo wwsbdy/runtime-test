@@ -2,7 +2,6 @@ package com.zj.runtimetest.vo;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.intellij.xdebugger.XExpression;
-import com.intellij.xdebugger.impl.breakpoints.XExpressionImpl;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -70,7 +69,7 @@ public class CacheVo extends RequestInfo implements Serializable {
     @JsonIgnore
     public XExpression getExpression() {
         if (Objects.isNull(expressionVo)) {
-            return XExpressionImpl.fromText("");
+            return ExpressionVo.EmptyXExpression.INSTANCE;
         }
         return expressionVo.toExpression();
     }

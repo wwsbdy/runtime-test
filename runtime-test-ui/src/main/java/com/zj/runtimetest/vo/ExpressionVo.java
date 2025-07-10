@@ -1,6 +1,7 @@
 package com.zj.runtimetest.vo;
 
 import com.intellij.lang.Language;
+import com.intellij.lang.java.JavaLanguage;
 import com.intellij.xdebugger.XExpression;
 import com.intellij.xdebugger.evaluation.EvaluationMode;
 import com.intellij.xdebugger.impl.breakpoints.XExpressionImpl;
@@ -27,5 +28,13 @@ public class ExpressionVo {
         vo.myCustomInfo = expression.getCustomInfo();
         vo.myMode = expression.getMode().name();
         return vo;
+    }
+
+    public static class EmptyXExpression {
+        public static final XExpression INSTANCE;
+        static {
+            INSTANCE = new XExpressionImpl("", JavaLanguage.INSTANCE, null, EvaluationMode.CODE_FRAGMENT);
+//            INSTANCE = XExpressionImpl.fromText("", EvaluationMode.CODE_FRAGMENT);
+        }
     }
 }
