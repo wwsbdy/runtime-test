@@ -1,5 +1,6 @@
 package com.zj.runtimetest.ui;
 
+import com.google.common.base.Charsets;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnAction;
@@ -14,6 +15,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.IconLoader;
 import com.intellij.openapi.util.Key;
 import com.intellij.openapi.util.UserDataHolder;
+import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.*;
 import com.intellij.psi.util.PsiTreeUtil;
@@ -34,6 +36,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URLEncoder;
 import java.util.Objects;
 
 
@@ -146,10 +149,15 @@ public class RuntimeTestAction extends AnAction implements Disposable {
     private void run(Project project, CacheVo cache) {
         String coreJarPath = PathManager.getPluginsPath() + File.separator + "runtime-test-ui" + File.separator + "lib" + File.separator + "runtime-test-core.jar";
         String pid = cache.getPid().toString();
+        String requestJson = JsonUtil.toJsonString(cache);
+        String jsonPath = project.getBasePath() + "/.idea/runtime-test/RequestInfo.json";
+        if (requestJson.length() > 600 && flushFile(jsonPath, requestJson)) {
+            requestJson = "file://" + URLEncoder.encode(jsonPath, Charsets.UTF_8);
+        }
         VirtualMachine vm = null;
         try {
             vm = VirtualMachine.attach(pid);
-            vm.loadAgent(coreJarPath, JsonUtil.toJsonString(cache));
+            vm.loadAgent(coreJarPath, requestJson);
         } catch (IOException e) {
             if (e.getMessage() != null && e.getMessage().contains("Non-numeric value found")) {
                 log.warn("jdk lower version attach higher version, can ignore");
@@ -158,7 +166,7 @@ public class RuntimeTestAction extends AnAction implements Disposable {
                     NoticeUtil.error(project, PluginBundle.get("notice.error.no-such-process") + " " + pid);
                 } else {
                     log.error("e: ", e);
-                    NoticeUtil.error(project, e.getMessage());
+                    NoticeUtil.error(project, ThrowUtil.printStackTrace(e));
                 }
             }
         } catch (AgentLoadException e) {
@@ -166,11 +174,11 @@ public class RuntimeTestAction extends AnAction implements Disposable {
                 log.warn("jdk higher version attach lower version, can ignore");
             } else {
                 log.error("e: ", e);
-                NoticeUtil.error(project, e.getMessage());
+                NoticeUtil.error(project, ThrowUtil.printStackTrace(e));
             }
         } catch (Exception e) {
             log.error("e: ", e);
-            NoticeUtil.error(project, e.getMessage());
+            NoticeUtil.error(project, ThrowUtil.printStackTrace(e));
         } finally {
             if (null != vm) {
                 try {
@@ -179,6 +187,21 @@ public class RuntimeTestAction extends AnAction implements Disposable {
                 }
             }
         }
+    }
+
+
+    /**
+     * rewrite content to file
+     */
+    public static boolean flushFile(String filePath, String content) {
+        File file = new File(filePath);
+        try {
+            FileUtil.writeToFile(file, content);
+            return true;
+        } catch (IOException e) {
+            log.error("flushFile error [filePath:{} content:{} errMsg:{}]", filePath, content, e.getMessage());
+        }
+        return false;
     }
 
     @Override

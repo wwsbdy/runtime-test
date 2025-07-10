@@ -1,12 +1,15 @@
 package com.zj.runtimetest;
 
 import com.zj.runtimetest.utils.JsonUtil;
+import com.zj.runtimetest.utils.ThrowUtil;
 import com.zj.runtimetest.vo.RequestInfo;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.lang.instrument.Instrumentation;
+import java.net.URLDecoder;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -39,6 +42,14 @@ public class RuntimeTestAttach {
      * @param inst 仪表
      */
     public static void agentmain(String args, Instrumentation inst) {
+        if (args.startsWith("file://")) {
+            try {
+                args = getTextFileAsString(new File(URLDecoder.decode(args.substring(7), "UTF-8")));
+            } catch (IOException e) {
+                System.out.println(ThrowUtil.printStackTrace(e));
+                return;
+            }
+        }
         System.out.println("[Agent] agentmain invoked with args: " + args);
         RequestInfo requestInfo = JsonUtil.toJavaBean(args, RequestInfo.class);
         CompletableFuture.runAsync(() -> {
@@ -49,14 +60,19 @@ public class RuntimeTestAttach {
                     }
                 })
                 .exceptionally(throwable -> {
-                    try (StringWriter sw = new StringWriter();
-                         PrintWriter pw = new PrintWriter(sw)) {
-                        throwable.printStackTrace(pw);
-                        System.err.println(sw);
-                    } catch (IOException e) {
-                        System.err.println("[Agent] agentmain failed: " + throwable.getMessage());
-                    }
+                    System.out.println(ThrowUtil.printStackTrace(throwable));
                     return null;
                 });
+    }
+
+    public static String getTextFileAsString(File file) throws IOException {
+        StringBuilder sb = new StringBuilder();
+        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+            String temp;
+            while ((temp = br.readLine()) != null) {
+                sb.append(temp);
+            }
+            return sb.toString();
+        }
     }
 }

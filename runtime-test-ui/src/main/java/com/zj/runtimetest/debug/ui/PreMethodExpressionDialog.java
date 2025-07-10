@@ -50,6 +50,7 @@ public class PreMethodExpressionDialog extends DialogWrapper {
 
     @Override
     protected JComponent createCenterPanel() {
+        // TODO 前置函数窗口有点小，待优化
         XDebuggerEditorsProvider debuggerEditorsProvider = bp.getType().getEditorsProvider(bp, project);
         if (Objects.nonNull(debuggerEditorsProvider)) {
             XExpression xExpression = Objects.isNull(bp.getLogExpressionObject()) ? XExpressionImpl.fromText("") : bp.getLogExpressionObject();
