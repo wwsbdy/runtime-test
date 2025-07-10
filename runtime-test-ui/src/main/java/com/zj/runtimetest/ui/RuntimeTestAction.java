@@ -120,7 +120,7 @@ public class RuntimeTestAction extends AnAction implements Disposable {
         }
         int startLineNumber = document.getLineNumber(psiMethod.getTextOffset());
         int endLineNumber = document.getLineNumber(psiMethod.getTextRange().getEndOffset() - 1);
-
+        // TODO 方法名的下一行如果是空或try这些，debug就无效了
         int lineNumber = startLineNumber >= endLineNumber ? startLineNumber : startLineNumber + 1;
         VirtualFile file = psiFile.getVirtualFile();
 
