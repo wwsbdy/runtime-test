@@ -10,12 +10,12 @@ import org.jetbrains.annotations.NotNull;
 /**
  * @author 19242
  */
-public class JavaBreakpointHandlerFactoryImpl implements JavaBreakpointHandlerFactory {
+public class RuntimeTestBreakpointHandlerFactoryImpl implements JavaBreakpointHandlerFactory {
     @Override
     public JavaBreakpointHandler createHandler(DebugProcessImpl debugProcess) {
-        return new JavaBreakpointHandler(MyDebugBreakpointType.class, debugProcess) {
+        return new JavaBreakpointHandler(RuntimeTestBreakpointType.class, debugProcess) {
             @Override
-            protected @NotNull LineBreakpoint<MyBreakpointProperties> createJavaBreakpoint(@NotNull XBreakpoint xBreakpoint) {
+            protected @NotNull LineBreakpoint<RuntimeTestBreakpointProperties> createJavaBreakpoint(@NotNull XBreakpoint xBreakpoint) {
                 return new RuntimeTestBreakpoint(debugProcess.getProject(), xBreakpoint);
             }
 

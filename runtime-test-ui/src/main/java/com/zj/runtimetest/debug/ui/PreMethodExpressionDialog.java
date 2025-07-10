@@ -11,7 +11,7 @@ import com.intellij.xdebugger.evaluation.XDebuggerEditorsProvider;
 import com.intellij.xdebugger.impl.breakpoints.XExpressionImpl;
 import com.intellij.xdebugger.impl.ui.XDebuggerEditorBase;
 import com.intellij.xdebugger.impl.ui.XDebuggerExpressionEditor;
-import com.zj.runtimetest.debug.MyBreakpointProperties;
+import com.zj.runtimetest.debug.RuntimeTestBreakpointProperties;
 import com.zj.runtimetest.language.PluginBundle;
 import lombok.Getter;
 import lombok.Setter;
@@ -36,9 +36,9 @@ public class PreMethodExpressionDialog extends DialogWrapper {
 
     private XDebuggerEditorBase expressionEditor;
 
-    private final @NotNull XLineBreakpoint<MyBreakpointProperties> bp;
+    private final @NotNull XLineBreakpoint<RuntimeTestBreakpointProperties> bp;
 
-    public PreMethodExpressionDialog(Project project,@NotNull XLineBreakpoint<MyBreakpointProperties> bp) {
+    public PreMethodExpressionDialog(Project project,@NotNull XLineBreakpoint<RuntimeTestBreakpointProperties> bp) {
         super(true);
         // 是否允许拖拽的方式扩大或缩小
         setResizable(true);

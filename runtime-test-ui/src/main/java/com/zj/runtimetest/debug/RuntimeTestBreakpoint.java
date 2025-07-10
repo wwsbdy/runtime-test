@@ -2,7 +2,6 @@ package com.zj.runtimetest.debug;
 
 import com.intellij.debugger.DebuggerInvocationUtil;
 import com.intellij.debugger.EvaluatingComputable;
-import com.intellij.debugger.JavaDebuggerBundle;
 import com.intellij.debugger.SourcePosition;
 import com.intellij.debugger.engine.ContextUtil;
 import com.intellij.debugger.engine.evaluation.EvaluateException;
@@ -36,7 +35,7 @@ import java.util.function.Function;
  * @author : jie.zhou
  * @date : 2025/7/10
  */
-public class RuntimeTestBreakpoint extends LineBreakpoint<MyBreakpointProperties> {
+public class RuntimeTestBreakpoint extends LineBreakpoint<RuntimeTestBreakpointProperties> {
     private static final Logger log = LoggerFactory.getLogger(RuntimeTestBreakpoint.class);
 
     protected RuntimeTestBreakpoint(Project project, XBreakpoint xBreakpoint) {
@@ -44,7 +43,7 @@ public class RuntimeTestBreakpoint extends LineBreakpoint<MyBreakpointProperties
     }
 
     @Override
-    protected @NotNull MyBreakpointProperties getProperties() {
+    protected @NotNull RuntimeTestBreakpointProperties getProperties() {
         return super.getProperties();
     }
 

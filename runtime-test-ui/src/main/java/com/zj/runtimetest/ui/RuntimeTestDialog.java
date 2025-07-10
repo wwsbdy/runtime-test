@@ -18,7 +18,7 @@ import com.intellij.util.ui.JBUI;
 import com.intellij.xdebugger.XDebuggerManager;
 import com.intellij.xdebugger.breakpoints.XLineBreakpoint;
 import com.zj.runtimetest.cache.RuntimeTestState;
-import com.zj.runtimetest.debug.MyBreakpointProperties;
+import com.zj.runtimetest.debug.RuntimeTestBreakpointProperties;
 import com.zj.runtimetest.debug.ui.PreMethodExpressionDialog;
 import com.zj.runtimetest.json.JsonEditorField;
 import com.zj.runtimetest.language.PluginBundle;
@@ -62,9 +62,9 @@ public class RuntimeTestDialog extends DialogWrapper {
     private ComboBox<String> historyComboBox;
     private JButton preMethodButton;
 
-    private final @NotNull XLineBreakpoint<MyBreakpointProperties> bp;
+    private final @NotNull XLineBreakpoint<RuntimeTestBreakpointProperties> bp;
 
-    public RuntimeTestDialog(Project project, String cacheKey, CacheVo cache, String defaultJson,@NotNull XLineBreakpoint<MyBreakpointProperties> bp) {
+    public RuntimeTestDialog(Project project, String cacheKey, CacheVo cache, String defaultJson,@NotNull XLineBreakpoint<RuntimeTestBreakpointProperties> bp) {
         super(true);
         // 是否允许拖拽的方式扩大或缩小
         setResizable(true);

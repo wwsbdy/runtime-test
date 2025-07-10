@@ -5,7 +5,7 @@ import org.jetbrains.java.debugger.breakpoints.properties.JavaBreakpointProperti
 /**
  * @author 19242
  */
-public class MyBreakpointProperties extends JavaBreakpointProperties<MyBreakpointProperties> {
+public class RuntimeTestBreakpointProperties extends JavaBreakpointProperties<RuntimeTestBreakpointProperties> {
 //    @Override
 //    public LineBreakpointState<XBreakpointProperties> getState() {
 //        return new LineBreakpointState<>();

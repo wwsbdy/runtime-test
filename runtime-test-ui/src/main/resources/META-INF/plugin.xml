@@ -41,8 +41,8 @@
         <projectService serviceImplementation="com.zj.runtimetest.cache.RuntimeTestState"/>
         <java.programPatcher implementation="com.zj.runtimetest.listener.RuntimeTestJavaProgramPatcher"/>
         <notificationGroup id="RuntimeTest" displayType="BALLOON"/>
-        <xdebugger.breakpointType implementation="com.zj.runtimetest.debug.MyDebugBreakpointType"/>
-        <debugger.javaBreakpointHandlerFactory implementation="com.zj.runtimetest.debug.JavaBreakpointHandlerFactoryImpl"/>
+        <xdebugger.breakpointType implementation="com.zj.runtimetest.debug.RuntimeTestBreakpointType"/>
+        <debugger.javaBreakpointHandlerFactory implementation="com.zj.runtimetest.debug.RuntimeTestBreakpointHandlerFactoryImpl"/>
     </extensions>
     <actions>
         <action id="RuntimeTest.RuntimeTestAction"

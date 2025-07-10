@@ -24,8 +24,8 @@ import com.intellij.xdebugger.breakpoints.XBreakpointManager;
 import com.intellij.xdebugger.breakpoints.XLineBreakpoint;
 import com.sun.tools.attach.AgentLoadException;
 import com.sun.tools.attach.VirtualMachine;
-import com.zj.runtimetest.debug.MyBreakpointProperties;
-import com.zj.runtimetest.debug.MyDebugBreakpointType;
+import com.zj.runtimetest.debug.RuntimeTestBreakpointProperties;
+import com.zj.runtimetest.debug.RuntimeTestBreakpointType;
 import com.zj.runtimetest.language.PluginBundle;
 import com.zj.runtimetest.utils.*;
 import com.zj.runtimetest.vo.CacheVo;
@@ -62,7 +62,7 @@ public class RuntimeTestAction extends AnAction implements Disposable {
         if (null == project || editor == null) {
             throw new IllegalArgumentException("idea arg error (project or editor is null)");
         }
-        XLineBreakpoint<MyBreakpointProperties> bp = null;
+        XLineBreakpoint<RuntimeTestBreakpointProperties> bp = null;
         try {
             PsiMethod psiMethod = null;
             if (e.getDataContext() instanceof UserDataHolder) {
@@ -109,7 +109,7 @@ public class RuntimeTestAction extends AnAction implements Disposable {
         }
     }
 
-    private @Nullable XLineBreakpoint<MyBreakpointProperties> addBreakpoint(AnActionEvent e, Project project, PsiMethod psiMethod) {
+    private @Nullable XLineBreakpoint<RuntimeTestBreakpointProperties> addBreakpoint(AnActionEvent e, Project project, PsiMethod psiMethod) {
         PsiFile psiFile = e.getData(CommonDataKeys.PSI_FILE);
         if (psiFile == null) {
             return null;
@@ -124,11 +124,11 @@ public class RuntimeTestAction extends AnAction implements Disposable {
         int lineNumber = startLineNumber >= endLineNumber ? startLineNumber : startLineNumber + 1;
         VirtualFile file = psiFile.getVirtualFile();
 
-        MyDebugBreakpointType type = XDebuggerUtil.getInstance()
-                .findBreakpointType(MyDebugBreakpointType.class);
+        RuntimeTestBreakpointType type = XDebuggerUtil.getInstance()
+                .findBreakpointType(RuntimeTestBreakpointType.class);
 
         XBreakpointManager manager = XDebuggerManager.getInstance(project).getBreakpointManager();
-        for (XLineBreakpoint<MyBreakpointProperties> bp : manager.getBreakpoints(type)) {
+        for (XLineBreakpoint<RuntimeTestBreakpointProperties> bp : manager.getBreakpoints(type)) {
             if (bp.getFileUrl().equals(file.getUrl()) && bp.getLine() == lineNumber) {
                 return bp;
             }
