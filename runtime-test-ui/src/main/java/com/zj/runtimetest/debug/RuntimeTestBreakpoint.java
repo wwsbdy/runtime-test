@@ -75,7 +75,7 @@ public class RuntimeTestBreakpoint extends MethodBreakpoint {
             evaluator.evaluate(context);
             NoticeUtil.notice(this.getProject(), "[RuntimeTest] " + PluginBundle.get("evaluation.message.success"));
         } catch (Exception e) {
-            log.error("[RuntimeTest] Pre handle evaluate error: ", e);
+            log.error("[RuntimeTest] Pre-processing evaluate error: ", e);
         }
         return false;
     }
