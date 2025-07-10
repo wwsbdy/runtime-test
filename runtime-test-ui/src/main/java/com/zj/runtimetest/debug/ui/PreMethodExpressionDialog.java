@@ -16,6 +16,7 @@ import com.zj.runtimetest.language.PluginBundle;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import java.util.Objects;
@@ -35,9 +36,9 @@ public class PreMethodExpressionDialog extends DialogWrapper {
 
     private XDebuggerEditorBase expressionEditor;
 
-    private final XLineBreakpoint<MyBreakpointProperties> bp;
+    private final @NotNull XLineBreakpoint<MyBreakpointProperties> bp;
 
-    public PreMethodExpressionDialog(Project project, XLineBreakpoint<MyBreakpointProperties> bp) {
+    public PreMethodExpressionDialog(Project project,@NotNull XLineBreakpoint<MyBreakpointProperties> bp) {
         super(true);
         // 是否允许拖拽的方式扩大或缩小
         setResizable(true);
@@ -54,7 +55,7 @@ public class PreMethodExpressionDialog extends DialogWrapper {
     protected JComponent createCenterPanel() {
         XDebuggerEditorsProvider debuggerEditorsProvider = bp.getType().getEditorsProvider(bp, project);
         if (Objects.nonNull(debuggerEditorsProvider)) {
-            XExpression xExpression = Objects.isNull(bp.getLogExpressionObject()) ? XExpressionImpl.fromText("") : bp.getLogExpressionObject();
+            XExpression xExpression = Objects.isNull(bp.getConditionExpression()) ? XExpressionImpl.fromText("") : bp.getConditionExpression();
             expressionEditor = new XDebuggerExpressionEditor(project, debuggerEditorsProvider, "runtimeTestLogExpression", bp.getSourcePosition(), xExpression, true, true, false);
 //            expressionEditor = new XDebuggerExpressionComboBox(project, debuggerEditorsProvider, "runtimeTestLogExpression", bp.getSourcePosition(), true, true);
             expressionEditor.setExpression(xExpression);
@@ -68,7 +69,7 @@ public class PreMethodExpressionDialog extends DialogWrapper {
     @Override
     protected void doOKAction() {
         if (Objects.nonNull(expressionEditor) && StringUtils.isNotEmpty(expressionEditor.getExpression().getExpression())) {
-            bp.setLogExpressionObject(expressionEditor.getExpression());
+            bp.setConditionExpression(expressionEditor.getExpression());
         } else {
             XDebuggerManager.getInstance(project).getBreakpointManager().removeBreakpoint(bp);
         }

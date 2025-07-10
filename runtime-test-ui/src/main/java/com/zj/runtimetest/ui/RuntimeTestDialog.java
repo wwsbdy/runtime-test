@@ -15,6 +15,7 @@ import com.intellij.openapi.util.Disposer;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.util.ui.JBUI;
+import com.intellij.xdebugger.XDebuggerManager;
 import com.intellij.xdebugger.breakpoints.XLineBreakpoint;
 import com.zj.runtimetest.cache.RuntimeTestState;
 import com.zj.runtimetest.debug.MyBreakpointProperties;
@@ -27,6 +28,7 @@ import com.zj.runtimetest.vo.ProcessVo;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import java.awt.*;
@@ -60,9 +62,9 @@ public class RuntimeTestDialog extends DialogWrapper {
     private ComboBox<String> historyComboBox;
     private JButton preMethodButton;
 
-    private final XLineBreakpoint<MyBreakpointProperties> bp;
+    private final @NotNull XLineBreakpoint<MyBreakpointProperties> bp;
 
-    public RuntimeTestDialog(Project project, String cacheKey, CacheVo cache, String defaultJson, XLineBreakpoint<MyBreakpointProperties> bp) {
+    public RuntimeTestDialog(Project project, String cacheKey, CacheVo cache, String defaultJson,@NotNull XLineBreakpoint<MyBreakpointProperties> bp) {
         super(true);
         // 是否允许拖拽的方式扩大或缩小
         setResizable(true);
@@ -176,10 +178,16 @@ public class RuntimeTestDialog extends DialogWrapper {
         cache.setPid(pid);
         cache.setRequestJson(jsonContentText);
         cache.addHistory(jsonContentText);
-        cache.setExpression(bp.getLogExpressionObject());
+        cache.setExpression(bp.getConditionExpression());
         RuntimeTestState.getInstance(project).putCache(cacheKey, cache);
         toFrontRunContent(pid);
         super.doOKAction();
+    }
+
+    @Override
+    public void doCancelAction() {
+        XDebuggerManager.getInstance(project).getBreakpointManager().removeBreakpoint(bp);
+        super.doCancelAction();
     }
 
     /**

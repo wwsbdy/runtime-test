@@ -48,7 +48,8 @@
         <action id="RuntimeTest.RuntimeTestAction"
                 class="com.zj.runtimetest.ui.RuntimeTestAction"
                 text="Runtime Test"
-                description="The method will be called">
+                icon="com.zj.runtimetest.utils.Icons.LOGO"
+                description="Run method">
             <add-to-group group-id="EditorPopupMenu" anchor="first"/>
         </action>
     </actions>
