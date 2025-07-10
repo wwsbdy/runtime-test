@@ -4,15 +4,14 @@ import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.util.ui.JBDimension;
-import com.intellij.xdebugger.XDebuggerManager;
 import com.intellij.xdebugger.XExpression;
 import com.intellij.xdebugger.breakpoints.XLineBreakpoint;
 import com.intellij.xdebugger.evaluation.XDebuggerEditorsProvider;
-import com.intellij.xdebugger.impl.breakpoints.XExpressionImpl;
 import com.intellij.xdebugger.impl.ui.XDebuggerEditorBase;
 import com.intellij.xdebugger.impl.ui.XDebuggerExpressionEditor;
 import com.zj.runtimetest.debug.RuntimeTestBreakpointProperties;
 import com.zj.runtimetest.language.PluginBundle;
+import com.zj.runtimetest.vo.ExpressionVo;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
@@ -55,12 +54,12 @@ public class PreMethodExpressionDialog extends DialogWrapper {
     protected JComponent createCenterPanel() {
         XDebuggerEditorsProvider debuggerEditorsProvider = bp.getType().getEditorsProvider(bp, project);
         if (Objects.nonNull(debuggerEditorsProvider)) {
-            XExpression xExpression = Objects.isNull(bp.getConditionExpression()) ? XExpressionImpl.fromText("") : bp.getConditionExpression();
+            XExpression xExpression = Objects.isNull(bp.getConditionExpression()) ? ExpressionVo.EmptyXExpression.INSTANCE : bp.getConditionExpression();
             expressionEditor = new XDebuggerExpressionEditor(project, debuggerEditorsProvider, "runtimeTestLogExpression", bp.getSourcePosition(), xExpression, true, true, false);
 //            expressionEditor = new XDebuggerExpressionComboBox(project, debuggerEditorsProvider, "runtimeTestLogExpression", bp.getSourcePosition(), true, true);
             expressionEditor.setExpression(xExpression);
             JComponent component = expressionEditor.getComponent();
-            component.setPreferredSize(new JBDimension(450, 300));
+            component.setPreferredSize(new JBDimension(700, 300));
             return component;
         }
         return null;
@@ -70,18 +69,8 @@ public class PreMethodExpressionDialog extends DialogWrapper {
     protected void doOKAction() {
         if (Objects.nonNull(expressionEditor) && StringUtils.isNotEmpty(expressionEditor.getExpression().getExpression())) {
             bp.setConditionExpression(expressionEditor.getExpression());
-        } else {
-            XDebuggerManager.getInstance(project).getBreakpointManager().removeBreakpoint(bp);
         }
         super.doOKAction();
-    }
-
-    @Override
-    public void doCancelAction() {
-        if (StringUtils.isEmpty(expressionEditor.getExpression().getExpression())) {
-            XDebuggerManager.getInstance(project).getBreakpointManager().removeBreakpoint(bp);
-        }
-        super.doCancelAction();
     }
 
     @Override
