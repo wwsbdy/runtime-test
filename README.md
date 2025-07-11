@@ -1,17 +1,22 @@
 # runtime-test
 
-Execute any method of the Java project (including all methods in the class and static methods), get bean from the Spring container, without creating it through a constructor.<br>
-Getting Started:<br>
+Execute Java methods at runtime (including both instance and static methods).<br>
+Supports retrieving beans from the Spring container. If no bean is found, the object will be created via its constructor.<br>
+Quick Start:<br>
 <ul>
-    <li>run project</li>
-    <li>select method and right-click and choose 'Runtime Test'</li>
-    <li>fill parameters, execute method</li>
+    <li>Start the project</li>
+    <li>Right-click the target method and select <b>Runtime Test</b></li>
+    <li>Fill in the parameters and execute the method</li>
 </ul>
-ps:<br>
+
+Notes:<br>
 <ul>
-    <li>please confirm the method in the selected process</li>
-    <li>not a Spring bean, it will choose the constructor with the least number of parameters to create the object, and the parameters will be passed as NULL</li>
-    <li>pre handle is only valid in Debug mode</li>
+    <li>Ensure the method belongs to the currently running process</li>
+    <li>If the object is created via constructor, the one with the fewest parameters will be chosen, and all arguments will be passed as <code>null</code></li>
+    <li>Pre-processing is only available in <b>Debug mode</b></li>
+    <li>Pre-processing is based on conditional breakpoints; if the method's first line changes (e.g., from line 10 to line 20) without restarting the project, the breakpoint condition may become invalid</li>
+    <li>Do not run <b>Runtime Test</b> before the project has fully started</li>
+    <li>Supports JDK 8 and above (theoretically)</li>
 </ul>
 
 执行 Java 项目的方法(包括类中的所有方法和静态方法)，获取到Spring容器里的Bean，没有会通过构造器创建<br>
@@ -26,6 +31,9 @@ ps:<br>
     <li>确认方法在指定的进程下</li>
     <li>通过构造器创建对象时，会选择传参最少的，参数会传入NULL</li>
     <li>前置处理仅Debug模式有效</li>
+    <li>前置处理基于Debug断点的Condition，代码改变后（如方法第一行由第10排变为第20排）未重新启动项目可能会失效</li>
+    <li>项目启动完成之前请勿运行RuntimeTest</li>
+    <li>理论上支持jdk8以上</li>
 </ul>
 
 ## 配置环境：

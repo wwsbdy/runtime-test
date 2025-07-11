@@ -12,7 +12,7 @@ import com.intellij.debugger.engine.evaluation.expression.ExpressionEvaluator;
 import com.intellij.debugger.engine.evaluation.expression.UnsupportedExpressionException;
 import com.intellij.debugger.engine.events.SuspendContextCommandImpl;
 import com.intellij.debugger.impl.DebuggerUtilsEx;
-import com.intellij.debugger.ui.breakpoints.LineBreakpoint;
+import com.intellij.debugger.ui.breakpoints.MethodBreakpoint;
 import com.intellij.debugger.ui.impl.watch.CompilingEvaluatorImpl;
 import com.intellij.openapi.project.IndexNotReadyException;
 import com.intellij.openapi.project.Project;
@@ -23,8 +23,10 @@ import com.intellij.xdebugger.breakpoints.XBreakpoint;
 import com.sun.jdi.event.LocatableEvent;
 import com.sun.jdi.request.EventRequest;
 import com.zj.runtimetest.language.PluginBundle;
+import com.zj.runtimetest.utils.NoticeUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.java.debugger.breakpoints.properties.JavaMethodBreakpointProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,7 +37,7 @@ import java.util.function.Function;
  * @author : jie.zhou
  * @date : 2025/7/10
  */
-public class RuntimeTestBreakpoint extends LineBreakpoint<RuntimeTestBreakpointProperties> {
+public class RuntimeTestBreakpoint extends MethodBreakpoint {
     private static final Logger log = LoggerFactory.getLogger(RuntimeTestBreakpoint.class);
 
     protected RuntimeTestBreakpoint(Project project, XBreakpoint xBreakpoint) {
@@ -43,7 +45,7 @@ public class RuntimeTestBreakpoint extends LineBreakpoint<RuntimeTestBreakpointP
     }
 
     @Override
-    protected @NotNull RuntimeTestBreakpointProperties getProperties() {
+    protected @NotNull JavaMethodBreakpointProperties getProperties() {
         return super.getProperties();
     }
 
@@ -53,14 +55,14 @@ public class RuntimeTestBreakpoint extends LineBreakpoint<RuntimeTestBreakpointP
         try {
             b = super.processLocatableEvent(action, event);
         } catch (Exception e) {
-            log.error("processLocatableEvent error: ", e);
+            log.error("[RuntimeTest] processLocatableEvent error: ", e);
         }
         XDebuggerManager.getInstance(getProject()).getBreakpointManager().removeBreakpoint(this.getXBreakpoint());
         return b;
     }
 
     @Override
-    public boolean evaluateCondition(EvaluationContextImpl context, LocatableEvent event) {
+    public boolean evaluateCondition(@NotNull EvaluationContextImpl context, @NotNull LocatableEvent event) {
         try {
             SourcePosition contextSourcePosition = ContextUtil.getSourcePosition(context);
             ExpressionEvaluator evaluator = DebuggerInvocationUtil.commitAndRunReadAction(this.myProject, () -> {
@@ -71,12 +73,17 @@ public class RuntimeTestBreakpoint extends LineBreakpoint<RuntimeTestBreakpointP
                 );
             });
             evaluator.evaluate(context);
+            NoticeUtil.notice(this.getProject(), "[RuntimeTest] " + PluginBundle.get("evaluation.message.success"));
         } catch (Exception e) {
-            log.error("evaluate error: ", e);
+            log.error("[RuntimeTest] Pre-processing evaluate error: ", e);
         }
         return false;
     }
 
+    /**
+     * 以下拷贝自
+     * @see com.intellij.debugger.ui.breakpoints.Breakpoint
+     */
     private static ExpressionEvaluator createExpressionEvaluator(Project project, PsiElement contextPsiElement, SourcePosition contextSourcePosition, TextWithImports text, Function<? super PsiElement, ? extends PsiCodeFragment> fragmentFactory) throws EvaluateException {
         try {
             return EvaluatorBuilderImpl.build(text, contextPsiElement, contextSourcePosition, project);

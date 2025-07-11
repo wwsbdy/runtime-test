@@ -19,7 +19,6 @@ import com.intellij.xdebugger.XDebuggerManager;
 import com.intellij.xdebugger.XExpression;
 import com.intellij.xdebugger.breakpoints.XLineBreakpoint;
 import com.zj.runtimetest.cache.RuntimeTestState;
-import com.zj.runtimetest.debug.RuntimeTestBreakpointProperties;
 import com.zj.runtimetest.debug.ui.PreMethodExpressionDialog;
 import com.zj.runtimetest.json.JsonEditorField;
 import com.zj.runtimetest.language.PluginBundle;
@@ -63,9 +62,9 @@ public class RuntimeTestDialog extends DialogWrapper {
     private ComboBox<String> historyComboBox;
     private JButton preMethodButton;
 
-    private final @NotNull XLineBreakpoint<RuntimeTestBreakpointProperties> bp;
+    private final @NotNull XLineBreakpoint<?> bp;
 
-    public RuntimeTestDialog(Project project, String cacheKey, CacheVo cache, String defaultJson,@NotNull XLineBreakpoint<RuntimeTestBreakpointProperties> bp) {
+    public RuntimeTestDialog(Project project, String cacheKey, CacheVo cache, String defaultJson,@NotNull XLineBreakpoint<?> bp) {
         super(true);
         // 是否允许拖拽的方式扩大或缩小
         setResizable(true);
@@ -137,7 +136,7 @@ public class RuntimeTestDialog extends DialogWrapper {
         this.preMethodButton = new JButton(AllIcons.Nodes.Function);
         preMethodButton.setToolTipText(PluginBundle.get("dialog.preMethodFunction.title"));
         preMethodButton.addActionListener(event -> {
-            PreMethodExpressionDialog expressionDialog = new PreMethodExpressionDialog(project, bp);
+            PreMethodExpressionDialog<?> expressionDialog = new PreMethodExpressionDialog<>(project, bp);
             Disposer.register(getDisposable(), expressionDialog.getDisposable());
             expressionDialog.show();
         });
