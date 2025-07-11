@@ -8,6 +8,7 @@ import com.intellij.execution.ui.RunContentDescriptor;
 import com.intellij.execution.ui.RunContentManager;
 import com.intellij.openapi.project.Project;
 import com.zj.runtimetest.cache.RuntimeTestState;
+import com.zj.runtimetest.utils.BreakpointUtil;
 import com.zj.runtimetest.vo.ProcessVo;
 import org.jetbrains.annotations.NotNull;
 
@@ -32,6 +33,7 @@ public class RuntimeTestExecutionListener implements ExecutionListener {
                         .orElse(null);
                 RuntimeTestState.getInstance(project).putPidProcessMap(pid, new ProcessVo(pid, env.toString(), executionId, executorId));
             }
+            BreakpointUtil.removeBreakpoints(project);
         } catch (Exception ignored) {
         }
     }
@@ -44,6 +46,7 @@ public class RuntimeTestExecutionListener implements ExecutionListener {
                 long pid = ((KillableColoredProcessHandler.Silent) handler).getProcess().pid();
                 RuntimeTestState.getInstance(project).removePidProcessMap(pid);
             }
+            BreakpointUtil.removeBreakpoints(project);
         } catch (Exception ignored) {
         }
     }

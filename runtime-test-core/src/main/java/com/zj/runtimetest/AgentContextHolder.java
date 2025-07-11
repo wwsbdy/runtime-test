@@ -20,7 +20,7 @@ public class AgentContextHolder {
     private static final ObjCache<ClassLoader, ObjCache<Object, Integer>> CLASS_LOADER_CONTEXT_MAP = new ObjCache<>();
     private static final ObjCache<String, BeanInfo> BEAN_CACHE = new ObjCache<>(10);
     private static final ObjCache<String, MethodInvokeInfo> METHOD_CACHE = new ObjCache<>(10);
-    private static final ClassLoader DEFAULT_CLASS_LOADER = Thread.currentThread().getContextClassLoader();
+    public static final ClassLoader DEFAULT_CLASS_LOADER = Thread.currentThread().getContextClassLoader();
 
     public static void setContext(Object ctx) {
         System.out.println("[Agent] ApplicationContext injected." + ctx.getClass().getName());

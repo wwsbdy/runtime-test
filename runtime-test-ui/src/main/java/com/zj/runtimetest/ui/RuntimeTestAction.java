@@ -1,35 +1,26 @@
 package com.zj.runtimetest.ui;
 
-import com.google.common.base.Charsets;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
-import com.intellij.openapi.application.PathManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.CaretModel;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Key;
 import com.intellij.openapi.util.UserDataHolder;
-import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.psi.*;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.xdebugger.XDebuggerManager;
 import com.intellij.xdebugger.breakpoints.XLineBreakpoint;
-import com.sun.tools.attach.AgentLoadException;
-import com.sun.tools.attach.VirtualMachine;
-import com.zj.runtimetest.language.PluginBundle;
 import com.zj.runtimetest.utils.*;
 import com.zj.runtimetest.vo.CacheVo;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.java.debugger.breakpoints.properties.JavaMethodBreakpointProperties;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URLEncoder;
 import java.util.Objects;
 
 
@@ -72,17 +63,7 @@ public class RuntimeTestAction extends AnAction implements Disposable {
             }
             String cacheKey = PluginCacheUtil.genCacheKey(psiMethod);
             String defaultJson = ParamUtil.getDefaultJson(psiMethod.getParameterList());
-            CacheVo cache = PluginCacheUtil.getCache(psiMethod);
-            if (Objects.isNull(cache)) {
-                cache = new CacheVo();
-                PsiParameterList parameterList = psiMethod.getParameterList();
-                cache.setClassName(((PsiClass) psiMethod.getParent()).getQualifiedName());
-                cache.setMethodName(psiMethod.getName());
-                cache.setParameterTypeList(ParamUtil.getParamTypeNameList(parameterList));
-                cache.setProjectBasePath(project.getBasePath());
-                cache.setStaticMethod(MethodUtil.isStaticMethod(psiMethod));
-                cache.setRequestJson(defaultJson);
-            }
+            CacheVo cache = PluginCacheUtil.getCacheOrDefault(psiMethod, project, defaultJson);
             bp = BreakpointUtil.addBreakpoint(e.getData(CommonDataKeys.PSI_FILE), project, psiMethod);
             if (Objects.isNull(bp)) {
                 return;
@@ -94,70 +75,13 @@ public class RuntimeTestAction extends AnAction implements Disposable {
             if (!runtimeTestDialog.isOK()) {
                 return;
             }
-            run(project, cache);
+            RunUtil.run(project, cache, bp);
         } catch (Exception exception) {
             if (Objects.nonNull(bp)) {
                 XDebuggerManager.getInstance(project).getBreakpointManager().removeBreakpoint(bp);
             }
             log.error("invoke exception", exception);
         }
-    }
-    private void run(Project project, CacheVo cache) {
-        String coreJarPath = PathManager.getPluginsPath() + File.separator + "runtime-test-ui" + File.separator + "lib" + File.separator + "runtime-test-core.jar";
-        String pid = cache.getPid().toString();
-        String requestJson = JsonUtil.toJsonString(cache);
-        String jsonPath = project.getBasePath() + "/.idea/runtime-test/RequestInfo.json";
-        if (requestJson.length() > 600 && flushFile(jsonPath, requestJson)) {
-            requestJson = "file://" + URLEncoder.encode(jsonPath, Charsets.UTF_8);
-        }
-        VirtualMachine vm = null;
-        try {
-            vm = VirtualMachine.attach(pid);
-            vm.loadAgent(coreJarPath, requestJson);
-        } catch (IOException e) {
-            if (e.getMessage() != null && e.getMessage().contains("Non-numeric value found")) {
-                log.warn("jdk lower version attach higher version, can ignore");
-            } else {
-                if (Objects.equals(e.getMessage(), "No such process")) {
-                    NoticeUtil.error(project, "[RuntimeTest] " + PluginBundle.get("notice.error.no-such-process") + " " + pid);
-                } else {
-                    log.error("e: ", e);
-                    NoticeUtil.error(project, "[RuntimeTest] " + e.getMessage());
-                }
-            }
-        } catch (AgentLoadException e) {
-            if ("0".equals(e.getMessage())) {
-                log.warn("jdk higher version attach lower version, can ignore");
-            } else {
-                log.error("e: ", e);
-                NoticeUtil.error(project, "[RuntimeTest] " + e.getMessage());
-            }
-        } catch (Exception e) {
-            log.error("e: ", e);
-            NoticeUtil.error(project, "[RuntimeTest] " + e.getMessage());
-        } finally {
-            if (null != vm) {
-                try {
-                    vm.detach();
-                } catch (Exception ignored) {
-                }
-            }
-        }
-    }
-
-
-    /**
-     * rewrite content to file
-     */
-    public static boolean flushFile(String filePath, String content) {
-        File file = new File(filePath);
-        try {
-            FileUtil.writeToFile(file, content);
-            return true;
-        } catch (IOException e) {
-            log.error("flushFile error [filePath:{} content:{} errMsg:{}]", filePath, content, e.getMessage());
-        }
-        return false;
     }
 
     @Override
