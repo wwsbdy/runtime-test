@@ -12,6 +12,7 @@
         <li>Start the project</li>
         <li>Right-click the target method and select <b>Runtime Test</b></li>
         <li>Fill in the parameters and execute the method</li>
+        <li>Code can be written at <b>pre-processing</b> to modify parameter; print log</li>
     </ul>
 
     Notes:<br>
@@ -19,7 +20,7 @@
         <li>Ensure the method belongs to the currently running process</li>
         <li>If the object is created via constructor, the one with the fewest parameters will be chosen, and all arguments will be passed as <code>null</code></li>
         <li>Pre-processing is only available in <b>Debug mode</b></li>
-        <li>Pre-processing is based on conditional breakpoints; if the method's first line changes (e.g., from line 10 to line 20) without restarting the project, the breakpoint condition may become invalid</li>
+        <li>Pre-processing is based on conditional breakpoints; if the code changed without restarting the project, the breakpoint condition may become invalid</li>
         <li>Do not run <b>Runtime Test</b> before the project has fully started</li>
         <li>Supports JDK 8 and above (theoretically)</li>
     </ul>
@@ -30,14 +31,15 @@
         <li>启动项目</li>
         <li>选择要执行的方法，右键选择 Runtime Test </li>
         <li>填充参数，执行方法</li>
+        <li>可在<b>前置处理</b>处编写代码用来修改传参；打印日志</li>
     </ul>
     备注：<br>
     <ul>
         <li>确认方法在指定的进程下</li>
-        <li>通过构造器创建对象时，会选择传参最少的，参数会传入NULL</li>
-        <li>前置处理仅Debug模式有效</li>
-        <li>前置处理基于Debug断点的Condition，代码改变后（如方法第一行由第10排变为第20排）未重新启动项目可能会失效</li>
-        <li>项目启动完成之前请勿运行RuntimeTest</li>
+        <li>通过构造器创建对象时，会选择传参最少的，参数会传入<code>null</code></li>
+        <li>前置处理仅<b>Debug模式</b>有效</li>
+        <li>前置处理基于Debug断点的Condition，代码改变后未重新启动项目可能会失效</li>
+        <li>项目启动完成之前请勿运行<b>Runtime Test</b></li>
         <li>理论上支持jdk8以上</li>
     </ul>
   ]]></description>

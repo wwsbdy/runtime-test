@@ -122,7 +122,7 @@ public class RuntimeTestAction extends AnAction implements Disposable {
                     NoticeUtil.error(project, "[RuntimeTest] " + PluginBundle.get("notice.error.no-such-process") + " " + pid);
                 } else {
                     log.error("e: ", e);
-                    NoticeUtil.error(project, "[RuntimeTest] " + ThrowUtil.printStackTrace(e));
+                    NoticeUtil.error(project, "[RuntimeTest] " + e.getMessage());
                 }
             }
         } catch (AgentLoadException e) {
@@ -130,11 +130,11 @@ public class RuntimeTestAction extends AnAction implements Disposable {
                 log.warn("jdk higher version attach lower version, can ignore");
             } else {
                 log.error("e: ", e);
-                NoticeUtil.error(project, "[RuntimeTest] " + ThrowUtil.printStackTrace(e));
+                NoticeUtil.error(project, "[RuntimeTest] " + e.getMessage());
             }
         } catch (Exception e) {
             log.error("e: ", e);
-            NoticeUtil.error(project, "[RuntimeTest] " + ThrowUtil.printStackTrace(e));
+            NoticeUtil.error(project, "[RuntimeTest] " + e.getMessage());
         } finally {
             if (null != vm) {
                 try {
