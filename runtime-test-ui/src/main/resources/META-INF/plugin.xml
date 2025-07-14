@@ -44,9 +44,8 @@
     </ul>
   ]]></description>
 
+    <depends>com.intellij.modules.platform</depends>
     <depends>com.intellij.java</depends>
-<!--    idea version 243-->
-<!--    <depends>com.intellij.modules.json</depends>-->
 
     <extensions defaultExtensionNs="com.intellij">
         <projectService serviceImplementation="com.zj.runtimetest.cache.RuntimeTestState"/>
