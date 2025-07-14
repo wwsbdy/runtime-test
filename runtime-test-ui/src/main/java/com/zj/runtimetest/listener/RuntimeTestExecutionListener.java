@@ -25,13 +25,13 @@ public class RuntimeTestExecutionListener implements ExecutionListener {
     public void processStarted(@NotNull String executorId, @NotNull ExecutionEnvironment env, @NotNull ProcessHandler handler) {
         // TODO 是否可以在启动完成后再放入pid，防止启动未完成就点运行
         Project project = env.getProject();
-        handler.addProcessListener(new RuntimeTestProcessAdapter(project));
         try {
             if (handler instanceof KillableColoredProcessHandler.Silent) {
                 long pid = ((KillableColoredProcessHandler.Silent) handler).getProcess().pid();
                 Long executionId = Optional.ofNullable(RunContentManager.getInstance(project).getSelectedContent())
                         .map(RunContentDescriptor::getExecutionId)
                         .orElse(null);
+                handler.addProcessListener(new RuntimeTestProcessAdapter(project));
                 RuntimeTestState.getInstance(project).putPidProcessMap(pid, new ProcessVo(pid, env.toString(), executionId, executorId));
             }
             BreakpointUtil.removeBreakpoints(project);
