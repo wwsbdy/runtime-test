@@ -180,7 +180,7 @@ public class RuntimeTestDialog extends DialogWrapper {
         cache.setPid(pid);
         cache.setRequestJson(jsonContentText);
         cache.addHistory(jsonContentText);
-        if (!Optional.ofNullable(bp.getConditionExpression()).map(XExpression::getExpression).filter(StringUtils::isNotBlank).isPresent()) {
+        if (Optional.ofNullable(bp.getConditionExpression()).map(XExpression::getExpression).filter(StringUtils::isNotBlank).isEmpty()) {
             XDebuggerManager.getInstance(project).getBreakpointManager().removeBreakpoint(bp);
         } else {
             cache.setExpression(bp.getConditionExpression());
