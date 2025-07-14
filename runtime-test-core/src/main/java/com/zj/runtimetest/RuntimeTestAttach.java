@@ -59,7 +59,7 @@ public class RuntimeTestAttach {
                     }
                 })
                 .exceptionally(throwable -> {
-                    System.out.println(ThrowUtil.printStackTrace(throwable));
+                    System.err.println("[Agent] " + ThrowUtil.printStackTrace(throwable));
                     return null;
                 });
     }

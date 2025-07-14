@@ -71,7 +71,7 @@ public class AgentContextHolder {
             try {
                 initContextClassLoaderMap();
             } catch (Exception e) {
-                System.err.println("[Agent] init context classLoader map failed: " + e.getMessage());
+                System.out.println("[Agent] init context classLoader map failed: " + e.getMessage());
             }
         }
         if (CLASS_LOADER_CONTEXT_MAP.isEmpty()) {
