@@ -75,7 +75,7 @@ public class RuntimeTestDialog extends DialogWrapper {
             content = "";
         }
         // 设置会话框标题
-        setTitle(PluginBundle.get("dialog.title"));
+        setTitle(PluginBundle.get("dialog.title") + " (" + cache.getMethodName() + ")");
         // 获取到当前项目的名称
         this.project = project;
         this.cacheKey = cacheKey;
