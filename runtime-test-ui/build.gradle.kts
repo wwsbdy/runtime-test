@@ -11,7 +11,7 @@ intellij {
     version.set(properties("intellij.version"))
     type.set(properties("intellij.type"))
 
-    plugins.set(listOf("com.intellij.java", "com.intellij.modules.json"))
+    plugins.set(listOf("com.intellij.java"))
 }
 
 tasks {

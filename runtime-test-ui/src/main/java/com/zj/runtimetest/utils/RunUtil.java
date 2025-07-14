@@ -1,6 +1,5 @@
 package com.zj.runtimetest.utils;
 
-import com.google.common.base.Charsets;
 import com.intellij.openapi.application.PathManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
@@ -14,6 +13,7 @@ import com.zj.runtimetest.vo.CacheVo;
 import java.io.File;
 import java.io.IOException;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
 /**
@@ -30,7 +30,7 @@ public class RunUtil {
         String requestJson = JsonUtil.toJsonString(cache);
         String jsonPath = project.getBasePath() + "/.idea/runtime-test/RequestInfo.json";
         if (requestJson.length() > 600 && PluginIOUtil.flushFile(jsonPath, requestJson)) {
-            requestJson = "file://" + URLEncoder.encode(jsonPath, Charsets.UTF_8);
+            requestJson = "file://" + URLEncoder.encode(jsonPath, StandardCharsets.UTF_8);
         }
         VirtualMachine vm = null;
         try {
