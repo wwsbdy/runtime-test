@@ -7,7 +7,6 @@ import com.intellij.execution.ui.ExecutionConsole;
 import com.intellij.execution.ui.RunContentDescriptor;
 import com.intellij.execution.ui.RunContentManager;
 import com.intellij.icons.AllIcons;
-import com.intellij.json.JsonLanguage;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.ComboBox;
@@ -23,6 +22,7 @@ import com.intellij.xdebugger.breakpoints.XLineBreakpoint;
 import com.zj.runtimetest.cache.RuntimeTestState;
 import com.zj.runtimetest.debug.ui.PreMethodExpressionDialog;
 import com.zj.runtimetest.json.JsonEditorField;
+import com.zj.runtimetest.json.JsonLanguage;
 import com.zj.runtimetest.language.PluginBundle;
 import com.zj.runtimetest.utils.ExecutorUtil;
 import com.zj.runtimetest.vo.CacheVo;
@@ -75,7 +75,7 @@ public class RuntimeTestDialog extends DialogWrapper {
             content = "";
         }
         // 设置会话框标题
-        setTitle(PluginBundle.get("dialog.title"));
+        setTitle(PluginBundle.get("dialog.title") + " (" + cache.getMethodName() + ")");
         // 获取到当前项目的名称
         this.project = project;
         this.cacheKey = cacheKey;
