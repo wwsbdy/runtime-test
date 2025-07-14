@@ -10,8 +10,10 @@ version = "0.0.1"
 intellij {
     version.set(properties("intellij.version"))
     type.set(properties("intellij.type"))
+    // idea version 243
+//    plugins.set(listOf("com.intellij.java", "com.intellij.modules.json"))
 
-    plugins.set(listOf("com.intellij.java", "com.intellij.modules.json"))
+    plugins.set(listOf("com.intellij.java"))
 }
 
 tasks {
