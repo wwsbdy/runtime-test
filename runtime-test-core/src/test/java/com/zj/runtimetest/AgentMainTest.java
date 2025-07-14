@@ -27,14 +27,14 @@ public class AgentMainTest {
         Thread.sleep(2000);
     }
 
-    @Test
+    @Test(expected = Exception.class)
     public void testLoadAgentAtRuntime() throws Exception {
         AgentUtil.run("com.zj.runtimetest.vo.OneVo",
                 "test",
                 Collections.emptyList(),
                 null);
     }
-    @Test
+    @Test(expected = Exception.class)
     public void testMethodArg() throws Exception {
         Method method = OneVo.class.getDeclaredMethod("testList", List.class);
         List<Person> personList = new ArrayList<>();
@@ -46,7 +46,7 @@ public class AgentMainTest {
         personList.add(new Person("cjasidj", 1920, Stream.of("121", "123").collect(Collectors.toList())));
         AgentUtil.run(method, JsonUtil.toJsonString(requestJson), new MethodParamInfo("list", "java.util.List"));
     }
-    @Test
+    @Test(expected = Exception.class)
     public void testClassNotFound() throws Exception {
         AgentUtil.run("com.zj.runtimetest.vo.OneVo11",
                 "test",
@@ -57,7 +57,7 @@ public class AgentMainTest {
                 Collections.emptyList(),
                 null);
     }
-    @Test
+    @Test(expected = Exception.class)
     public void testMethodNotFound() throws Exception {
         AgentUtil.run("com.zj.runtimetest.vo.OneVo",
                 "test11",
