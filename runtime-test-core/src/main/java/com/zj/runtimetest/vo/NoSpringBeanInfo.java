@@ -31,10 +31,8 @@ public class NoSpringBeanInfo extends BeanInfo {
                     Object instanceSmart = createInstanceSmart(ClassUtil.getClass(super.getClassName(), super.getClassLoader()));
                     super.setBean(instanceSmart);
                     return instanceSmart;
-                } catch (ClassNotFoundException e) {
-                    System.err.println("[Agent] Create bean by constructor fail: " + super.getClassName() + ", reason: ClassNotFoundException");
                 } catch (Exception e) {
-                    System.err.println("[Agent] Create bean by constructor fail: " + super.getClassName() + ", reason: " + e.getMessage());
+                    throw new RuntimeException(e);
                 }
             }
         }

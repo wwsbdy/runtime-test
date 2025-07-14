@@ -42,7 +42,7 @@ public class AgentContextHolder {
                 BeanInfo beanInfo = getBean(className);
                 bean = beanInfo.getBean();
                 if (Objects.isNull(bean)) {
-                    System.out.println("[Agent] Bean not found: " + className);
+                    System.err.println("[Agent] Bean not found: " + className);
                     return;
                 }
                 classLoader = beanInfo.getClassLoader();
