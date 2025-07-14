@@ -9,6 +9,7 @@ import com.zj.runtimetest.utils.BreakpointUtil;
 import org.jetbrains.annotations.NotNull;
 
 /**
+ * 监听agent报错日志，清空断点
  * @author : jie.zhou
  * @date : 2025/7/14
  */
@@ -25,6 +26,7 @@ public class RuntimeTestProcessAdapter extends ProcessAdapter {
     public void onTextAvailable(@NotNull ProcessEvent event, @NotNull Key outputType) {
         String text = event.getText();
         if (text.startsWith("[Agent]") && ProcessOutputType.isStderr(outputType)) {
+            // 这里是清空断点，小概率会把其他RuntimeTest请求的前置处理删除
             BreakpointUtil.removeBreakpoints(project);
             return;
         }

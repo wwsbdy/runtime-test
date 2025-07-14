@@ -2,6 +2,8 @@ package com.zj.runtimetest.ui;
 
 import com.intellij.execution.Executor;
 import com.intellij.execution.ExecutorRegistry;
+import com.intellij.execution.ui.ConsoleView;
+import com.intellij.execution.ui.ExecutionConsole;
 import com.intellij.execution.ui.RunContentDescriptor;
 import com.intellij.execution.ui.RunContentManager;
 import com.intellij.icons.AllIcons;
@@ -216,7 +218,8 @@ public class RuntimeTestDialog extends DialogWrapper {
             log.info("toFrontRunContent executor is null");
             return;
         }
-        RunContentDescriptor runContentDescriptor = RunContentManager.getInstance(project).getAllDescriptors().stream()
+        RunContentManager runContentManager = RunContentManager.getInstance(project);
+        RunContentDescriptor runContentDescriptor = runContentManager.getAllDescriptors().stream()
                 .filter(descriptor -> process.getExecutionId().equals(descriptor.getExecutionId()))
                 .findFirst()
                 .orElse(null);
@@ -224,7 +227,12 @@ public class RuntimeTestDialog extends DialogWrapper {
             log.info("toFrontRunContent runContentDescriptor is null");
             return;
         }
-        RunContentManager.getInstance(project).toFrontRunContent(executor, runContentDescriptor);
+        runContentManager.toFrontRunContent(executor, runContentDescriptor);
+        ExecutionConsole console = runContentDescriptor.getExecutionConsole();
+        if (console instanceof ConsoleView) {
+            ConsoleView consoleView = (ConsoleView) console;
+            consoleView.requestScrollingToEnd();
+        }
     }
 
     @Override
