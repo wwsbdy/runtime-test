@@ -8,7 +8,7 @@ plugins {
 }
 
 group = "com.zj"
-version = "1.0.0"
+version = "1.0.201"
 
 intellij {
     // org.jetbrains.intellij version 1.14.1
