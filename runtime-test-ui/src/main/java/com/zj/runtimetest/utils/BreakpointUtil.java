@@ -7,6 +7,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.*;
 import com.intellij.xdebugger.XDebuggerManager;
 import com.intellij.xdebugger.XDebuggerUtil;
+import com.intellij.xdebugger.breakpoints.XBreakpoint;
 import com.intellij.xdebugger.breakpoints.XBreakpointManager;
 import com.intellij.xdebugger.breakpoints.XLineBreakpoint;
 import com.zj.runtimetest.debug.RuntimeTestBreakpointType;
@@ -48,6 +49,18 @@ public class BreakpointUtil {
             }
         }
         return manager.addLineBreakpoint(type, file.getUrl(), lineNumber, type.createProperties());
+    }
+
+    public static void removeBreakpoints(Project project) {
+        RuntimeTestBreakpointType type = XDebuggerUtil.getInstance()
+                .findBreakpointType(RuntimeTestBreakpointType.class);
+        XBreakpointManager manager = XDebuggerManager.getInstance(project).getBreakpointManager();
+        manager.getBreakpoints(type).forEach(manager::removeBreakpoint);
+    }
+
+    public static void removeBreakpoint(Project project, XBreakpoint<?> bp) {
+        XBreakpointManager manager = XDebuggerManager.getInstance(project).getBreakpointManager();
+        manager.removeBreakpoint(bp);
     }
 
     public static Integer findFirstExecutableLine(PsiMethod method, Project project) {

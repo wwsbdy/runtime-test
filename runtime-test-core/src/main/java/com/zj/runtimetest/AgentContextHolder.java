@@ -20,7 +20,7 @@ public class AgentContextHolder {
     private static final ObjCache<ClassLoader, ObjCache<Object, Integer>> CLASS_LOADER_CONTEXT_MAP = new ObjCache<>();
     private static final ObjCache<String, BeanInfo> BEAN_CACHE = new ObjCache<>(10);
     private static final ObjCache<String, MethodInvokeInfo> METHOD_CACHE = new ObjCache<>(10);
-    private static final ClassLoader DEFAULT_CLASS_LOADER = Thread.currentThread().getContextClassLoader();
+    public static final ClassLoader DEFAULT_CLASS_LOADER = Thread.currentThread().getContextClassLoader();
 
     public static void setContext(Object ctx) {
         System.out.println("[Agent] ApplicationContext injected." + ctx.getClass().getName());
@@ -42,7 +42,7 @@ public class AgentContextHolder {
                 BeanInfo beanInfo = getBean(className);
                 bean = beanInfo.getBean();
                 if (Objects.isNull(bean)) {
-                    System.out.println("[Agent] Bean not found: " + className);
+                    System.err.println("[Agent] Bean not found: " + className);
                     return;
                 }
                 classLoader = beanInfo.getClassLoader();
@@ -71,7 +71,7 @@ public class AgentContextHolder {
             try {
                 initContextClassLoaderMap();
             } catch (Exception e) {
-                System.err.println("[Agent] init context classLoader map failed: " + e.getMessage());
+                System.out.println("[Agent] init context classLoader map failed: " + e.getMessage());
             }
         }
         if (CLASS_LOADER_CONTEXT_MAP.isEmpty()) {

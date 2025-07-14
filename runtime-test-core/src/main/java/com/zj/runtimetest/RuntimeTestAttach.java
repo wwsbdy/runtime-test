@@ -1,12 +1,11 @@
 package com.zj.runtimetest;
 
+import com.zj.runtimetest.utils.IOUtil;
 import com.zj.runtimetest.utils.JsonUtil;
 import com.zj.runtimetest.utils.ThrowUtil;
 import com.zj.runtimetest.vo.RequestInfo;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.lang.instrument.Instrumentation;
 import java.net.URLDecoder;
@@ -44,7 +43,7 @@ public class RuntimeTestAttach {
     public static void agentmain(String args, Instrumentation inst) {
         if (args.startsWith("file://")) {
             try {
-                args = getTextFileAsString(new File(URLDecoder.decode(args.substring(7), "UTF-8")));
+                args = IOUtil.getTextFileAsString(new File(URLDecoder.decode(args.substring(7), "UTF-8")));
             } catch (IOException e) {
                 System.out.println(ThrowUtil.printStackTrace(e));
                 return;
@@ -60,19 +59,8 @@ public class RuntimeTestAttach {
                     }
                 })
                 .exceptionally(throwable -> {
-                    System.out.println(ThrowUtil.printStackTrace(throwable));
+                    System.err.println("[Agent] " + ThrowUtil.printStackTrace(throwable));
                     return null;
                 });
-    }
-
-    public static String getTextFileAsString(File file) throws IOException {
-        StringBuilder sb = new StringBuilder();
-        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
-            String temp;
-            while ((temp = br.readLine()) != null) {
-                sb.append(temp);
-            }
-            return sb.toString();
-        }
     }
 }

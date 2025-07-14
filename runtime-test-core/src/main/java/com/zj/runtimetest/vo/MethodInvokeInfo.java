@@ -5,7 +5,9 @@ import com.zj.runtimetest.utils.FiledUtil;
 import com.zj.runtimetest.utils.JsonUtil;
 import lombok.Getter;
 
-import java.lang.reflect.*;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +17,7 @@ import java.util.Objects;
  * @author : jie.zhou
  * @date : 2025/7/1
  */
+@Getter
 public class MethodInvokeInfo {
 
     private final boolean staticMethod;
@@ -25,7 +28,6 @@ public class MethodInvokeInfo {
     private Class<?>[] paramClazzArr;
     private Method method;
     private final List<MethodParamInfo> parameterTypeList;
-    @Getter
     private boolean returnValue;
 
     public MethodInvokeInfo(RequestInfo requestInfo, ClassLoader classLoader, Object bean) {
