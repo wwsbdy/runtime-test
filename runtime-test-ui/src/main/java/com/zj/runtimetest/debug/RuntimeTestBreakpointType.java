@@ -19,10 +19,15 @@ public class RuntimeTestBreakpointType extends JavaMethodBreakpointType {
     public RuntimeTestBreakpointType() {
         super(ID, TITLE);
     }
-
+    // idea version 243
+//    @Override
+//    public @NotNull Breakpoint<JavaMethodBreakpointProperties> createJavaBreakpoint(Project project, XBreakpoint<JavaMethodBreakpointProperties> breakpoint) {
+//        return new RuntimeTestBreakpoint(project, breakpoint);
+////        return super.createJavaBreakpoint(project, breakpoint);
+//    }
+    // idea version 223
     @Override
-    public @NotNull Breakpoint<JavaMethodBreakpointProperties> createJavaBreakpoint(Project project, XBreakpoint<JavaMethodBreakpointProperties> breakpoint) {
+    public @NotNull Breakpoint<JavaMethodBreakpointProperties> createJavaBreakpoint(Project project, XBreakpoint breakpoint) {
         return new RuntimeTestBreakpoint(project, breakpoint);
-//        return super.createJavaBreakpoint(project, breakpoint);
     }
 }

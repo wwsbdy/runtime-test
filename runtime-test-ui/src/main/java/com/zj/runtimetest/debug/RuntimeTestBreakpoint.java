@@ -108,7 +108,10 @@ public class RuntimeTestBreakpoint extends MethodBreakpoint {
 
     private PsiCodeFragment createConditionCodeFragment(PsiElement context) {
         TextWithImports text = this.getCondition();
-        return DebuggerUtilsEx.findAppropriateCodeFragmentFactory(text, context).createPsiCodeFragment(text, context, getProject());
+        // idea version 243
+//        return DebuggerUtilsEx.findAppropriateCodeFragmentFactory(text, context).createPsiCodeFragment(text, context, getProject());
+        // idea version 223
+        return DebuggerUtilsEx.findAppropriateCodeFragmentFactory(text, context).createCodeFragment(text, context, getProject());
     }
 
     private static final class EvaluatorCache {
