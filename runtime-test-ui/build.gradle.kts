@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "com.zj"
-version = "1.1.0"
+version = "1.1.222"
 
 intellij {
     version.set(properties("intellij.version"))
