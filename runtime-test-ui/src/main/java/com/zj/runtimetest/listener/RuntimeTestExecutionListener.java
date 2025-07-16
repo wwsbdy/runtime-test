@@ -6,6 +6,7 @@ import com.intellij.execution.process.ProcessHandler;
 import com.intellij.execution.runners.ExecutionEnvironment;
 import com.intellij.execution.ui.RunContentDescriptor;
 import com.intellij.execution.ui.RunContentManager;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
 import com.zj.runtimetest.cache.RuntimeTestState;
 import com.zj.runtimetest.utils.BreakpointUtil;
@@ -47,7 +48,10 @@ public class RuntimeTestExecutionListener implements ExecutionListener {
                 long pid = ((KillableColoredProcessHandler.Silent) handler).getProcess().pid();
                 RuntimeTestState.getInstance(project).removePidProcessMap(pid);
             }
-            BreakpointUtil.removeBreakpoints(project);
+            ApplicationManager.getApplication()
+                    .runWriteAction(() ->
+                            BreakpointUtil.removeBreakpoints(project)
+                    );
         } catch (Exception ignored) {
         }
     }
