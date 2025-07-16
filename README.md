@@ -58,3 +58,8 @@ Notes:<br>
 - 支持spring-boot-devtools热部署场景
 - 点击ok后跳转指定Run/Debug进程窗口
 - 支持前置表达式
+
+### 1.1.*
+
+- 兼容其他版本
+- 防止项目卡死（断点暂停方法后再运行RuntimeTest，项目会卡死）

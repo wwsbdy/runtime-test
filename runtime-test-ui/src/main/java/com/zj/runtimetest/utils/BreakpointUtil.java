@@ -1,8 +1,10 @@
 package com.zj.runtimetest.utils;
 
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.Computable;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.*;
 import com.intellij.xdebugger.XDebuggerManager;
@@ -48,7 +50,10 @@ public class BreakpointUtil {
                 return bp;
             }
         }
-        return manager.addLineBreakpoint(type, file.getUrl(), lineNumber, type.createProperties());
+        return ApplicationManager.getApplication()
+                .runWriteAction((Computable<XLineBreakpoint<JavaMethodBreakpointProperties>>) () ->
+                        manager.addLineBreakpoint(type, file.getUrl(), lineNumber, type.createProperties())
+                );
     }
 
     public static void removeBreakpoints(Project project) {
@@ -59,8 +64,10 @@ public class BreakpointUtil {
     }
 
     public static void removeBreakpoint(Project project, XBreakpoint<?> bp) {
-        XBreakpointManager manager = XDebuggerManager.getInstance(project).getBreakpointManager();
-        manager.removeBreakpoint(bp);
+        if (Objects.isNull(bp)) {
+            return;
+        }
+        XDebuggerManager.getInstance(project).getBreakpointManager().removeBreakpoint(bp);
     }
 
     public static Integer findFirstExecutableLine(PsiMethod method, Project project) {

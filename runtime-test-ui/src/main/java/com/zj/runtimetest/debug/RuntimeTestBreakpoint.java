@@ -14,15 +14,16 @@ import com.intellij.debugger.engine.events.SuspendContextCommandImpl;
 import com.intellij.debugger.impl.DebuggerUtilsEx;
 import com.intellij.debugger.ui.breakpoints.MethodBreakpoint;
 import com.intellij.debugger.ui.impl.watch.CompilingEvaluatorImpl;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.IndexNotReadyException;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiCodeFragment;
 import com.intellij.psi.PsiElement;
-import com.intellij.xdebugger.XDebuggerManager;
 import com.intellij.xdebugger.breakpoints.XBreakpoint;
 import com.sun.jdi.event.LocatableEvent;
 import com.sun.jdi.request.EventRequest;
 import com.zj.runtimetest.language.PluginBundle;
+import com.zj.runtimetest.utils.BreakpointUtil;
 import com.zj.runtimetest.utils.NoticeUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -57,7 +58,13 @@ public class RuntimeTestBreakpoint extends MethodBreakpoint {
         } catch (Exception e) {
             log.error("[RuntimeTest] processLocatableEvent error: ", e);
         }
-        XDebuggerManager.getInstance(getProject()).getBreakpointManager().removeBreakpoint(this.getXBreakpoint());
+        ApplicationManager.getApplication()
+                .invokeLater(() ->
+                        ApplicationManager.getApplication()
+                                .runWriteAction(() ->
+                                        BreakpointUtil.removeBreakpoint(getProject(), this.getXBreakpoint())
+                                )
+                );
         return b;
     }
 
@@ -108,9 +115,9 @@ public class RuntimeTestBreakpoint extends MethodBreakpoint {
 
     private PsiCodeFragment createConditionCodeFragment(PsiElement context) {
         TextWithImports text = this.getCondition();
-        // org.jetbrains.intellij version 1.14.1
+        // idea version 243
 //        return DebuggerUtilsEx.findAppropriateCodeFragmentFactory(text, context).createPsiCodeFragment(text, context, getProject());
-        // org.jetbrains.intellij version 1.0
+        // idea version 201
         return DebuggerUtilsEx.findAppropriateCodeFragmentFactory(text, context).createCodeFragment(text, context, getProject());
     }
 
@@ -136,5 +143,20 @@ public class RuntimeTestBreakpoint extends MethodBreakpoint {
                 return evaluator;
             }
         }
+    }
+
+    @Override
+    public boolean isEmulated() {
+        return true;
+    }
+
+    @Override
+    public boolean isWatchEntry() {
+        return true;
+    }
+
+    @Override
+    public boolean isWatchExit() {
+        return false;
     }
 }

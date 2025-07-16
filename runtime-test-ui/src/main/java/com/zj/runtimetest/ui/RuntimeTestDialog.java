@@ -7,6 +7,7 @@ import com.intellij.execution.ui.ExecutionConsole;
 import com.intellij.execution.ui.RunContentDescriptor;
 import com.intellij.execution.ui.RunContentManager;
 import com.intellij.icons.AllIcons;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.ComboBox;
@@ -16,7 +17,6 @@ import com.intellij.openapi.util.Disposer;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.util.ui.JBUI;
-import com.intellij.xdebugger.XDebuggerManager;
 import com.intellij.xdebugger.XExpression;
 import com.intellij.xdebugger.breakpoints.XLineBreakpoint;
 import com.zj.runtimetest.cache.RuntimeTestState;
@@ -24,6 +24,7 @@ import com.zj.runtimetest.debug.ui.PreMethodExpressionDialog;
 import com.zj.runtimetest.json.JsonEditorField;
 import com.zj.runtimetest.json.JsonLanguage;
 import com.zj.runtimetest.language.PluginBundle;
+import com.zj.runtimetest.utils.BreakpointUtil;
 import com.zj.runtimetest.utils.ExecutorUtil;
 import com.zj.runtimetest.vo.CacheVo;
 import com.zj.runtimetest.vo.ProcessVo;
@@ -66,7 +67,7 @@ public class RuntimeTestDialog extends DialogWrapper {
 
     private final @NotNull XLineBreakpoint<?> bp;
 
-    public RuntimeTestDialog(Project project, String cacheKey, CacheVo cache, String defaultJson,@NotNull XLineBreakpoint<?> bp) {
+    public RuntimeTestDialog(Project project, String cacheKey, CacheVo cache, String defaultJson, @NotNull XLineBreakpoint<?> bp) {
         super(true);
         // 是否允许拖拽的方式扩大或缩小
         setResizable(true);
@@ -184,7 +185,7 @@ public class RuntimeTestDialog extends DialogWrapper {
         cache.setRequestJson(jsonContentText);
         cache.addHistory(jsonContentText);
         if (Optional.ofNullable(bp.getConditionExpression()).map(XExpression::getExpression).filter(StringUtils::isNotBlank).isEmpty()) {
-            XDebuggerManager.getInstance(project).getBreakpointManager().removeBreakpoint(bp);
+            BreakpointUtil.removeBreakpoint(project, bp);
         } else {
             cache.setExpression(bp.getConditionExpression());
         }
@@ -195,7 +196,10 @@ public class RuntimeTestDialog extends DialogWrapper {
 
     @Override
     public void doCancelAction() {
-        XDebuggerManager.getInstance(project).getBreakpointManager().removeBreakpoint(bp);
+        ApplicationManager.getApplication()
+                .runWriteAction(() ->
+                        BreakpointUtil.removeBreakpoint(project, bp)
+                );
         super.doCancelAction();
     }
 
