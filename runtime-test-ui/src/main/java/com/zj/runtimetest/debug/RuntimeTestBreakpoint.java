@@ -18,11 +18,11 @@ import com.intellij.openapi.project.IndexNotReadyException;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiCodeFragment;
 import com.intellij.psi.PsiElement;
-import com.intellij.xdebugger.XDebuggerManager;
 import com.intellij.xdebugger.breakpoints.XBreakpoint;
 import com.sun.jdi.event.LocatableEvent;
 import com.sun.jdi.request.EventRequest;
 import com.zj.runtimetest.language.PluginBundle;
+import com.zj.runtimetest.utils.BreakpointUtil;
 import com.zj.runtimetest.utils.NoticeUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -57,7 +57,7 @@ public class RuntimeTestBreakpoint extends MethodBreakpoint {
         } catch (Exception e) {
             log.error("[RuntimeTest] processLocatableEvent error: ", e);
         }
-        XDebuggerManager.getInstance(getProject()).getBreakpointManager().removeBreakpoint(this.getXBreakpoint());
+        BreakpointUtil.removeBreakpoint(getProject(), this.getXBreakpoint());
         return b;
     }
 

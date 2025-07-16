@@ -11,11 +11,15 @@ import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Key;
 import com.intellij.openapi.util.UserDataHolder;
-import com.intellij.psi.*;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiFile;
+import com.intellij.psi.PsiMethod;
 import com.intellij.psi.util.PsiTreeUtil;
-import com.intellij.xdebugger.XDebuggerManager;
 import com.intellij.xdebugger.breakpoints.XLineBreakpoint;
-import com.zj.runtimetest.utils.*;
+import com.zj.runtimetest.utils.BreakpointUtil;
+import com.zj.runtimetest.utils.ParamUtil;
+import com.zj.runtimetest.utils.PluginCacheUtil;
+import com.zj.runtimetest.utils.RunUtil;
 import com.zj.runtimetest.vo.CacheVo;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -77,9 +81,7 @@ public class RuntimeTestAction extends AnAction implements Disposable {
             }
             RunUtil.run(project, cache, bp);
         } catch (Exception exception) {
-            if (Objects.nonNull(bp)) {
-                XDebuggerManager.getInstance(project).getBreakpointManager().removeBreakpoint(bp);
-            }
+            BreakpointUtil.removeBreakpoint(project, bp);
             log.error("invoke exception", exception);
         }
     }
