@@ -14,6 +14,7 @@ import com.intellij.debugger.engine.events.SuspendContextCommandImpl;
 import com.intellij.debugger.impl.DebuggerUtilsEx;
 import com.intellij.debugger.ui.breakpoints.MethodBreakpoint;
 import com.intellij.debugger.ui.impl.watch.CompilingEvaluatorImpl;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.IndexNotReadyException;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiCodeFragment;
@@ -57,7 +58,13 @@ public class RuntimeTestBreakpoint extends MethodBreakpoint {
         } catch (Exception e) {
             log.error("[RuntimeTest] processLocatableEvent error: ", e);
         }
-        BreakpointUtil.removeBreakpoint(getProject(), this.getXBreakpoint());
+        ApplicationManager.getApplication()
+                .invokeLater(() ->
+                        ApplicationManager.getApplication()
+                                .runWriteAction(() ->
+                                        BreakpointUtil.removeBreakpoint(getProject(), this.getXBreakpoint())
+                                )
+                );
         return b;
     }
 
@@ -136,5 +143,20 @@ public class RuntimeTestBreakpoint extends MethodBreakpoint {
                 return evaluator;
             }
         }
+    }
+
+    @Override
+    public boolean isEmulated() {
+        return true;
+    }
+
+    @Override
+    public boolean isWatchEntry() {
+        return true;
+    }
+
+    @Override
+    public boolean isWatchExit() {
+        return false;
     }
 }

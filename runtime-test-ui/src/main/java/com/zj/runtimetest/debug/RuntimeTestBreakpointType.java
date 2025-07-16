@@ -4,6 +4,7 @@ package com.zj.runtimetest.debug;
 import com.intellij.debugger.ui.breakpoints.Breakpoint;
 import com.intellij.debugger.ui.breakpoints.JavaMethodBreakpointType;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.xdebugger.breakpoints.XBreakpoint;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.java.debugger.breakpoints.properties.JavaMethodBreakpointProperties;
@@ -29,5 +30,10 @@ public class RuntimeTestBreakpointType extends JavaMethodBreakpointType {
     @Override
     public @NotNull Breakpoint<JavaMethodBreakpointProperties> createJavaBreakpoint(Project project, XBreakpoint breakpoint) {
         return new RuntimeTestBreakpoint(project, breakpoint);
+    }
+
+    @Override
+    public boolean canPutAt(@NotNull VirtualFile file, int line, @NotNull Project project) {
+        return false;
     }
 }

@@ -26,6 +26,7 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.java.debugger.breakpoints.properties.JavaMethodBreakpointProperties;
 
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 
 
 /**
@@ -79,7 +80,8 @@ public class RuntimeTestAction extends AnAction implements Disposable {
             if (!runtimeTestDialog.isOK()) {
                 return;
             }
-            RunUtil.run(project, cache, bp);
+            XLineBreakpoint<JavaMethodBreakpointProperties> finalBp = bp;
+            CompletableFuture.runAsync(() -> RunUtil.run(project, cache, finalBp));
         } catch (Exception exception) {
             BreakpointUtil.removeBreakpoint(project, bp);
             log.error("invoke exception", exception);

@@ -60,20 +60,14 @@ public class BreakpointUtil {
         RuntimeTestBreakpointType type = XDebuggerUtil.getInstance()
                 .findBreakpointType(RuntimeTestBreakpointType.class);
         XBreakpointManager manager = XDebuggerManager.getInstance(project).getBreakpointManager();
-        ApplicationManager.getApplication()
-                .runWriteAction(() ->
-                        manager.getBreakpoints(type).forEach(manager::removeBreakpoint)
-                );
+        manager.getBreakpoints(type).forEach(manager::removeBreakpoint);
     }
 
     public static void removeBreakpoint(Project project, XBreakpoint<?> bp) {
         if (Objects.isNull(bp)) {
             return;
         }
-        ApplicationManager.getApplication()
-                .runWriteAction(() ->
-                        XDebuggerManager.getInstance(project).getBreakpointManager().removeBreakpoint(bp)
-                );
+        XDebuggerManager.getInstance(project).getBreakpointManager().removeBreakpoint(bp);
     }
 
     public static Integer findFirstExecutableLine(PsiMethod method, Project project) {

@@ -7,6 +7,7 @@ import com.intellij.execution.ui.ExecutionConsole;
 import com.intellij.execution.ui.RunContentDescriptor;
 import com.intellij.execution.ui.RunContentManager;
 import com.intellij.icons.AllIcons;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.ComboBox;
@@ -192,7 +193,10 @@ public class RuntimeTestDialog extends DialogWrapper {
 
     @Override
     public void doCancelAction() {
-        BreakpointUtil.removeBreakpoint(project, bp);
+        ApplicationManager.getApplication()
+                .runWriteAction(() ->
+                        BreakpointUtil.removeBreakpoint(project, bp)
+                );
         super.doCancelAction();
     }
 
