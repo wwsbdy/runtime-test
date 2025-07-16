@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "com.zj"
-version = "1.0.0"
+version = "1.1.0"
 
 intellij {
     version.set(properties("intellij.version"))
@@ -24,6 +24,15 @@ tasks {
     patchPluginXml {
         sinceBuild.set(properties("since.build"))
         untilBuild.set(properties("until.build"))
+        changeNotes.set(
+            """
+            <b>1.1.*</b><br>
+            <ul>
+                <li>兼容其他版本</li>
+                <li>防止项目卡死</li>
+            </ul>
+           """
+        )
     }
 
 }
