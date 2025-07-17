@@ -1,6 +1,7 @@
 package com.zj.runtimetest.utils;
 
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.project.Project;
@@ -14,6 +15,7 @@ import com.intellij.xdebugger.breakpoints.XBreakpointManager;
 import com.intellij.xdebugger.breakpoints.XLineBreakpoint;
 import com.zj.runtimetest.debug.RuntimeTestBreakpointType;
 import com.zj.runtimetest.language.PluginBundle;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.java.debugger.breakpoints.properties.JavaMethodBreakpointProperties;
 
@@ -23,37 +25,51 @@ import java.util.Objects;
  * @author 19242
  */
 public class BreakpointUtil {
-    public static @Nullable XLineBreakpoint<JavaMethodBreakpointProperties> addBreakpoint(PsiFile psiFile, Project project, PsiMethod psiMethod) {
+    private static final Logger log = Logger.getInstance(BreakpointUtil.class);
+
+    public static @Nullable XLineBreakpoint<JavaMethodBreakpointProperties> addBreakpoint(PsiFile psiFile, Project project, PsiMethod psiMethod, Boolean addIfAbsent) {
         if (psiFile == null) {
-            NoticeUtil.notice(project, "[RuntimeTest] " + PluginBundle.get("notice.info.preHandleInvalid"));
+            log.info("[RuntimeTest] " + PluginBundle.get("notice.info.preHandleInvalid"));
             return null;
         }
         Document document = PsiDocumentManager.getInstance(project).getDocument(psiFile);
         if (document == null) {
-            NoticeUtil.notice(project, "[RuntimeTest] " + PluginBundle.get("notice.info.preHandleInvalid"));
+            log.info("[RuntimeTest] " + PluginBundle.get("notice.info.preHandleInvalid"));
             return null;
         }
         Integer lineNumber = findFirstExecutableLine(psiMethod, project);
         if (Objects.isNull(lineNumber)) {
-            NoticeUtil.notice(project, "[RuntimeTest] " + PluginBundle.get("notice.info.preHandleInvalid"));
+            log.info("[RuntimeTest] " + PluginBundle.get("notice.info.preHandleInvalid"));
             return null;
         }
         VirtualFile file = psiFile.getVirtualFile();
+        return addBreakpoint(project, file.getUrl(), lineNumber, addIfAbsent);
+    }
 
+    public static XLineBreakpoint<JavaMethodBreakpointProperties> addBreakpoint(Project project, String fileUrl, Integer lineNumber, Boolean addIfAbsent) {
+        if (StringUtils.isEmpty(fileUrl)) {
+            log.info("fileUrl is empty");
+            return null;
+        }
+        if (Objects.isNull(lineNumber)) {
+            log.info("lineNumber is null");
+            return null;
+        }
         RuntimeTestBreakpointType type = XDebuggerUtil.getInstance()
                 .findBreakpointType(RuntimeTestBreakpointType.class);
-        XDebuggerUtil.getInstance().canPutBreakpointAt(project, file, lineNumber);
-
         XBreakpointManager manager = XDebuggerManager.getInstance(project).getBreakpointManager();
         for (XLineBreakpoint<JavaMethodBreakpointProperties> bp : manager.getBreakpoints(type)) {
-            if (bp.getFileUrl().equals(file.getUrl()) && bp.getLine() == lineNumber) {
+            if (bp.getFileUrl().equals(fileUrl) && bp.getLine() == lineNumber) {
                 return bp;
             }
         }
-        return ApplicationManager.getApplication()
-                .runWriteAction((Computable<XLineBreakpoint<JavaMethodBreakpointProperties>>) () ->
-                        manager.addLineBreakpoint(type, file.getUrl(), lineNumber, type.createProperties())
-                );
+        if (Objects.nonNull(addIfAbsent) && addIfAbsent) {
+            return ApplicationManager.getApplication()
+                    .runWriteAction((Computable<XLineBreakpoint<JavaMethodBreakpointProperties>>) () ->
+                            manager.addLineBreakpoint(type, fileUrl, lineNumber, type.createProperties())
+                    );
+        }
+        return null;
     }
 
     public static void removeBreakpoints(Project project) {
