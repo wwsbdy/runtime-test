@@ -101,11 +101,6 @@ public class BreakpointUtil {
     }
 
     public static Integer findFirstExecutableLine(PsiMethod method, Project project) {
-        PsiCodeBlock body = method.getBody();
-        if (body == null) {
-            return null;
-        }
-
         VirtualFile file = method.getContainingFile().getVirtualFile();
         if (file == null) {
             return null;
