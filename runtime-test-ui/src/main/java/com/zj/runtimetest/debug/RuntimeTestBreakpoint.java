@@ -19,6 +19,9 @@ import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiCodeFragment;
 import com.intellij.psi.PsiElement;
 import com.intellij.xdebugger.breakpoints.XBreakpoint;
+import com.sun.jdi.Locatable;
+import com.sun.jdi.Location;
+import com.sun.jdi.ReferenceType;
 import com.sun.jdi.event.LocatableEvent;
 import com.sun.jdi.request.EventRequest;
 import com.zj.runtimetest.language.PluginBundle;
@@ -31,6 +34,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Function;
 
 /**
@@ -52,6 +56,17 @@ public class RuntimeTestBreakpoint extends MethodBreakpoint {
     @Override
     public boolean processLocatableEvent(@NotNull SuspendContextCommandImpl action, LocatableEvent event) {
         boolean b = false;
+        EventRequest request = event.request();
+        // 忽略代理类
+        if (request instanceof Locatable) {
+            if (Optional.ofNullable(((Locatable) request).location())
+                    .map(Location::declaringType)
+                    .map(ReferenceType::name)
+                    .filter(name -> name.contains("$$") || name.contains("CGLIB") || name.contains("Proxy"))
+                    .isPresent()) {
+                return false;
+            }
+        }
         try {
             b = super.processLocatableEvent(action, event);
         } catch (Exception e) {
