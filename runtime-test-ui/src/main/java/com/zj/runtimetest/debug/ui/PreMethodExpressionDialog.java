@@ -1,25 +1,33 @@
 package com.zj.runtimetest.debug.ui;
 
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
+import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.util.ui.JBDimension;
 import com.intellij.xdebugger.XExpression;
 import com.intellij.xdebugger.XSourcePosition;
 import com.intellij.xdebugger.breakpoints.XBreakpointProperties;
 import com.intellij.xdebugger.breakpoints.XLineBreakpoint;
-import com.intellij.xdebugger.evaluation.XDebuggerEditorsProvider;
 import com.intellij.xdebugger.impl.XSourcePositionImpl;
 import com.intellij.xdebugger.impl.ui.XDebuggerEditorBase;
 import com.intellij.xdebugger.impl.ui.XDebuggerExpressionEditor;
 import com.zj.runtimetest.language.PluginBundle;
+import com.zj.runtimetest.utils.BreakpointUtil;
+import com.zj.runtimetest.vo.CacheVo;
 import com.zj.runtimetest.vo.ExpressionVo;
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.java.debugger.JavaDebuggerEditorsProvider;
+import org.jetbrains.java.debugger.breakpoints.properties.JavaMethodBreakpointProperties;
 
 import javax.swing.*;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.function.Function;
 
 /**
  * @author arthur_zhou
@@ -36,9 +44,16 @@ public class PreMethodExpressionDialog<T extends XBreakpointProperties<?>> exten
 
     private XDebuggerEditorBase expressionEditor;
 
-    private final @NotNull XLineBreakpoint<T> bp;
+    private Function<Boolean, XLineBreakpoint<JavaMethodBreakpointProperties>> breakpointFunc;
+    private CacheVo cache;
+    private VirtualFile file;
+    private int line;
 
-    public PreMethodExpressionDialog(Project project,@NotNull XLineBreakpoint<T> bp) {
+    public PreMethodExpressionDialog(Project project,
+                                     @NotNull Function<Boolean, XLineBreakpoint<JavaMethodBreakpointProperties>> breakpointFunc,
+                                     @NotNull CacheVo cache,
+                                     @NotNull VirtualFile file,
+                                     int line) {
         super(true);
         // 是否允许拖拽的方式扩大或缩小
         setResizable(true);
@@ -46,37 +61,54 @@ public class PreMethodExpressionDialog<T extends XBreakpointProperties<?>> exten
         setTitle(PluginBundle.get("dialog.preMethodFunction.title"));
         // 获取到当前项目的名称
         this.project = project;
-        this.bp = bp;
+        this.breakpointFunc = breakpointFunc;
+        this.cache = cache;
+        this.file = file;
+        this.line = line;
         // 触发一下init方法，否则swing样式将无法展示在会话框
         init();
     }
 
     @Override
     protected JComponent createCenterPanel() {
-        XDebuggerEditorsProvider debuggerEditorsProvider = bp.getType().getEditorsProvider(bp, project);
-        if (Objects.nonNull(debuggerEditorsProvider)) {
-            XExpression xExpression = Objects.isNull(bp.getConditionExpression()) ? ExpressionVo.EmptyXExpression.INSTANCE : bp.getConditionExpression();
-            XSourcePosition sourcePosition = bp.getSourcePosition();
-            if (Objects.isNull(sourcePosition)) {
-                log.error("sourcePosition is null");
-                return null;
-            }
-            expressionEditor = new XDebuggerExpressionEditor(project, debuggerEditorsProvider, "runtimeTestLogExpression", XSourcePositionImpl.create(sourcePosition.getFile(), sourcePosition.getLine() + 1), xExpression, true, true, false);
+        XExpression xExpression = cache.getExpression();
+        XSourcePosition sourcePosition = XSourcePositionImpl.create(file, line + 1);
+        expressionEditor = new XDebuggerExpressionEditor(project, new JavaDebuggerEditorsProvider(), "runtimeTestLogExpression", sourcePosition, xExpression, true, true, false);
 //            expressionEditor = new XDebuggerExpressionComboBox(project, debuggerEditorsProvider, "runtimeTestLogExpression", bp.getSourcePosition(), true, true);
-            expressionEditor.setExpression(xExpression);
-            JComponent component = expressionEditor.getComponent();
-            component.setPreferredSize(new JBDimension(700, 300));
-            return component;
-        }
-        return null;
+        expressionEditor.setExpression(xExpression);
+        JComponent component = expressionEditor.getComponent();
+        component.setPreferredSize(new JBDimension(700, 300));
+        return component;
     }
 
     @Override
     protected void doOKAction() {
-        if (Objects.nonNull(expressionEditor)) {
-            bp.setConditionExpression(expressionEditor.getExpression());
-        }
+        addBreakpoint();
         super.doOKAction();
+    }
+
+    private void addBreakpoint() {
+        XExpression expression;
+        if (Objects.nonNull(expressionEditor)
+                && Objects.nonNull(expression = expressionEditor.getExpression())
+                && StringUtils.isNotBlank(expression.getExpression())) {
+            XLineBreakpoint<JavaMethodBreakpointProperties> bp = breakpointFunc.apply(true);
+            Optional.ofNullable(bp).ifPresent(breakpoint -> breakpoint.setConditionExpression(expression));
+            cache.setExpression(expression);
+        } else {
+            ApplicationManager.getApplication()
+                    .runWriteAction(() ->
+                            BreakpointUtil.removeBreakpoint(project, breakpointFunc.apply(false))
+                    );
+            cache.setExpression(ExpressionVo.EmptyXExpression.INSTANCE);
+        }
+    }
+
+
+    @Override
+    public void doCancelAction() {
+        addBreakpoint();
+        super.doCancelAction();
     }
 
     @Override
@@ -84,6 +116,9 @@ public class PreMethodExpressionDialog<T extends XBreakpointProperties<?>> exten
         if (!disposed) {
             disposed = true;
             expressionEditor = null;
+            breakpointFunc = null;
+            cache = null;
+            file = null;
         }
         super.dispose();
     }

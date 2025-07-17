@@ -4,12 +4,14 @@ import com.intellij.openapi.Disposable;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.CaretModel;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Key;
 import com.intellij.openapi.util.UserDataHolder;
+import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiMethod;
@@ -18,14 +20,13 @@ import com.intellij.xdebugger.breakpoints.XLineBreakpoint;
 import com.zj.runtimetest.utils.BreakpointUtil;
 import com.zj.runtimetest.utils.ParamUtil;
 import com.zj.runtimetest.utils.PluginCacheUtil;
-import com.zj.runtimetest.utils.RunUtil;
 import com.zj.runtimetest.vo.CacheVo;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.java.debugger.breakpoints.properties.JavaMethodBreakpointProperties;
 
-import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
+import java.util.Optional;
+import java.util.function.Function;
 
 
 /**
@@ -52,36 +53,34 @@ public class RuntimeTestAction extends AnAction implements Disposable {
         if (null == project || editor == null) {
             throw new IllegalArgumentException("idea arg error (project or editor is null)");
         }
-        XLineBreakpoint<JavaMethodBreakpointProperties> bp = null;
         try {
+            PsiFile file = e.getData(CommonDataKeys.PSI_FILE);
             PsiMethod psiMethod = null;
             if (e.getDataContext() instanceof UserDataHolder) {
                 psiMethod = ((UserDataHolder) e.getDataContext()).getUserData(USER_DATE_ELEMENT_KEY);
             }
             if (psiMethod == null) {
-                PsiFile file = e.getData(CommonDataKeys.PSI_FILE);
                 psiMethod = PsiTreeUtil.getParentOfType(getElement(editor, file), PsiMethod.class);
                 if (psiMethod == null) {
                     throw new IllegalArgumentException("idea arg error (method is null)");
                 }
             }
+            Integer lineNumber = BreakpointUtil.findFirstExecutableLine(psiMethod, project);
+            String fileUrl = Optional.ofNullable(file).map(PsiFile::getVirtualFile).map(VirtualFile::getUrl).orElse(null);
             String cacheKey = PluginCacheUtil.genCacheKey(psiMethod);
             String defaultJson = ParamUtil.getDefaultJson(psiMethod.getParameterList());
             CacheVo cache = PluginCacheUtil.getCacheOrDefault(psiMethod, project, defaultJson);
-            bp = BreakpointUtil.addBreakpoint(e.getData(CommonDataKeys.PSI_FILE), project, psiMethod);
-            if (Objects.isNull(bp)) {
-                return;
-            }
-            bp.setConditionExpression(cache.getExpression());
-            RuntimeTestDialog runtimeTestDialog = new RuntimeTestDialog(project, cacheKey, cache, defaultJson, bp);
+            Function<Boolean, XLineBreakpoint<JavaMethodBreakpointProperties>> breakpointFunc =
+                    addIfAbsent -> BreakpointUtil.addBreakpoint(project, fileUrl, lineNumber, addIfAbsent);
+            RuntimeTestDialog runtimeTestDialog = new RuntimeTestDialog(project, cacheKey, cache, defaultJson, breakpointFunc,
+                    Optional.ofNullable(file).map(PsiFile::getVirtualFile).orElse(null), lineNumber);
 //            Disposer.register(this, runtimeTestDialog.getDisposable());
             runtimeTestDialog.show();
-            if (runtimeTestDialog.isOK()) {
-                XLineBreakpoint<JavaMethodBreakpointProperties> finalBp = bp;
-                CompletableFuture.runAsync(() -> RunUtil.run(project, cache, finalBp));
-            }
         } catch (Exception exception) {
-            BreakpointUtil.removeBreakpoint(project, bp);
+            ApplicationManager.getApplication()
+                    .runWriteAction(() ->
+                            BreakpointUtil.removeBreakpoints(project)
+                    );
             log.error("invoke exception", exception);
         }
     }

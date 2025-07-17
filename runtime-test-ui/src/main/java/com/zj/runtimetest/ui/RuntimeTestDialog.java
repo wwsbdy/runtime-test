@@ -14,10 +14,10 @@ import com.intellij.openapi.ui.ComboBox;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.util.Disposer;
+import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.util.ui.JBUI;
-import com.intellij.xdebugger.XExpression;
 import com.intellij.xdebugger.breakpoints.XLineBreakpoint;
 import com.zj.runtimetest.cache.RuntimeTestState;
 import com.zj.runtimetest.debug.ui.PreMethodExpressionDialog;
@@ -26,17 +26,20 @@ import com.zj.runtimetest.json.JsonLanguage;
 import com.zj.runtimetest.language.PluginBundle;
 import com.zj.runtimetest.utils.BreakpointUtil;
 import com.zj.runtimetest.utils.ExecutorUtil;
+import com.zj.runtimetest.utils.RunUtil;
 import com.zj.runtimetest.vo.CacheVo;
 import com.zj.runtimetest.vo.ProcessVo;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.java.debugger.breakpoints.properties.JavaMethodBreakpointProperties;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
 
 /**
  * @author arthur_zhou
@@ -65,9 +68,11 @@ public class RuntimeTestDialog extends DialogWrapper {
     private ComboBox<String> historyComboBox;
     private JButton preMethodButton;
 
-    private final @NotNull XLineBreakpoint<?> bp;
+    private Function<Boolean, XLineBreakpoint<JavaMethodBreakpointProperties>> breakpointFunc;
 
-    public RuntimeTestDialog(Project project, String cacheKey, CacheVo cache, String defaultJson, @NotNull XLineBreakpoint<?> bp) {
+    public RuntimeTestDialog(Project project, String cacheKey, CacheVo cache, String defaultJson,
+                             Function<Boolean, XLineBreakpoint<JavaMethodBreakpointProperties>> breakpointFunc,
+                             VirtualFile virtualFile, Integer lineNumber) {
         super(true);
         // 是否允许拖拽的方式扩大或缩小
         setResizable(true);
@@ -82,7 +87,20 @@ public class RuntimeTestDialog extends DialogWrapper {
         this.cacheKey = cacheKey;
         this.cache = cache;
         this.defaultJson = defaultJson;
-        this.bp = bp;
+        this.breakpointFunc = breakpointFunc;
+        if (StringUtils.isNotBlank(cache.getExpression().getExpression())) {
+            breakpointFunc.apply(true).setConditionExpression(cache.getExpression());
+        }
+        if (Objects.nonNull(virtualFile) && Objects.nonNull(lineNumber)) {
+            this.preMethodButton = new JButton(AllIcons.Nodes.Function);
+            preMethodButton.setToolTipText(PluginBundle.get("dialog.preMethodFunction.title"));
+            preMethodButton.addActionListener(event -> {
+                PreMethodExpressionDialog<?> expressionDialog = new PreMethodExpressionDialog<>(project, breakpointFunc, cache, virtualFile, lineNumber);
+                Disposer.register(getDisposable(), expressionDialog.getDisposable());
+                expressionDialog.show();
+            });
+        }
+
         jsonContent = new JsonEditorField(JsonLanguage.INSTANCE, project, content);
         jsonContent.setPreferredSize(new Dimension(500, 700));
         // 触发一下init方法，否则swing样式将无法展示在会话框
@@ -136,14 +154,9 @@ public class RuntimeTestDialog extends DialogWrapper {
         resetButton.addActionListener(event -> jsonContent.setText(defaultJson));
         jPanel.add(resetButton);
 
-        this.preMethodButton = new JButton(AllIcons.Nodes.Function);
-        preMethodButton.setToolTipText(PluginBundle.get("dialog.preMethodFunction.title"));
-        preMethodButton.addActionListener(event -> {
-            PreMethodExpressionDialog<?> expressionDialog = new PreMethodExpressionDialog<>(project, bp);
-            Disposer.register(getDisposable(), expressionDialog.getDisposable());
-            expressionDialog.show();
-        });
-        jPanel.add(preMethodButton);
+        if (Objects.nonNull(preMethodButton)) {
+            jPanel.add(preMethodButton);
+        }
         return jPanel;
     }
 
@@ -184,17 +197,17 @@ public class RuntimeTestDialog extends DialogWrapper {
         cache.setPid(pid);
         cache.setRequestJson(jsonContentText);
         cache.addHistory(jsonContentText);
-        cache.setExpression(bp.getConditionExpression());
-        if (Optional.ofNullable(bp.getConditionExpression()).map(XExpression::getExpression).filter(StringUtils::isNotBlank).isEmpty()) {
-            ApplicationManager.getApplication()
-                    .runWriteAction(() ->
-                            BreakpointUtil.removeBreakpoint(project, bp)
-                    );
-        }
+
         RuntimeTestState.getInstance(project).putCache(cacheKey, cache);
         toFrontRunContent(pid);
+        CompletableFuture.runAsync(() -> RunUtil.run(project, cache, breakpointFunc))
+                .exceptionally(throwable -> {
+                    log.error("run error", throwable);
+                    return null;
+                });
         super.doOKAction();
     }
+
 
     @Override
     public void doCancelAction() {
@@ -205,11 +218,10 @@ public class RuntimeTestDialog extends DialogWrapper {
         String jsonContentText = jsonContent.getText();
         cache.setPid(pid);
         cache.setRequestJson(jsonContentText);
-        cache.setExpression(bp.getConditionExpression());
         RuntimeTestState.getInstance(project).putCache(cacheKey, cache);
         ApplicationManager.getApplication()
                 .runWriteAction(() ->
-                        BreakpointUtil.removeBreakpoint(project, bp)
+                        BreakpointUtil.removeBreakpoint(project, breakpointFunc.apply(false))
                 );
         super.doCancelAction();
     }
@@ -265,6 +277,7 @@ public class RuntimeTestDialog extends DialogWrapper {
             cache = null;
             defaultJson = null;
             preMethodButton = null;
+            breakpointFunc = null;
         }
         super.dispose();
     }
