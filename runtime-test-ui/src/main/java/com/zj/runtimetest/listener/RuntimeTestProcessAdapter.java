@@ -2,7 +2,6 @@ package com.zj.runtimetest.listener;
 
 import com.intellij.execution.process.ProcessAdapter;
 import com.intellij.execution.process.ProcessEvent;
-import com.intellij.execution.process.ProcessOutputType;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Key;
 import com.zj.runtimetest.utils.BreakpointUtil;
@@ -25,8 +24,7 @@ public class RuntimeTestProcessAdapter extends ProcessAdapter {
     @Override
     public void onTextAvailable(@NotNull ProcessEvent event, @NotNull Key outputType) {
         String text = event.getText();
-        if (text.startsWith("[Agent]") && ProcessOutputType.isStderr(outputType)
-                || text.startsWith("[Agent] success ")) {
+        if ("[Agent] agentmain finished\n".equals(text)) {
             // 这里是清空断点，小概率会把其他RuntimeTest请求的前置处理删除
             BreakpointUtil.removeBreakpoints(project);
             return;
