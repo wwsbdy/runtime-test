@@ -27,13 +27,13 @@ public class RunUtil {
     private static final Logger log = Logger.getInstance(RunUtil.class);
 
     public static void run(Project project, CacheVo cache, Function<Boolean, XLineBreakpoint<JavaMethodBreakpointProperties>> breakpointFunc) {
-        try {
-            // 延迟500ms，等待断点加载完成
-            Thread.sleep(500);
-        } catch (InterruptedException e) {
-            BreakpointUtil.removeBreakpoint(project, breakpointFunc.apply(false));
-            return;
-        }
+//        try {
+//            // 延迟500ms，等待断点加载完成
+//            Thread.sleep(500);
+//        } catch (InterruptedException e) {
+//            BreakpointUtil.removeBreakpoint(project, breakpointFunc.apply(false));
+//            return;
+//        }
         String coreJarPath = PathManager.getPluginsPath() + File.separator + "runtime-test-ui" + File.separator + "lib" + File.separator + "runtime-test-core.jar";
         String pid = cache.getPid().toString();
         String requestJson = JsonUtil.toJsonString(cache);

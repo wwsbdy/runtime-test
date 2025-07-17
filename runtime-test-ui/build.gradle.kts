@@ -15,9 +15,10 @@ intellij {
 //
 //    plugins.set(listOf("com.intellij.java", "com.intellij.modules.json"))
     // idea version 201
-    version.set("2020.1.2")
+//    version.set("2020.1.2")
 //    version.set("2022.1.4")
 //    version.set("2020.2.4")
+    version.set("2021.1.1")
     type.set("IC")
 
     plugins.set(listOf("com.intellij.java"))
