@@ -29,13 +29,10 @@ public class RunUtil {
 
     public static void run(Project project, CacheVo cache, Function<Boolean, XLineBreakpoint<JavaMethodBreakpointProperties>> breakpointFunc) {
         try {
-            // 延迟100ms，等待断点加载完成
-            Thread.sleep(100);
+            // 延迟200ms，等待断点加载完成
+            Thread.sleep(200);
         } catch (InterruptedException e) {
-            ApplicationManager.getApplication()
-                    .runWriteAction(() ->
-                            BreakpointUtil.removeBreakpoint(project, breakpointFunc.apply(false))
-                    );
+            BreakpointUtil.removeBreakpoint(project, breakpointFunc.apply(false));
             return;
         }
         String coreJarPath = PathManager.getPluginsPath() + File.separator + "runtime-test-ui" + File.separator + "lib" + File.separator + "runtime-test-core.jar";
