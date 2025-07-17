@@ -26,7 +26,8 @@ public class RuntimeTestProcessAdapter extends ProcessAdapter {
     @Override
     public void onTextAvailable(@NotNull ProcessEvent event, @NotNull Key outputType) {
         String text = event.getText();
-        if (text.startsWith("[Agent]") && ProcessOutputType.isStderr(outputType)) {
+        if (text.startsWith("[Agent]") && ProcessOutputType.isStderr(outputType)
+                || text.startsWith("[Agent] success ")) {
             // 这里是清空断点，小概率会把其他RuntimeTest请求的前置处理删除
             ApplicationManager.getApplication()
                     .runReadAction(() ->
