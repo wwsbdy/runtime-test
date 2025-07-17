@@ -14,10 +14,12 @@ import com.intellij.debugger.engine.events.SuspendContextCommandImpl;
 import com.intellij.debugger.impl.DebuggerUtilsEx;
 import com.intellij.debugger.ui.breakpoints.MethodBreakpoint;
 import com.intellij.debugger.ui.impl.watch.CompilingEvaluatorImpl;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.IndexNotReadyException;
 import com.intellij.openapi.project.Project;
-import com.intellij.psi.PsiCodeFragment;
-import com.intellij.psi.PsiElement;
+import com.intellij.openapi.util.Computable;
+import com.intellij.psi.*;
+import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.xdebugger.breakpoints.XBreakpoint;
 import com.sun.jdi.Locatable;
 import com.sun.jdi.Location;
@@ -27,6 +29,7 @@ import com.sun.jdi.request.EventRequest;
 import com.zj.runtimetest.language.PluginBundle;
 import com.zj.runtimetest.utils.BreakpointUtil;
 import com.zj.runtimetest.utils.NoticeUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.java.debugger.breakpoints.properties.JavaMethodBreakpointProperties;
@@ -62,7 +65,14 @@ public class RuntimeTestBreakpoint extends MethodBreakpoint {
             if (Optional.ofNullable(((Locatable) request).location())
                     .map(Location::declaringType)
                     .map(ReferenceType::name)
-                    .filter(name -> name.contains("$$") || name.contains("CGLIB") || name.contains("Proxy"))
+                    .filter(name -> name.contains("$$"))
+                    .filter(name -> {
+                        String qualifiedClassName = getQualifiedClassNameAt(getSourcePosition());
+                        if (StringUtils.isBlank(qualifiedClassName)) {
+                            return false;
+                        }
+                        return name.startsWith(qualifiedClassName);
+                    })
                     .isPresent()) {
                 return false;
             }
@@ -74,6 +84,26 @@ public class RuntimeTestBreakpoint extends MethodBreakpoint {
         }
         BreakpointUtil.removeBreakpoint(getProject(), this.getXBreakpoint());
         return b;
+    }
+
+    private @Nullable String getQualifiedClassNameAt(@Nullable SourcePosition position) {
+        if (position == null) {
+            return null;
+        }
+        return ApplicationManager.getApplication()
+                .runReadAction((Computable<String>) () -> {
+                            PsiFile psiFile = PsiManager.getInstance(getProject()).findFile(position.getFile().getVirtualFile());
+                            if (psiFile == null) {
+                                return null;
+                            }
+                            PsiElement element = psiFile.findElementAt(position.getOffset());
+                            PsiClass psiClass = PsiTreeUtil.getParentOfType(element, PsiClass.class);
+                            if (psiClass == null) {
+                                return null;
+                            }
+                            return psiClass.getQualifiedName();
+                        }
+                );
     }
 
     @Override
