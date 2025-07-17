@@ -1,5 +1,6 @@
 package com.zj.runtimetest.utils;
 
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.PathManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
@@ -27,13 +28,16 @@ public class RunUtil {
     private static final Logger log = Logger.getInstance(RunUtil.class);
 
     public static void run(Project project, CacheVo cache, Function<Boolean, XLineBreakpoint<JavaMethodBreakpointProperties>> breakpointFunc) {
-//        try {
-//            // 延迟500ms，等待断点加载完成
-//            Thread.sleep(500);
-//        } catch (InterruptedException e) {
-//            BreakpointUtil.removeBreakpoint(project, breakpointFunc.apply(false));
-//            return;
-//        }
+        try {
+            // 延迟100ms，等待断点加载完成
+            Thread.sleep(100);
+        } catch (InterruptedException e) {
+            ApplicationManager.getApplication()
+                    .runWriteAction(() ->
+                            BreakpointUtil.removeBreakpoint(project, breakpointFunc.apply(false))
+                    );
+            return;
+        }
         String coreJarPath = PathManager.getPluginsPath() + File.separator + "runtime-test-ui" + File.separator + "lib" + File.separator + "runtime-test-core.jar";
         String pid = cache.getPid().toString();
         String requestJson = JsonUtil.toJsonString(cache);
@@ -49,7 +53,10 @@ public class RunUtil {
             if (e.getMessage() != null && e.getMessage().contains("Non-numeric value found")) {
                 log.warn("jdk lower version attach higher version, can ignore");
             } else {
-                BreakpointUtil.removeBreakpoint(project, breakpointFunc.apply(false));
+                ApplicationManager.getApplication()
+                        .runWriteAction(() ->
+                                BreakpointUtil.removeBreakpoint(project, breakpointFunc.apply(false))
+                        );
                 if (Objects.equals(e.getMessage(), "No such process")) {
                     NoticeUtil.error(project, "[RuntimeTest] " + PluginBundle.get("notice.error.no-such-process") + " " + pid);
                 } else {
@@ -61,7 +68,10 @@ public class RunUtil {
             if ("0".equals(e.getMessage())) {
                 log.warn("jdk higher version attach lower version, can ignore");
             } else {
-                BreakpointUtil.removeBreakpoint(project, breakpointFunc.apply(false));
+                ApplicationManager.getApplication()
+                        .runWriteAction(() ->
+                                BreakpointUtil.removeBreakpoint(project, breakpointFunc.apply(false))
+                        );
                 log.error("AgentLoadException: ", e);
                 NoticeUtil.error(project, "[RuntimeTest] " + e.getMessage());
             }
@@ -69,7 +79,10 @@ public class RunUtil {
             log.error("AgentInitializationException: ", e);
             NoticeUtil.error(project, "[RuntimeTest] " + e.getMessage());
         } catch (Exception e) {
-            BreakpointUtil.removeBreakpoint(project, breakpointFunc.apply(false));
+            ApplicationManager.getApplication()
+                    .runWriteAction(() ->
+                            BreakpointUtil.removeBreakpoint(project, breakpointFunc.apply(false))
+                    );
             log.error("Exception: ", e);
             NoticeUtil.error(project, "[RuntimeTest] " + e.getMessage());
         } finally {
