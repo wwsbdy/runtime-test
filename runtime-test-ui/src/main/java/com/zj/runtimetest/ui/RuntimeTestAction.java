@@ -77,11 +77,10 @@ public class RuntimeTestAction extends AnAction implements Disposable {
             RuntimeTestDialog runtimeTestDialog = new RuntimeTestDialog(project, cacheKey, cache, defaultJson, bp);
 //            Disposer.register(this, runtimeTestDialog.getDisposable());
             runtimeTestDialog.show();
-            if (!runtimeTestDialog.isOK()) {
-                return;
+            if (runtimeTestDialog.isOK()) {
+                XLineBreakpoint<JavaMethodBreakpointProperties> finalBp = bp;
+                CompletableFuture.runAsync(() -> RunUtil.run(project, cache, finalBp));
             }
-            XLineBreakpoint<JavaMethodBreakpointProperties> finalBp = bp;
-            CompletableFuture.runAsync(() -> RunUtil.run(project, cache, finalBp));
         } catch (Exception exception) {
             BreakpointUtil.removeBreakpoint(project, bp);
             log.error("invoke exception", exception);
