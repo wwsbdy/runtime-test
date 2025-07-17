@@ -9,12 +9,14 @@ import com.sun.tools.attach.AgentLoadException;
 import com.sun.tools.attach.VirtualMachine;
 import com.zj.runtimetest.language.PluginBundle;
 import com.zj.runtimetest.vo.CacheVo;
+import org.jetbrains.java.debugger.breakpoints.properties.JavaMethodBreakpointProperties;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
+import java.util.function.Function;
 
 /**
  * @author : jie.zhou
@@ -24,7 +26,7 @@ public class RunUtil {
 
     private static final Logger log = Logger.getInstance(RunUtil.class);
 
-    public static void run(Project project, CacheVo cache, XLineBreakpoint<?> bp) {
+    public static void run(Project project, CacheVo cache, Function<Boolean, XLineBreakpoint<JavaMethodBreakpointProperties>> breakpointFunc) {
         String coreJarPath = PathManager.getPluginsPath() + File.separator + "runtime-test-ui" + File.separator + "lib" + File.separator + "runtime-test-core.jar";
         String pid = cache.getPid().toString();
         String requestJson = JsonUtil.toJsonString(cache);
@@ -40,7 +42,7 @@ public class RunUtil {
             if (e.getMessage() != null && e.getMessage().contains("Non-numeric value found")) {
                 log.warn("jdk lower version attach higher version, can ignore");
             } else {
-                BreakpointUtil.removeBreakpoint(project, bp);
+                BreakpointUtil.removeBreakpoint(project, breakpointFunc.apply(false));
                 if (Objects.equals(e.getMessage(), "No such process")) {
                     NoticeUtil.error(project, "[RuntimeTest] " + PluginBundle.get("notice.error.no-such-process") + " " + pid);
                 } else {
@@ -52,7 +54,7 @@ public class RunUtil {
             if ("0".equals(e.getMessage())) {
                 log.warn("jdk higher version attach lower version, can ignore");
             } else {
-                BreakpointUtil.removeBreakpoint(project, bp);
+                BreakpointUtil.removeBreakpoint(project, breakpointFunc.apply(false));
                 log.error("AgentLoadException: ", e);
                 NoticeUtil.error(project, "[RuntimeTest] " + e.getMessage());
             }
@@ -60,7 +62,7 @@ public class RunUtil {
             log.error("AgentInitializationException: ", e);
             NoticeUtil.error(project, "[RuntimeTest] " + e.getMessage());
         } catch (Exception e) {
-            BreakpointUtil.removeBreakpoint(project, bp);
+            BreakpointUtil.removeBreakpoint(project, breakpointFunc.apply(false));
             log.error("Exception: ", e);
             NoticeUtil.error(project, "[RuntimeTest] " + e.getMessage());
         } finally {

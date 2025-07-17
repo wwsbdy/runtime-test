@@ -5,6 +5,7 @@ import com.intellij.xdebugger.XExpression;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -62,12 +63,12 @@ public class CacheVo extends RequestInfo implements Serializable {
         }
     }
 
-    public void setExpression(XExpression expression) {
+    public void setExpression(@NotNull XExpression expression) {
         this.expressionVo = ExpressionVo.fromExpression(expression);
     }
 
     @JsonIgnore
-    public XExpression getExpression() {
+    public @NotNull XExpression getExpression() {
         if (Objects.isNull(expressionVo)) {
             return ExpressionVo.EmptyXExpression.INSTANCE;
         }
