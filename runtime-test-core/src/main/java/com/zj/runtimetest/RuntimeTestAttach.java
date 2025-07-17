@@ -20,6 +20,7 @@ public class RuntimeTestAttach {
     /**
      * premain方法在JVM启动时执行，在main方法之前执行
      * 监听ApplicationContext，拦截ApplicationContext#refresh()方法，获取到spring上下文
+     *
      * @param args main方法的参数
      * @param inst 仪表
      */
@@ -37,6 +38,7 @@ public class RuntimeTestAttach {
 
     /**
      * 接收插件给的参数，调用方法
+     *
      * @param args main方法的参数
      * @param inst 仪表
      */
@@ -61,6 +63,7 @@ public class RuntimeTestAttach {
                 .exceptionally(throwable -> {
                     System.err.println("[Agent] " + ThrowUtil.printStackTrace(throwable));
                     return null;
-                });
+                })
+                .thenAccept(aVoid -> System.out.println("[Agent] agentmain finished"));
     }
 }
