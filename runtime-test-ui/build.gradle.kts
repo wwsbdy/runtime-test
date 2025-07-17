@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "com.zj"
-version = "1.1.222"
+version = "1.2.222"
 
 intellij {
     version.set(properties("intellij.version"))
@@ -26,12 +26,16 @@ tasks {
         untilBuild.set(properties("until.build"))
         changeNotes.set(
             """
+            <b>1.2.*</b><br>
+            <ul>
+                <li>取消也保存填写的信息</li>
+            </ul>
             <b>1.1.*</b><br>
             <ul>
                 <li>兼容其他版本</li>
                 <li>防止项目卡死</li>
             </ul>
-           """
+            """
         )
     }
 

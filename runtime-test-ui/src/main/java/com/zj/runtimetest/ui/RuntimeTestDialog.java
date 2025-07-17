@@ -181,10 +181,12 @@ public class RuntimeTestDialog extends DialogWrapper {
         cache.setPid(pid);
         cache.setRequestJson(jsonContentText);
         cache.addHistory(jsonContentText);
+        cache.setExpression(bp.getConditionExpression());
         if (Optional.ofNullable(bp.getConditionExpression()).map(XExpression::getExpression).filter(StringUtils::isNotBlank).isEmpty()) {
-            BreakpointUtil.removeBreakpoint(project, bp);
-        } else {
-            cache.setExpression(bp.getConditionExpression());
+            ApplicationManager.getApplication()
+                    .runWriteAction(() ->
+                            BreakpointUtil.removeBreakpoint(project, bp)
+                    );
         }
         RuntimeTestState.getInstance(project).putCache(cacheKey, cache);
         toFrontRunContent(pid);
@@ -193,6 +195,12 @@ public class RuntimeTestDialog extends DialogWrapper {
 
     @Override
     public void doCancelAction() {
+        Long pid = pidComboBox.getItem();
+        String jsonContentText = jsonContent.getText();
+        cache.setPid(pid);
+        cache.setRequestJson(jsonContentText);
+        cache.setExpression(bp.getConditionExpression());
+        RuntimeTestState.getInstance(project).putCache(cacheKey, cache);
         ApplicationManager.getApplication()
                 .runWriteAction(() ->
                         BreakpointUtil.removeBreakpoint(project, bp)
