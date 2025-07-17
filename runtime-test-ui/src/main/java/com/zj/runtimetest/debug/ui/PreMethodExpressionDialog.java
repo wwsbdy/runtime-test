@@ -16,7 +16,6 @@ import com.zj.runtimetest.language.PluginBundle;
 import com.zj.runtimetest.vo.ExpressionVo;
 import lombok.Getter;
 import lombok.Setter;
-import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
@@ -74,7 +73,7 @@ public class PreMethodExpressionDialog<T extends XBreakpointProperties<?>> exten
 
     @Override
     protected void doOKAction() {
-        if (Objects.nonNull(expressionEditor) && StringUtils.isNotEmpty(expressionEditor.getExpression().getExpression())) {
+        if (Objects.nonNull(expressionEditor)) {
             bp.setConditionExpression(expressionEditor.getExpression());
         }
         super.doOKAction();

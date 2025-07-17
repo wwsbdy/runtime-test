@@ -8,7 +8,7 @@ plugins {
 }
 
 group = "com.zj"
-version = "1.1.201"
+version = "1.2.201"
 
 intellij {
     // org.jetbrains.intellij version 1.14.1
@@ -37,12 +37,16 @@ tasks {
         untilBuild.set("221.*")
         changeNotes.set(
             """
+            <b>1.2.*</b><br>
+            <ul>
+                <li>取消也保存填写的信息</li>
+            </ul>
             <b>1.1.*</b><br>
             <ul>
                 <li>兼容其他版本</li>
                 <li>防止项目卡死</li>
             </ul>
-           """
+            """
         )
     }
 
