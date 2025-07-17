@@ -4,6 +4,7 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
+import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Computable;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -77,6 +78,7 @@ public class BreakpointUtil {
                 .findBreakpointType(RuntimeTestBreakpointType.class);
         XBreakpointManager manager = XDebuggerManager.getInstance(project).getBreakpointManager();
         manager.getBreakpoints(type).forEach(manager::removeBreakpoint);
+        FileEditorManager.getInstance(project).getSelectedTextEditor().getContentComponent().repaint();
     }
 
     public static void removeBreakpoint(Project project, XBreakpoint<?> bp) {
