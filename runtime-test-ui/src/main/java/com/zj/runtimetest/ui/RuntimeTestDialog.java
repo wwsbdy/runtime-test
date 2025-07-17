@@ -168,9 +168,9 @@ public class RuntimeTestDialog extends DialogWrapper {
 
     @Override
     protected void doOKAction() {
-        // org.jetbrains.intellij version 1.14.1
+        // idea version 243
 //        Long pid = pidComboBox.getItem();
-        // org.jetbrains.intellij version 1.0
+        // idea version 201
         Long pid = (Long) pidComboBox.getSelectedItem();
         if (Objects.isNull(pid)) {
             Messages.showErrorDialog(PluginBundle.get("notice.error.no-process-selected"), PluginBundle.get("notice.error"));
@@ -198,7 +198,10 @@ public class RuntimeTestDialog extends DialogWrapper {
 
     @Override
     public void doCancelAction() {
-        Long pid = pidComboBox.getItem();
+        // idea version 243
+//        Long pid = pidComboBox.getItem();
+        // idea version 201
+        Long pid = (Long) pidComboBox.getSelectedItem();
         String jsonContentText = jsonContent.getText();
         cache.setPid(pid);
         cache.setRequestJson(jsonContentText);

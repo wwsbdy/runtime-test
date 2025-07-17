@@ -109,7 +109,7 @@ public class RuntimeTestAction extends AnAction implements Disposable {
         return file.findElementAt(position);
     }
 
-    // org.jetbrains.intellij version 1.14.1
+    // idea version 243
 //    @Override
 //    public @NotNull ActionUpdateThread getActionUpdateThread() {
 //        return ActionUpdateThread.BGT;

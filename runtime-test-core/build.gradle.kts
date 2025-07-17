@@ -1,7 +1,7 @@
 plugins {
-    // org.jetbrains.intellij version 1.14.1
+    // idea version 243
 //    id("com.github.johnrengelman.shadow") version "8.1.1"
-    // org.jetbrains.intellij version 1.0
+    // idea version 201
     id("com.github.johnrengelman.shadow") version "6.1.0"
 }
 

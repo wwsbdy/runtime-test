@@ -12,24 +12,24 @@ import com.intellij.openapi.project.Project;
 public class NoticeUtil {
 
     public static void notice(Project project, String message) {
-        // org.jetbrains.intellij version 1.14.1
+        // idea version 243
 //        NotificationGroupManager.getInstance()
 //                .getNotificationGroup("RuntimeTest")
 //                .createNotification(message, NotificationType.INFORMATION)
 //                .notify(project);
-        // org.jetbrains.intellij version 1.0
+        // idea version 201
         NotificationGroup group = new NotificationGroup("RuntimeTest", NotificationDisplayType.BALLOON, true);
         group.createNotification(message, NotificationType.INFORMATION)
                 .notify(project);
     }
 
     public static void error(Project project, String message) {
-        // org.jetbrains.intellij version 1.14.1
+        // idea version 243
 //        NotificationGroupManager.getInstance()
 //                .getNotificationGroup("RuntimeTest")
 //                .createNotification(message, NotificationType.ERROR)
 //                .notify(project);
-        // org.jetbrains.intellij version 1.0
+        // idea version 201
         NotificationGroup group = new NotificationGroup("RuntimeTest", NotificationDisplayType.BALLOON, true);
         group.createNotification(message, NotificationType.ERROR)
                 .notify(project);
