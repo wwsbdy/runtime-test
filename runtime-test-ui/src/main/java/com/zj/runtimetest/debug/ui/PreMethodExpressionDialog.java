@@ -1,6 +1,5 @@
 package com.zj.runtimetest.debug.ui;
 
-import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
@@ -96,10 +95,7 @@ public class PreMethodExpressionDialog<T extends XBreakpointProperties<?>> exten
             Optional.ofNullable(bp).ifPresent(breakpoint -> breakpoint.setConditionExpression(expression));
             cache.setExpression(expression);
         } else {
-            ApplicationManager.getApplication()
-                    .runWriteAction(() ->
-                            BreakpointUtil.removeBreakpoint(project, breakpointFunc.apply(false))
-                    );
+            BreakpointUtil.removeBreakpoint(project, breakpointFunc.apply(false));
             cache.setExpression(ExpressionVo.EmptyXExpression.INSTANCE);
         }
     }

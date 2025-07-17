@@ -15,10 +15,12 @@ import com.intellij.xdebugger.breakpoints.XBreakpointManager;
 import com.intellij.xdebugger.breakpoints.XLineBreakpoint;
 import com.zj.runtimetest.debug.RuntimeTestBreakpointType;
 import com.zj.runtimetest.language.PluginBundle;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.java.debugger.breakpoints.properties.JavaMethodBreakpointProperties;
 
+import java.util.Collection;
 import java.util.Objects;
 
 /**
@@ -76,14 +78,26 @@ public class BreakpointUtil {
         RuntimeTestBreakpointType type = XDebuggerUtil.getInstance()
                 .findBreakpointType(RuntimeTestBreakpointType.class);
         XBreakpointManager manager = XDebuggerManager.getInstance(project).getBreakpointManager();
-        manager.getBreakpoints(type).forEach(manager::removeBreakpoint);
+        Collection<? extends XLineBreakpoint<JavaMethodBreakpointProperties>> breakpoints = ApplicationManager.getApplication()
+                .runReadAction((Computable<Collection<? extends XLineBreakpoint<JavaMethodBreakpointProperties>>>)() ->
+                        manager.getBreakpoints(type)
+                );
+        if (CollectionUtils.isNotEmpty(breakpoints)) {
+            breakpoints.forEach(bp -> removeBreakpoint(project, bp));
+        }
     }
 
     public static void removeBreakpoint(Project project, XBreakpoint<?> bp) {
         if (Objects.isNull(bp)) {
             return;
         }
-        XDebuggerManager.getInstance(project).getBreakpointManager().removeBreakpoint(bp);
+        ApplicationManager.getApplication().invokeAndWait(() ->
+                ApplicationManager.getApplication()
+                        .runWriteAction(() ->
+                                XDebuggerManager.getInstance(project).getBreakpointManager().removeBreakpoint(bp)
+                        )
+                );
+
     }
 
     public static Integer findFirstExecutableLine(PsiMethod method, Project project) {

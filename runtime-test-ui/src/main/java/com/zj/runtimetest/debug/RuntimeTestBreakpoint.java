@@ -14,7 +14,6 @@ import com.intellij.debugger.engine.events.SuspendContextCommandImpl;
 import com.intellij.debugger.impl.DebuggerUtilsEx;
 import com.intellij.debugger.ui.breakpoints.MethodBreakpoint;
 import com.intellij.debugger.ui.impl.watch.CompilingEvaluatorImpl;
-import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.IndexNotReadyException;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiCodeFragment;
@@ -58,13 +57,7 @@ public class RuntimeTestBreakpoint extends MethodBreakpoint {
         } catch (Exception e) {
             log.error("[RuntimeTest] processLocatableEvent error: ", e);
         }
-        ApplicationManager.getApplication()
-                .invokeLater(() ->
-                        ApplicationManager.getApplication()
-                                .runWriteAction(() ->
-                                        BreakpointUtil.removeBreakpoint(getProject(), this.getXBreakpoint())
-                                )
-                );
+        BreakpointUtil.removeBreakpoint(getProject(), this.getXBreakpoint());
         return b;
     }
 
@@ -96,6 +89,7 @@ public class RuntimeTestBreakpoint extends MethodBreakpoint {
 
     /**
      * 以下拷贝自
+     *
      * @see com.intellij.debugger.ui.breakpoints.Breakpoint
      */
     private static ExpressionEvaluator createExpressionEvaluator(Project project, PsiElement contextPsiElement, SourcePosition contextSourcePosition, TextWithImports text, Function<? super PsiElement, ? extends PsiCodeFragment> fragmentFactory) throws EvaluateException {
