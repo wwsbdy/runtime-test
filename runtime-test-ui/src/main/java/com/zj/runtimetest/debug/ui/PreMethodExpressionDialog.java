@@ -12,7 +12,6 @@ import com.intellij.xdebugger.breakpoints.XLineBreakpoint;
 import com.intellij.xdebugger.impl.XSourcePositionImpl;
 import com.intellij.xdebugger.impl.ui.XDebuggerEditorBase;
 import com.intellij.xdebugger.impl.ui.XDebuggerExpressionEditor;
-import com.zj.runtimetest.debug.MyDebuggerEditorsProvider;
 import com.zj.runtimetest.language.PluginBundle;
 import com.zj.runtimetest.utils.BreakpointUtil;
 import com.zj.runtimetest.vo.CacheVo;
@@ -21,6 +20,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.java.debugger.JavaDebuggerEditorsProvider;
 import org.jetbrains.java.debugger.breakpoints.properties.JavaMethodBreakpointProperties;
 
 import javax.swing.*;
@@ -72,7 +72,7 @@ public class PreMethodExpressionDialog<T extends XBreakpointProperties<?>> exten
     protected JComponent createCenterPanel() {
         XExpression xExpression = cache.getExpression();
         XSourcePosition sourcePosition = XSourcePositionImpl.create(file, line + 1);
-        expressionEditor = new XDebuggerExpressionEditor(project, new MyDebuggerEditorsProvider(), "runtimeTestLogExpression", sourcePosition, xExpression, true, true, false);
+        expressionEditor = new XDebuggerExpressionEditor(project, new JavaDebuggerEditorsProvider(), "runtimeTestLogExpression", sourcePosition, xExpression, true, true, false);
 //            expressionEditor = new XDebuggerExpressionComboBox(project, debuggerEditorsProvider, "runtimeTestLogExpression", bp.getSourcePosition(), true, true);
         expressionEditor.setExpression(xExpression);
         JComponent component = expressionEditor.getComponent();
