@@ -115,8 +115,12 @@ public class RuntimeTestBreakpoint extends MethodBreakpoint {
                 log.error("[RuntimeTest] getSourcePosition is null");
                 return false;
             }
+            Integer firstExecutableLine = BreakpointUtil.findFirstExecutableLineNew(sourcePosition, getProject());
+            if (firstExecutableLine == null) {
+                firstExecutableLine = sourcePosition.getLine() + 1;
+            }
             // 执行器判断位置定位到方法下一行，context的位置可能不准导致报错（修改代码没重新启动，这时行号变化，context还是老的）
-            SourcePosition contextSourcePosition = SourcePosition.createFromLine(sourcePosition.getFile(), sourcePosition.getLine() + 1);
+            SourcePosition contextSourcePosition = SourcePosition.createFromLine(sourcePosition.getFile(), firstExecutableLine);
             ExpressionEvaluator evaluator = DebuggerInvocationUtil.commitAndRunReadAction(this.myProject, () -> {
                 PsiElement contextElement = ContextUtil.getContextElement(contextSourcePosition);
                 PsiElement contextPsiElement = contextElement != null ? contextElement : this.getEvaluationElement();
