@@ -29,10 +29,10 @@ public class ClassUtil {
             return clazz;
         }
         if (className.endsWith("...")) {
-            return Array.newInstance(Class.forName(className.substring(0, className.length() - 3), true, classLoader), 0).getClass();
+            return Array.newInstance(getClass(className.substring(0, className.length() - 3), classLoader), 0).getClass();
         }
         if (className.endsWith("[]")) {
-            return Array.newInstance(Class.forName(className.substring(0, className.length() - 2), true, classLoader), 0).getClass();
+            return Array.newInstance(getClass(className.substring(0, className.length() - 2), classLoader), 0).getClass();
         }
         return Class.forName(className, true, classLoader);
     }
