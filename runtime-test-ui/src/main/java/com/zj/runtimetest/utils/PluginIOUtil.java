@@ -1,6 +1,7 @@
 package com.zj.runtimetest.utils;
 
 import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.util.io.FileUtil;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,7 +19,7 @@ public class PluginIOUtil {
     public static boolean flushFile(String filePath, String content) {
         File file = new File(filePath);
         try {
-            com.intellij.openapi.util.io.FileUtil.writeToFile(file, content);
+            FileUtil.writeToFile(file, content);
             return true;
         } catch (IOException e) {
             log.error("flushFile error [filePath:{} content:{} errMsg:{}]", filePath, content, e.getMessage());
