@@ -1,4 +1,4 @@
-package com.zj.runtimetest.debug.ui;
+package com.zj.runtimetest.ui;
 
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;

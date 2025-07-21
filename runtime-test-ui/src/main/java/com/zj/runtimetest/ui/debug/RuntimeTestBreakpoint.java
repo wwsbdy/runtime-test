@@ -1,4 +1,4 @@
-package com.zj.runtimetest.debug;
+package com.zj.runtimetest.ui.debug;
 
 import com.intellij.debugger.DebuggerInvocationUtil;
 import com.intellij.debugger.EvaluatingComputable;
