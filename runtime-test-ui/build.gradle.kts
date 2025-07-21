@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "com.zj"
-version = "1.2.201"
+version = "1.3.201"
 
 intellij {
     // idea version 243
@@ -38,9 +38,15 @@ tasks {
         untilBuild.set("221.*")
         changeNotes.set(
             """
+            <b>1.3.*</b><br>
+            <ul>
+                <li>调整断点定位逻辑</li>
+            </ul>
             <b>1.2.*</b><br>
             <ul>
                 <li>取消也保存填写的信息</li>
+                <li>调整一些情况下断点未删除情况</li>
+                <li>跳过代理类的断点拦截</li>
             </ul>
             <b>1.1.*</b><br>
             <ul>
