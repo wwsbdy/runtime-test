@@ -66,15 +66,21 @@ public class RuntimeTestAction extends AnAction implements Disposable {
                     throw new IllegalArgumentException("idea arg error (method is null)");
                 }
             }
-            Integer lineNumber = BreakpointUtil.findFirstExecutableLine(psiMethod, project);
+
+            VirtualFile virtualFile = Optional.ofNullable(file).map(PsiFile::getVirtualFile).orElse(null);
+            Integer lineNumber = BreakpointUtil.findMethodLine(psiMethod, virtualFile);
             String fileUrl = Optional.ofNullable(file).map(PsiFile::getVirtualFile).map(VirtualFile::getUrl).orElse(null);
             String cacheKey = PluginCacheUtil.genCacheKey(psiMethod);
             String defaultJson = ParamUtil.getDefaultJson(psiMethod.getParameterList());
             CacheVo cache = PluginCacheUtil.getCacheOrDefault(psiMethod, project, defaultJson);
             Function<Boolean, XLineBreakpoint<JavaMethodBreakpointProperties>> breakpointFunc =
                     addIfAbsent -> BreakpointUtil.addBreakpoint(project, fileUrl, lineNumber, addIfAbsent);
+
             RuntimeTestDialog runtimeTestDialog = new RuntimeTestDialog(project, cacheKey, cache, defaultJson, breakpointFunc,
-                    Optional.ofNullable(file).map(PsiFile::getVirtualFile).orElse(null), lineNumber);
+                    virtualFile,
+                    BreakpointUtil.findFirstExecutableLineNew(psiMethod, project, virtualFile),
+                    psiMethod
+            );
 //            Disposer.register(this, runtimeTestDialog.getDisposable());
             runtimeTestDialog.show();
         } catch (Exception exception) {
