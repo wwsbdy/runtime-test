@@ -98,13 +98,32 @@ public class AgentMainTest {
         RequestInfo requestInfo = new RequestInfo();
         requestInfo.setClassName(method.getDeclaringClass().getName());
         requestInfo.setMethodName(method.getName());
+        requestInfo.setProjectBasePath(System.getProperty("user.dir").replace("runtime-test-core", ""));
 
         requestInfo.setParameterTypeList(Collections.singletonList(new MethodParamInfo("param", "java.lang.String")));
         requestInfo.setRequestJson("{\"param\":\"mmm\"}");
         requestInfo.setExpVo(new ExpressionVo("System.out.println(param.toUpperCase());param += param.toUpperCase()", null));
-        RuntimeTestExprExecutor.ExpressionExecutor executor = RuntimeTestExprExecutor.getExecutor(requestInfo);
+        RuntimeTestExprExecutor.ExpressionExecutor executor = AgentUtil.getExecutor(method, requestInfo);
         if (executor != null) {
             Object[] eval = executor.eval(new Object[]{"abc"});
+            System.out.println();
+        }
+    }
+
+    @Test
+    public void test3() throws Exception {
+        Method method = SampleTarget.class.getDeclaredMethod("target1", List.class);
+        RequestInfo requestInfo = new RequestInfo();
+        requestInfo.setClassName(method.getDeclaringClass().getName());
+        requestInfo.setMethodName(method.getName());
+        requestInfo.setProjectBasePath(System.getProperty("user.dir").replace("runtime-test-core", ""));
+
+        requestInfo.setParameterTypeList(Collections.singletonList(new MethodParamInfo("param", "java.util.List<java.lang.String>")));
+        requestInfo.setRequestJson("{\"param\":\"mmm\"}");
+        requestInfo.setExpVo(new ExpressionVo("System.out.println(param.get(0).toUpperCase());", null));
+        RuntimeTestExprExecutor.ExpressionExecutor executor = AgentUtil.getExecutor(method, requestInfo);
+        if (executor != null) {
+            Object[] eval = executor.eval(new Object[]{Collections.singletonList("abc")});
             System.out.println();
         }
     }

@@ -18,12 +18,10 @@ import com.intellij.psi.PsiMethod;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.util.ui.JBUI;
-import com.intellij.xdebugger.breakpoints.XLineBreakpoint;
 import com.zj.runtimetest.cache.RuntimeTestState;
 import com.zj.runtimetest.json.JsonEditorField;
 import com.zj.runtimetest.json.JsonLanguage;
 import com.zj.runtimetest.language.PluginBundle;
-import com.zj.runtimetest.utils.BreakpointUtil;
 import com.zj.runtimetest.utils.ExecutorUtil;
 import com.zj.runtimetest.utils.RunUtil;
 import com.zj.runtimetest.vo.CacheVo;
@@ -31,14 +29,12 @@ import com.zj.runtimetest.vo.ProcessVo;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
-import org.jetbrains.java.debugger.breakpoints.properties.JavaMethodBreakpointProperties;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Function;
 
 /**
  * @author arthur_zhou
@@ -67,10 +63,7 @@ public class RuntimeTestDialog extends DialogWrapper {
     private ComboBox<String> historyComboBox;
     private JButton preMethodButton;
 
-    private Function<Boolean, XLineBreakpoint<JavaMethodBreakpointProperties>> breakpointFunc;
-
     public RuntimeTestDialog(Project project, String cacheKey, CacheVo cache, String defaultJson,
-                             Function<Boolean, XLineBreakpoint<JavaMethodBreakpointProperties>> breakpointFunc,
                              VirtualFile virtualFile, Integer lineNumber, PsiMethod psiMethod) {
         super(true);
         // 是否允许拖拽的方式扩大或缩小
@@ -86,16 +79,12 @@ public class RuntimeTestDialog extends DialogWrapper {
         this.cacheKey = cacheKey;
         this.cache = cache;
         this.defaultJson = defaultJson;
-        this.breakpointFunc = breakpointFunc;
-        if (StringUtils.isNotBlank(cache.getExpression().getExpression())) {
-            breakpointFunc.apply(true).setConditionExpression(cache.getExpression());
-        }
 
         if (Objects.nonNull(virtualFile) && Objects.nonNull(lineNumber)) {
             this.preMethodButton = new JButton(AllIcons.Nodes.Function);
             preMethodButton.setToolTipText(PluginBundle.get("dialog.preMethodFunction.title"));
             preMethodButton.addActionListener(event -> {
-                PreMethodExpressionDialog<?> expressionDialog = new PreMethodExpressionDialog<>(project, breakpointFunc, cache, virtualFile, lineNumber);
+                PreMethodExpressionDialog<?> expressionDialog = new PreMethodExpressionDialog<>(project, cache, virtualFile, lineNumber);
                 Disposer.register(getDisposable(), expressionDialog.getDisposable());
                 expressionDialog.show();
             });
@@ -197,7 +186,7 @@ public class RuntimeTestDialog extends DialogWrapper {
 
         RuntimeTestState.getInstance(project).putCache(cacheKey, cache);
         toFrontRunContent(pid);
-        CompletableFuture.runAsync(() -> RunUtil.run(project, cache, breakpointFunc))
+        CompletableFuture.runAsync(() -> RunUtil.run(project, cache))
                 .exceptionally(throwable -> {
                     log.error("run error", throwable);
                     return null;
@@ -213,7 +202,6 @@ public class RuntimeTestDialog extends DialogWrapper {
         cache.setPid(pid);
         cache.setRequestJson(jsonContentText);
         RuntimeTestState.getInstance(project).putCache(cacheKey, cache);
-        BreakpointUtil.removeBreakpoint(project, breakpointFunc.apply(false));
         super.doCancelAction();
     }
 
@@ -268,7 +256,6 @@ public class RuntimeTestDialog extends DialogWrapper {
             cache = null;
             defaultJson = null;
             preMethodButton = null;
-            breakpointFunc = null;
         }
         super.dispose();
     }

@@ -8,24 +8,19 @@ import com.intellij.util.ui.JBDimension;
 import com.intellij.xdebugger.XExpression;
 import com.intellij.xdebugger.XSourcePosition;
 import com.intellij.xdebugger.breakpoints.XBreakpointProperties;
-import com.intellij.xdebugger.breakpoints.XLineBreakpoint;
 import com.intellij.xdebugger.impl.XSourcePositionImpl;
 import com.intellij.xdebugger.impl.ui.XDebuggerEditorBase;
 import com.intellij.xdebugger.impl.ui.XDebuggerExpressionEditor;
 import com.zj.runtimetest.language.PluginBundle;
-import com.zj.runtimetest.utils.BreakpointUtil;
 import com.zj.runtimetest.vo.CacheVo;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.java.debugger.JavaDebuggerEditorsProvider;
-import org.jetbrains.java.debugger.breakpoints.properties.JavaMethodBreakpointProperties;
 
 import javax.swing.*;
 import java.util.Objects;
-import java.util.Optional;
-import java.util.function.Function;
 
 /**
  * @author arthur_zhou
@@ -42,13 +37,11 @@ public class PreMethodExpressionDialog<T extends XBreakpointProperties<?>> exten
 
     private XDebuggerEditorBase expressionEditor;
 
-    private Function<Boolean, XLineBreakpoint<JavaMethodBreakpointProperties>> breakpointFunc;
     private CacheVo cache;
     private VirtualFile file;
     private int line;
 
     public PreMethodExpressionDialog(Project project,
-                                     @NotNull Function<Boolean, XLineBreakpoint<JavaMethodBreakpointProperties>> breakpointFunc,
                                      @NotNull CacheVo cache,
                                      @NotNull VirtualFile file,
                                      int line) {
@@ -59,7 +52,6 @@ public class PreMethodExpressionDialog<T extends XBreakpointProperties<?>> exten
         setTitle(PluginBundle.get("dialog.preMethodFunction.title"));
         // 获取到当前项目的名称
         this.project = project;
-        this.breakpointFunc = breakpointFunc;
         this.cache = cache;
         this.file = file;
         this.line = line;
@@ -85,26 +77,11 @@ public class PreMethodExpressionDialog<T extends XBreakpointProperties<?>> exten
         if (Objects.nonNull(expressionEditor)
                 && Objects.nonNull(expression = expressionEditor.getExpression())
                 && StringUtils.isNotBlank(expression.getExpression())) {
-            XLineBreakpoint<JavaMethodBreakpointProperties> bp = breakpointFunc.apply(true);
-            Optional.ofNullable(bp).ifPresent(breakpoint -> breakpoint.setConditionExpression(expression));
             cache.setExpression(expression);
         } else {
-            BreakpointUtil.removeBreakpoint(project, breakpointFunc.apply(false));
             cache.setExpression(CacheVo.EmptyXExpression.INSTANCE);
         }
         super.doOKAction();
-    }
-
-    @Override
-    public void doCancelAction() {
-        XExpression expression = cache.getExpression();
-        if (StringUtils.isNotBlank(expression.getExpression())) {
-            XLineBreakpoint<JavaMethodBreakpointProperties> bp = breakpointFunc.apply(true);
-            Optional.ofNullable(bp).ifPresent(breakpoint -> breakpoint.setConditionExpression(expression));
-        } else {
-            BreakpointUtil.removeBreakpoint(project, breakpointFunc.apply(false));
-        }
-        super.doCancelAction();
     }
 
     @Override
@@ -112,7 +89,6 @@ public class PreMethodExpressionDialog<T extends XBreakpointProperties<?>> exten
         if (!disposed) {
             disposed = true;
             expressionEditor = null;
-            breakpointFunc = null;
             cache = null;
             file = null;
         }

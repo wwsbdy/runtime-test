@@ -1,9 +1,11 @@
 package com.zj.runtimetest.exp;
 
 import com.zj.runtimetest.vo.ExpressionVo;
-import com.zj.runtimetest.vo.RequestInfo;
+import com.zj.runtimetest.vo.MethodParamTypeInfo;
 
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 
@@ -12,34 +14,51 @@ import java.util.concurrent.ConcurrentHashMap;
  * @date : 2025/7/22
  */
 public class RuntimeTestExprExecutor {
-    private static final Map<String, ExpressionExecutor> cache = new ConcurrentHashMap<>();
+    public static final Map<String, ExpressionExecutor> CACHE = new ConcurrentHashMap<>();
 
     public interface ExpressionExecutor {
         Object[] eval(Object[] args);
     }
 
-    public static synchronized ExpressionExecutor getExecutor(RequestInfo requestInfo) {
-        try {
-            ExpressionVo expVo = requestInfo.getExpVo();
-            String expr = expVo.getMyExpression();
 
-            ExpressionExecutor compiled = cache.get(expr);
-            if (compiled == null) {
-                compiled = RuntimeTestExpCompiler.compile(requestInfo);
-                cache.put(expr, compiled);
-            }
+    public static ExpressionExecutor getExecutor(ExpressionVo expVo, List<MethodParamTypeInfo> parameterTypeList, String projectBasePath) {
+        String expr = expVo.getMyExpression();
+        ExpressionExecutor compiled = CACHE.get(expr);
+        if (Objects.nonNull(compiled)) {
             return compiled;
+        }
+        try {
+            compiled = RuntimeTestExpCompiler.compileInMemory(expVo, parameterTypeList);
         } catch (Throwable t) {
             t.printStackTrace();
+            compiled = ExpressionExecutorFactory.ERROR;
         }
-        return null;
+        CACHE.put(expr, compiled);
+        return compiled;
+    }
+
+    public static Object[] evaluate(ExpressionVo expVo,
+                                              List<MethodParamTypeInfo> parameterTypeList,
+                                              String projectBasePath,
+                                              Object[] args) {
+        ExpressionExecutor executor = getExecutor(expVo, parameterTypeList, projectBasePath);
+        try {
+            return executor.eval(args);
+        } catch (Throwable t) {
+            put(expVo.getMyExpression(), ExpressionExecutorFactory.ERROR);
+            throw new RuntimeException(t);
+        }
     }
 
     public static void clear() {
-        cache.clear();
+        CACHE.clear();
     }
 
     public static void remove(String expr) {
-        cache.remove(expr);
+        CACHE.remove(expr);
+    }
+
+    public static void put(String expr, ExpressionExecutor executor) {
+        CACHE.put(expr, executor);
     }
 }

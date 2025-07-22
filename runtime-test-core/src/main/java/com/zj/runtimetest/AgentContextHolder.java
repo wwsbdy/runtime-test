@@ -53,7 +53,7 @@ public class AgentContextHolder {
         } else {
             System.out.println("[Agent] " + className + "." + methodName + "() is cached.");
         }
-        Object result = methodInvokeInfo.invoke(requestInfo.getRequestJson());
+        Object result = methodInvokeInfo.invoke(requestInfo.getExpVo(), requestInfo.getRequestJson());
         System.out.println("[Agent] " + methodName + "() invoked successfully." + (methodInvokeInfo.isReturnValue() ? " result: " + JsonUtil.toJsonString(result) : ""));
     }
 

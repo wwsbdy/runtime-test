@@ -5,7 +5,6 @@ import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
-import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.CaretModel;
 import com.intellij.openapi.editor.Editor;
@@ -17,17 +16,14 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiMethod;
 import com.intellij.psi.util.PsiTreeUtil;
-import com.intellij.xdebugger.breakpoints.XLineBreakpoint;
 import com.zj.runtimetest.utils.BreakpointUtil;
 import com.zj.runtimetest.utils.ParamUtil;
 import com.zj.runtimetest.utils.PluginCacheUtil;
 import com.zj.runtimetest.vo.CacheVo;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jetbrains.java.debugger.breakpoints.properties.JavaMethodBreakpointProperties;
 
 import java.util.Optional;
-import java.util.function.Function;
 
 
 /**
@@ -68,15 +64,11 @@ public class RuntimeTestAction extends AnAction implements Disposable {
             }
 
             VirtualFile virtualFile = Optional.ofNullable(file).map(PsiFile::getVirtualFile).orElse(null);
-            Integer lineNumber = BreakpointUtil.findMethodLine(psiMethod, virtualFile);
-            String fileUrl = Optional.ofNullable(file).map(PsiFile::getVirtualFile).map(VirtualFile::getUrl).orElse(null);
             String cacheKey = PluginCacheUtil.genCacheKey(psiMethod);
             String defaultJson = ParamUtil.getDefaultJson(psiMethod.getParameterList());
             CacheVo cache = PluginCacheUtil.getCacheOrDefault(psiMethod, project, defaultJson);
-            Function<Boolean, XLineBreakpoint<JavaMethodBreakpointProperties>> breakpointFunc =
-                    addIfAbsent -> BreakpointUtil.addBreakpoint(project, fileUrl, lineNumber, addIfAbsent);
 
-            RuntimeTestDialog runtimeTestDialog = new RuntimeTestDialog(project, cacheKey, cache, defaultJson, breakpointFunc,
+            RuntimeTestDialog runtimeTestDialog = new RuntimeTestDialog(project, cacheKey, cache, defaultJson,
                     virtualFile,
                     BreakpointUtil.findFirstExecutableLineNew(psiMethod, project, virtualFile),
                     psiMethod
@@ -84,10 +76,6 @@ public class RuntimeTestAction extends AnAction implements Disposable {
 //            Disposer.register(this, runtimeTestDialog.getDisposable());
             runtimeTestDialog.show();
         } catch (Exception exception) {
-            ApplicationManager.getApplication()
-                    .runWriteAction(() ->
-                            BreakpointUtil.removeBreakpoints(project)
-                    );
             log.error("invoke exception", exception);
         }
     }

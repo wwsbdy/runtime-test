@@ -1,11 +1,16 @@
 package com.zj.runtimetest.vo;
 
+import java.util.List;
+
 /**
  * @author : jie.zhou
  * @date : 2025/7/22
  */
 public class SampleTarget {
     public void target(String param) {
+        System.out.println("original logic: " + param);
+    }
+    public void target1(List<String> param) {
         System.out.println("original logic: " + param);
     }
 
