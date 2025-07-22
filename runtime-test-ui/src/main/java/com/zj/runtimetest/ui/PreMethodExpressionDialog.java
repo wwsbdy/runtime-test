@@ -15,7 +15,6 @@ import com.intellij.xdebugger.impl.ui.XDebuggerExpressionEditor;
 import com.zj.runtimetest.language.PluginBundle;
 import com.zj.runtimetest.utils.BreakpointUtil;
 import com.zj.runtimetest.vo.CacheVo;
-import com.zj.runtimetest.vo.ExpressionVo;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
@@ -91,7 +90,7 @@ public class PreMethodExpressionDialog<T extends XBreakpointProperties<?>> exten
             cache.setExpression(expression);
         } else {
             BreakpointUtil.removeBreakpoint(project, breakpointFunc.apply(false));
-            cache.setExpression(ExpressionVo.EmptyXExpression.INSTANCE);
+            cache.setExpression(CacheVo.EmptyXExpression.INSTANCE);
         }
         super.doOKAction();
     }

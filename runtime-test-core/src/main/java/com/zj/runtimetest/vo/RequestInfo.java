@@ -60,4 +60,6 @@ public class RequestInfo implements Serializable {
 
     private boolean staticMethod;
 
+    private ExpressionVo expVo;
+
 }

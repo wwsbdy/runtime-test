@@ -1,18 +1,15 @@
 package com.zj.runtimetest;
 
+import com.zj.runtimetest.exp.ExprExecutor;
+import com.zj.runtimetest.exp.RuntimeTestExprExecutor;
 import com.zj.runtimetest.utils.AgentUtil;
 import com.zj.runtimetest.utils.JsonUtil;
-import com.zj.runtimetest.vo.MethodParamInfo;
-import com.zj.runtimetest.vo.OneVo;
-import com.zj.runtimetest.vo.Person;
+import com.zj.runtimetest.vo.*;
 import org.junit.After;
 import org.junit.Test;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -34,6 +31,7 @@ public class AgentMainTest {
                 Collections.emptyList(),
                 null);
     }
+
     @Test(expected = Exception.class)
     public void testMethodArg() throws Exception {
         Method method = OneVo.class.getDeclaredMethod("testList", List.class);
@@ -46,6 +44,7 @@ public class AgentMainTest {
         personList.add(new Person("cjasidj", 1920, Stream.of("121", "123").collect(Collectors.toList())));
         AgentUtil.run(method, JsonUtil.toJsonString(requestJson), new MethodParamInfo("list", "java.util.List"));
     }
+
     @Test
     public void testClassNotFound() throws Exception {
         AgentUtil.run("com.zj.runtimetest.vo.OneVo11",
@@ -57,6 +56,7 @@ public class AgentMainTest {
                 Collections.emptyList(),
                 null);
     }
+
     @Test
     public void testMethodNotFound() throws Exception {
         AgentUtil.run("com.zj.runtimetest.vo.OneVo",
@@ -67,5 +67,45 @@ public class AgentMainTest {
                 "test11",
                 Collections.emptyList(),
                 null);
+    }
+
+    @Test
+    public void test111() throws Exception {
+        // 第一次：使用 String param
+        ExprExecutor.run(
+                new Object[]{"abc"},
+                "System.out.println(param.toUpperCase())",
+                Collections.singletonMap("param", "java.lang.String"),
+                Collections.singletonList("java.lang.String")
+        );
+        ExprExecutor.run(
+                new Object[]{"abc"},
+                "System.out.println(param.toUpperCase());System.out.println(FiledUtil.getFieldNullValue(int.class))",
+                Collections.singletonMap("param", "java.lang.String"),
+                Arrays.asList("java.lang.String", "com.zj.runtimetest.utils.FiledUtil")
+        );
+//        Method method = SampleTarget.class.getDeclaredMethod("target", String.class);
+//        HashMap<Object, Object> requestJson = new HashMap<>();
+//        requestJson.put("param", "test");
+//
+//        // void target(String param)
+//        AgentUtil.run(method, JsonUtil.toJsonString(requestJson), new MethodParamInfo("param", "java.lang.String"));
+    }
+
+    @Test
+    public void test222() throws Exception {
+        Method method = SampleTarget.class.getDeclaredMethod("target", String.class);
+        RequestInfo requestInfo = new RequestInfo();
+        requestInfo.setClassName(method.getDeclaringClass().getName());
+        requestInfo.setMethodName(method.getName());
+
+        requestInfo.setParameterTypeList(Collections.singletonList(new MethodParamInfo("param", "java.lang.String")));
+        requestInfo.setRequestJson("{\"param\":\"mmm\"}");
+        requestInfo.setExpVo(new ExpressionVo("System.out.println(param.toUpperCase());param += param.toUpperCase()", null));
+        RuntimeTestExprExecutor.ExpressionExecutor executor = RuntimeTestExprExecutor.getExecutor(requestInfo);
+        if (executor != null) {
+            Object[] eval = executor.eval(new Object[]{"abc"});
+            System.out.println();
+        }
     }
 }
