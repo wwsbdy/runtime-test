@@ -6,7 +6,7 @@ package com.zj.runtimetest.exp;
  */
 public class ExpressionExecutorFactory {
     public static final RuntimeTestExprExecutor.ExpressionExecutor ERROR = args -> {
-        System.out.println("expression execution failed");
+        System.err.println("[Agent] expression execution failed");
         return args;
     };
 

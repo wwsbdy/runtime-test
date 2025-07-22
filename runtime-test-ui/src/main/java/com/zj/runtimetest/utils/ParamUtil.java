@@ -44,10 +44,7 @@ public class ParamUtil {
      *
      */
     public static List<MethodParamInfo> getParamGenericsTypeNameList(PsiParameterList parameterList) {
-        if (parameterList == null) {
-            return Collections.emptyList();
-        }
-        if (parameterList.getParametersCount() == 0) {
+        if (parameterList == null || parameterList.getParametersCount() == 0) {
             return Collections.emptyList();
         }
         List<MethodParamInfo> parameterTypeList = new ArrayList<>();
@@ -61,6 +58,9 @@ public class ParamUtil {
 
 
     public static String getDefaultJson(PsiParameterList parameterList) {
+        if (Objects.isNull(parameterList) || parameterList.getParametersCount() == 0) {
+            return "";
+        }
         ObjectNode objectNode = JsonUtil.objectMapper.createObjectNode();
         for (int i = 0; i < parameterList.getParametersCount(); i++) {
             PsiParameter parameter = Objects.requireNonNull(parameterList.getParameter(i));

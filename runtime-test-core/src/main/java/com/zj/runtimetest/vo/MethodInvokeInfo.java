@@ -78,7 +78,7 @@ public class MethodInvokeInfo {
     private Object[] getArgs(ExpressionVo expVo, String requestJson) {
         Type[] parameterTypes = method.getGenericParameterTypes();
         if (parameterTypes.length == 0) {
-            return null;
+            return before(expVo, null);
         }
         if (parameterTypeList.size() != parameterTypes.length
                 && parameterTypeList.size() != paramClazzArr.length) {

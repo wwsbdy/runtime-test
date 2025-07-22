@@ -11,19 +11,15 @@ import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Key;
 import com.intellij.openapi.util.UserDataHolder;
-import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiMethod;
 import com.intellij.psi.util.PsiTreeUtil;
-import com.zj.runtimetest.utils.BreakpointUtil;
 import com.zj.runtimetest.utils.ParamUtil;
 import com.zj.runtimetest.utils.PluginCacheUtil;
 import com.zj.runtimetest.vo.CacheVo;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.Optional;
 
 
 /**
@@ -34,6 +30,7 @@ import java.util.Optional;
  * 2. [调整请求信息]
  * Source: <a href="https://github.com/lgp547/any-door">any-door</a>
  * License: [Apache 2.0]
+ *
  * @author jie.zhou
  * @date : 2025/7/2
  */
@@ -63,16 +60,11 @@ public class RuntimeTestAction extends AnAction implements Disposable {
                 }
             }
 
-            VirtualFile virtualFile = Optional.ofNullable(file).map(PsiFile::getVirtualFile).orElse(null);
             String cacheKey = PluginCacheUtil.genCacheKey(psiMethod);
             String defaultJson = ParamUtil.getDefaultJson(psiMethod.getParameterList());
             CacheVo cache = PluginCacheUtil.getCacheOrDefault(psiMethod, project, defaultJson);
 
-            RuntimeTestDialog runtimeTestDialog = new RuntimeTestDialog(project, cacheKey, cache, defaultJson,
-                    virtualFile,
-                    BreakpointUtil.findFirstExecutableLineNew(psiMethod, project, virtualFile),
-                    psiMethod
-            );
+            RuntimeTestDialog runtimeTestDialog = new RuntimeTestDialog(project, cacheKey, cache, defaultJson, psiMethod);
 //            Disposer.register(this, runtimeTestDialog.getDisposable());
             runtimeTestDialog.show();
         } catch (Exception exception) {

@@ -22,6 +22,9 @@ public class RuntimeTestExprExecutor {
 
 
     public static ExpressionExecutor getExecutor(ExpressionVo expVo, List<MethodParamTypeInfo> parameterTypeList, String projectBasePath) {
+        if (Objects.isNull(expVo)) {
+            return ExpressionExecutorFactory.EMPTY;
+        }
         String expr = expVo.getMyExpression();
         ExpressionExecutor compiled = CACHE.get(expr);
         if (Objects.nonNull(compiled)) {
@@ -41,6 +44,9 @@ public class RuntimeTestExprExecutor {
                                               List<MethodParamTypeInfo> parameterTypeList,
                                               String projectBasePath,
                                               Object[] args) {
+        if (Objects.isNull(expVo)) {
+            return args;
+        }
         ExpressionExecutor executor = getExecutor(expVo, parameterTypeList, projectBasePath);
         try {
             return executor.eval(args);

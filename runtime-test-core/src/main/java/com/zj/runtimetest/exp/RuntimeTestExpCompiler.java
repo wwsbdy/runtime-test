@@ -22,7 +22,6 @@ import java.util.stream.Stream;
  * @date : 2025/7/22
  */
 public class RuntimeTestExpCompiler {
-    @Deprecated
     public static RuntimeTestExprExecutor.ExpressionExecutor compile(ExpressionVo expVo, List<MethodParamTypeInfo> parameterTypes, String projectBasePath) throws ClassNotFoundException, NoSuchMethodException, IOException, InvocationTargetException, InstantiationException, IllegalAccessException {
         String expr = expVo.getMyExpression();
         if (Objects.isNull(expr) || expr.isEmpty()) {
@@ -37,31 +36,8 @@ public class RuntimeTestExpCompiler {
         String className = "ExprDynamic_" + Math.abs(expr.hashCode());
         String fullName = "agent." + className;
 
-        StringBuilder sb = new StringBuilder();
-        sb.append("package agent;\n");
-        for (String imp : imports) {
-            sb.append("import ").append(imp).append(";\n");
-        }
-        sb.append("public class ").append(className)
-                .append(" implements com.zj.runtimetest.exp.RuntimeTestExprExecutor.ExpressionExecutor {\n");
-        sb.append("  public Object[] eval(Object[] args) {\n");
-
-        int i = 0;
-        for (Map.Entry<String, String> entry : varTypes.entrySet()) {
-            sb.append("    ").append(entry.getValue()).append(" ").append(entry.getKey())
-                    .append(" = (").append(entry.getValue()).append(") args[").append(i).append("];\n");
-            i++;
-        }
-        sb.append("    try { ").append(expr).append("; } catch (Throwable t) { t.printStackTrace(); }\n");
-        sb.append("    ").append("return new Object[]{");
-
-        varTypes.keySet().forEach(key -> sb.append(key).append(", "));
-        // 如果末尾是", "，去掉
-        if (sb.charAt(sb.length() - 2) == ',') {
-            sb.delete(sb.length() - 2, sb.length());
-        }
-        sb.append("};\n");
-        sb.append("  }\n}\n");
+        // 构建 Java 源码
+        StringBuilder sb = buildClassStr(parameterTypes, imports, className, expr);
         JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
         JavaFileObject file = new JavaSourceFromString(fullName, sb.toString());
         DiagnosticCollector<JavaFileObject> diagnostics = new DiagnosticCollector<>();
@@ -102,34 +78,7 @@ public class RuntimeTestExpCompiler {
         String fullName = "agent." + className;
 
         // 构建 Java 源码
-        StringBuilder sb = new StringBuilder();
-        sb.append("package agent;\n");
-        for (String imp : imports) {
-            sb.append("import ").append(imp).append(";\n");
-        }
-
-        sb.append("public class ").append(className)
-                .append(" implements com.zj.runtimetest.exp.RuntimeTestExprExecutor.ExpressionExecutor {\n")
-                .append("  public Object[] eval(Object[] args) {\n");
-
-        for (int i = 0; i < parameterTypes.size(); i++) {
-            MethodParamTypeInfo methodParamTypeInfo = parameterTypes.get(i);
-            String typeName = methodParamTypeInfo.getType().getTypeName();
-            String paramName = methodParamTypeInfo.getParamName();
-            sb.append("    ").append(typeName).append(" ").append(paramName)
-                    .append(" = (").append(typeName).append(") args[").append(i).append("];\n");
-        }
-
-        sb.append("    try { ").append(expr).append("; } catch (Throwable t) { throw new RuntimeException(t); }\n")
-                .append("    return new Object[]{");
-        for (int i = 0; i < parameterTypes.size(); i++) {
-            sb.append(parameterTypes.get(i).getParamName());
-            if (i < parameterTypes.size() - 1) {
-                sb.append(", ");
-            }
-        }
-        sb.append("};\n  }\n}\n");
-
+        StringBuilder sb = buildClassStr(parameterTypes, imports, className, expr);
         // 内存中编译
         JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
         JavaFileObject source = new JavaSourceFromString(fullName, sb.toString());
@@ -157,5 +106,36 @@ public class RuntimeTestExpCompiler {
         Class<?> clazz = (Class<?>) defineClass.invoke(appCl, fullName, classBytes, 0, classBytes.length);
 
         return (RuntimeTestExprExecutor.ExpressionExecutor) clazz.getDeclaredConstructor().newInstance();
+    }
+
+    private static StringBuilder buildClassStr(List<MethodParamTypeInfo> parameterTypes, List<String> imports, String className, String expr) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("package agent;\n");
+        for (String imp : imports) {
+            sb.append("import ").append(imp).append(";\n");
+        }
+
+        sb.append("public class ").append(className)
+                .append(" implements com.zj.runtimetest.exp.RuntimeTestExprExecutor.ExpressionExecutor {\n")
+                .append("  public Object[] eval(Object[] args) {\n");
+
+        for (int i = 0; i < parameterTypes.size(); i++) {
+            MethodParamTypeInfo methodParamTypeInfo = parameterTypes.get(i);
+            String typeName = methodParamTypeInfo.getType().getTypeName();
+            String paramName = methodParamTypeInfo.getParamName();
+            sb.append("    ").append(typeName).append(" ").append(paramName)
+                    .append(" = (").append(typeName).append(") args[").append(i).append("];\n");
+        }
+        sb.append("    try { ").append(expr).append("; } catch (Throwable t) { throw new RuntimeException(t); }\n")
+                .append("    System.out.println(\"[Agent] pre-processing execution succeeded\");")
+                .append("    return new Object[]{");
+        for (int i = 0; i < parameterTypes.size(); i++) {
+            sb.append(parameterTypes.get(i).getParamName());
+            if (i < parameterTypes.size() - 1) {
+                sb.append(", ");
+            }
+        }
+        sb.append("};\n  }\n}\n");
+        return sb;
     }
 }
