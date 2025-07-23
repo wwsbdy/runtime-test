@@ -2,6 +2,7 @@ package com.zj.runtimetest.exp;
 
 import com.zj.runtimetest.vo.ExpressionVo;
 import com.zj.runtimetest.vo.MethodParamTypeInfo;
+import lombok.Setter;
 
 import java.util.List;
 import java.util.Map;
@@ -15,9 +16,18 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class RuntimeTestExprExecutor {
     public static final Map<String, ExpressionExecutor> CACHE = new ConcurrentHashMap<>();
-
-    public interface ExpressionExecutor {
-        Object[] eval(Object[] args);
+    @Setter
+    public abstract static class ExpressionExecutor {
+        private String classStr;
+        public abstract Object[] eval(Object[] args);
+        protected void fakeMethod(Object... args) {
+            System.out.println("Don not execute me");
+        }
+        protected void printPreProcessingMethod() {
+            if (Objects.nonNull(classStr) && !classStr.isEmpty()) {
+                System.out.println(classStr);
+            }
+        }
     }
 
 

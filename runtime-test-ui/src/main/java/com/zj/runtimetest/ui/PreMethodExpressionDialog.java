@@ -24,7 +24,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.java.debugger.JavaDebuggerEditorsProvider;
 
 import javax.swing.*;
-import javax.tools.ToolProvider;
 import java.util.Objects;
 
 /**
@@ -110,6 +109,8 @@ public class PreMethodExpressionDialog extends DialogWrapper {
         builder.append(") {\n");
         builder.append("        // cursor\n");
         builder.append("    }\n");
+        // printPreProcessingMethod
+        builder.append("    private void printPreProcessingMethod() {}\n");
         builder.append("}\n");
 
         return builder.toString();

@@ -73,3 +73,4 @@ Notes:<br>
 ### 1.3.*
 
 - 移除前置处理对断点对依赖
+- 支持打印前置处理方法（在前置处理中调用 <code>printPreProcessingMethod()</code> ）

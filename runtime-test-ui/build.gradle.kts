@@ -29,6 +29,7 @@ tasks {
             <b>1.3.*</b><br>
             <ul>
                 <li>移除前置处理对断点对依赖</li>
+                <li>支持打印前置处理方法（在前置处理中调用 <code>printPreProcessingMethod()</code> ）</li>
             </ul>
             <b>1.2.*</b><br>
             <ul>

@@ -39,7 +39,7 @@ public class PureECJCompiler {
         String fullName = packageName + "." + className;
 
         // 构建 Java 源码
-        StringBuilder source = buildClassStr(parameterTypes, imports, className, expr);
+        String source = buildClassStr(parameterTypes, imports, className, expr).toString();
         // 编译配置
         Map<String, String> options = new HashMap<>();
         // 使用你的 JDK 版本
@@ -73,7 +73,7 @@ public class PureECJCompiler {
                 },
                 new DefaultProblemFactory()
         );
-        compiler.compile(new ICompilationUnit[]{new StringSourceCompilationUnit(fullName, source.toString())});
+        compiler.compile(new ICompilationUnit[]{new StringSourceCompilationUnit(fullName, source)});
 //        compiler.compile(new ICompilationUnit[]{new CompilationUnit(source.toString().toCharArray(), fullName.replace('.', '/') + ".java", "UTF-8")});
 
         byte[] classBytes = compiledClasses.values().iterator().next();
@@ -84,12 +84,14 @@ public class PureECJCompiler {
 //        defineClass.setAccessible(true);
 //        Class<?> clazz = (Class<?>) defineClass.invoke(appCl, fullName, classBytes, 0, classBytes.length);
         Class<?> clazz;
-        try (RuntimeTestClassLoader runtimeTestClassLoader = RuntimeTestClassLoader.defaultClassLoader()){
+        try (RuntimeTestClassLoader runtimeTestClassLoader = RuntimeTestClassLoader.defaultClassLoader()) {
             clazz = runtimeTestClassLoader.publicDefineClass(fullName, classBytes, 0, classBytes.length);
         } catch (Exception e) {
             return ExpressionExecutorFactory.ERROR;
         }
-        return (RuntimeTestExprExecutor.ExpressionExecutor) clazz.getDeclaredConstructor().newInstance();
+        RuntimeTestExprExecutor.ExpressionExecutor expressionExecutor = (RuntimeTestExprExecutor.ExpressionExecutor) clazz.getDeclaredConstructor().newInstance();
+        expressionExecutor.setClassStr(source);
+        return expressionExecutor;
     }
 
 
@@ -99,9 +101,9 @@ public class PureECJCompiler {
         for (String imp : imports) {
             sb.append("import ").append(imp).append(";\n");
         }
-
+        sb.append("import com.zj.runtimetest.exp.RuntimeTestExprExecutor.ExpressionExecutor;\n\n");
         sb.append("public class ").append(className)
-                .append(" implements com.zj.runtimetest.exp.RuntimeTestExprExecutor.ExpressionExecutor {\n")
+                .append(" extends ExpressionExecutor {\n")
                 .append("    public Object[] eval(Object[] args) {\n");
 
         for (int i = 0; i < parameterTypes.size(); i++) {
@@ -111,7 +113,8 @@ public class PureECJCompiler {
             sb.append("        ").append(typeName).append(" ").append(paramName)
                     .append(" = (").append(typeName).append(") args[").append(i).append("];\n");
         }
-        sb.append("        try { ").append(expr).append("; } catch (Throwable t) { throw new RuntimeException(t); }\n")
+        sb.append("        try {\n").append(expr)
+                .append(";\n        } catch (Throwable t) { throw new RuntimeException(t); }\n")
                 .append("        System.out.println(\"[Agent] pre-processing execution succeeded\");\n")
                 .append("        return new Object[]{");
         for (int i = 0; i < parameterTypes.size(); i++) {
@@ -120,7 +123,8 @@ public class PureECJCompiler {
                 sb.append(", ");
             }
         }
-        sb.append("};\n    }\n}\n");
+        sb.append("};\n    }\n");
+        sb.append("}\n");
         return sb;
     }
 
