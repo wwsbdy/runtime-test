@@ -31,7 +31,7 @@ public class RuntimeTestExprExecutor {
             return compiled;
         }
         try {
-            compiled = RuntimeTestExpCompiler.compileInMemory(expVo, parameterTypeList);
+            compiled = PureECJCompiler.compileInMemory(expVo, parameterTypeList);
         } catch (Throwable t) {
             t.printStackTrace();
             compiled = ExpressionExecutorFactory.ERROR;

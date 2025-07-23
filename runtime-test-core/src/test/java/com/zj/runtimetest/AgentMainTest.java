@@ -1,6 +1,5 @@
 package com.zj.runtimetest;
 
-import com.zj.runtimetest.exp.ExprExecutor;
 import com.zj.runtimetest.exp.RuntimeTestExprExecutor;
 import com.zj.runtimetest.utils.AgentUtil;
 import com.zj.runtimetest.utils.JsonUtil;
@@ -67,29 +66,6 @@ public class AgentMainTest {
                 "test11",
                 Collections.emptyList(),
                 null);
-    }
-
-    @Test
-    public void test111() throws Exception {
-        // 第一次：使用 String param
-        ExprExecutor.run(
-                new Object[]{"abc"},
-                "System.out.println(param.toUpperCase())",
-                Collections.singletonMap("param", "java.lang.String"),
-                Collections.singletonList("java.lang.String")
-        );
-        ExprExecutor.run(
-                new Object[]{"abc"},
-                "System.out.println(param.toUpperCase());System.out.println(FiledUtil.getFieldNullValue(int.class))",
-                Collections.singletonMap("param", "java.lang.String"),
-                Arrays.asList("java.lang.String", "com.zj.runtimetest.utils.FiledUtil")
-        );
-//        Method method = SampleTarget.class.getDeclaredMethod("target", String.class);
-//        HashMap<Object, Object> requestJson = new HashMap<>();
-//        requestJson.put("param", "test");
-//
-//        // void target(String param)
-//        AgentUtil.run(method, JsonUtil.toJsonString(requestJson), new MethodParamInfo("param", "java.lang.String"));
     }
 
     @Test

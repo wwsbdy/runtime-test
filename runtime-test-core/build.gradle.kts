@@ -13,6 +13,7 @@ dependencies {
     implementation("org.ow2.asm:asm-tree:9.7.1")
     implementation("org.ow2.asm:asm-analysis:9.7.1")
     implementation("com.fasterxml.jackson.core:jackson-databind:2.13.4.2")
+    implementation("org.eclipse.jdt:ecj:3.20.0")
 }
 
 tasks.withType<JavaCompile>().configureEach {
