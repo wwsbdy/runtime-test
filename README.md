@@ -61,10 +61,19 @@ Notes:<br>
 
 ### 1.1.*
 
+- Maintain compatibility with other versions
+- Fix project freeze issue (when resuming execution after breakpoint pause in RuntimeTest)
+
+
 - 兼容其他版本
 - 防止项目卡死（断点暂停方法后再运行RuntimeTest，项目会卡死）
 
 ### 1.2.*
+
+- Save entered information even when canceled
+- Fix cases where breakpoints were not properly removed
+- Skip breakpoint interception for proxy classes
+
 
 - 取消也保存填写的信息
 - 调整一些情况下断点未删除情况
@@ -72,5 +81,10 @@ Notes:<br>
 
 ### 1.3.*
 
+- Remove dependency on breakpoints for pre-processing
+- Add support for printing pre-processing methods (call <b>printPreProcessingMethod()</b> during pre-processing)
+- Now supports pre-processing in <b>non-Debug mode</b>
+
 - 移除前置处理对断点对依赖
-- 支持打印前置处理方法（在前置处理中调用 <code>printPreProcessingMethod()</code> ）
+- 支持打印前置处理方法（在前置处理中调用 <b>printPreProcessingMethod()</b> ）
+- 现在支持<b>非Debug模式</b>前置处理
