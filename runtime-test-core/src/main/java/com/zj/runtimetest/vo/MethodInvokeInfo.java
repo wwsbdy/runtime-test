@@ -34,7 +34,11 @@ public class MethodInvokeInfo {
         if (Objects.nonNull(requestInfo.getParameterTypeList()) && !requestInfo.getParameterTypeList().isEmpty()) {
             paramClazzArr = requestInfo.getParameterTypeList().stream().map(MethodParamInfo::getParamType).map(clsStr -> {
                         try {
-                            return ClassUtil.getClass(clsStr, classLoader);
+                            if (clsStr.contains(".")) {
+                                return ClassUtil.getClass(clsStr, classLoader);
+                            }
+                            // 兼容范型
+                            return Object.class;
                         } catch (ClassNotFoundException e) {
                             throw new RuntimeException(e);
                         }

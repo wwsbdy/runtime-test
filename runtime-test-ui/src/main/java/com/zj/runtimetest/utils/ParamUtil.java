@@ -33,6 +33,9 @@ public class ParamUtil {
         for (int i = 0; i < parameterList.getParametersCount(); i++) {
             PsiParameter parameter = Objects.requireNonNull(parameterList.getParameter(i));
             String canonicalText = parameter.getType().getCanonicalText();
+            if (!canonicalText.contains(".")) {
+                canonicalText = "java.lang.Object";
+            }
             String classType = StringUtils.substringBefore(canonicalText, "<");
             parameterTypeList.add(new MethodParamInfo(parameter.getName(), classType));
         }
@@ -51,6 +54,9 @@ public class ParamUtil {
         for (int i = 0; i < parameterList.getParametersCount(); i++) {
             PsiParameter parameter = Objects.requireNonNull(parameterList.getParameter(i));
             String canonicalText = parameter.getType().getCanonicalText();
+            if (!canonicalText.contains(".")) {
+                canonicalText = "java.lang.Object";
+            }
             parameterTypeList.add(new MethodParamInfo(parameter.getName(), canonicalText));
         }
         return parameterTypeList;
