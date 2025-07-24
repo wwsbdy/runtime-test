@@ -1,17 +1,17 @@
 package com.zj.runtimetest.vo;
 
+import com.zj.runtimetest.exp.RuntimeTestExprExecutor;
 import com.zj.runtimetest.utils.ClassUtil;
 import com.zj.runtimetest.utils.FiledUtil;
+import com.zj.runtimetest.utils.HttpServletRequestUtil;
 import com.zj.runtimetest.utils.JsonUtil;
 import lombok.Getter;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author : jie.zhou
@@ -27,14 +27,19 @@ public class MethodInvokeInfo {
     private final Object bean;
     private Class<?>[] paramClazzArr;
     private Method method;
-    private final List<MethodParamInfo> parameterTypeList;
+    private final List<MethodParamTypeInfo> parameterTypeList;
     private boolean returnValue;
+    private final String projectBasePath;
 
     public MethodInvokeInfo(RequestInfo requestInfo, ClassLoader classLoader, Object bean) {
         if (Objects.nonNull(requestInfo.getParameterTypeList()) && !requestInfo.getParameterTypeList().isEmpty()) {
             paramClazzArr = requestInfo.getParameterTypeList().stream().map(MethodParamInfo::getParamType).map(clsStr -> {
                         try {
-                            return ClassUtil.getClass(clsStr, classLoader);
+                            if (clsStr.contains(".")) {
+                                return ClassUtil.getClass(clsStr, classLoader);
+                            }
+                            // 兼容范型
+                            return Object.class;
                         } catch (ClassNotFoundException e) {
                             throw new RuntimeException(e);
                         }
@@ -44,18 +49,23 @@ public class MethodInvokeInfo {
         this.staticMethod = requestInfo.isStaticMethod();
         this.className = requestInfo.getClassName();
         this.methodName = requestInfo.getMethodName();
-        this.parameterTypeList = requestInfo.getParameterTypeList();
+        this.projectBasePath = requestInfo.getProjectBasePath();
+        this.parameterTypeList = Optional.ofNullable(requestInfo.getParameterTypeList())
+                .map(list -> list.stream()
+                        .map(v -> new MethodParamTypeInfo(v.getParamName(), v.getParamType(), null))
+                        .collect(Collectors.toList())
+                )
+                .orElse(Collections.emptyList());
         this.classLoader = classLoader;
         this.bean = bean;
     }
 
 
-
-    public Object invoke(String requestJson) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, ClassNotFoundException {
+    public Object invoke(ExpressionVo expVo, String requestJson) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, ClassNotFoundException {
         if (Objects.isNull(method)) {
             synchronized (this) {
                 if (Objects.nonNull(method)) {
-                    return method.invoke(bean, getArgs(method, requestJson));
+                    return method.invoke(bean, getArgs(expVo, requestJson));
                 }
                 if (staticMethod) {
                     method = ClassUtil.getClass(className, classLoader).getDeclaredMethod(methodName, paramClazzArr);
@@ -64,16 +74,16 @@ public class MethodInvokeInfo {
                 }
                 method.setAccessible(true);
                 returnValue = method.getReturnType() != void.class;
-                return method.invoke(bean, getArgs(method, requestJson));
+                return method.invoke(bean, getArgs(expVo, requestJson));
             }
         }
-        return method.invoke(bean, getArgs(method, requestJson));
+        return method.invoke(bean, getArgs(expVo, requestJson));
     }
 
-    private Object[] getArgs(Method method, String requestJson) {
+    private Object[] getArgs(ExpressionVo expVo, String requestJson) {
         Type[] parameterTypes = method.getGenericParameterTypes();
         if (parameterTypes.length == 0) {
-            return null;
+            return before(expVo, null, null);
         }
         if (parameterTypeList.size() != parameterTypes.length
                 && parameterTypeList.size() != paramClazzArr.length) {
@@ -86,15 +96,29 @@ public class MethodInvokeInfo {
             map = JsonUtil.toMap(requestJson);
         }
         Object[] args = new Object[parameterTypes.length];
+        Object httpServletRequest = null;
         for (int i = 0; i < parameterTypes.length; i++) {
-            Object arg = map.get(parameterTypeList.get(i).getParamName());
-            Type argType = parameterTypes[i];
+            MethodParamTypeInfo methodParamTypeInfo = parameterTypeList.get(i);
+            Object arg = map.get(methodParamTypeInfo.getParamName());
+            Type argType;
+            if (Objects.isNull(methodParamTypeInfo.getType())) {
+                argType = parameterTypes[i];
+                methodParamTypeInfo.setType(argType);
+            } else {
+                argType = methodParamTypeInfo.getType();
+            }
             if (arg == null) {
                 args[i] = FiledUtil.getFieldNullValue(paramClazzArr[i]);
-                continue;
+            } else if (HttpServletRequestUtil.isHttpServletRequest(paramClazzArr[i])) {
+                args[i] = httpServletRequest = HttpServletRequestUtil.setRequestAttributes(null, JsonUtil.toMap(JsonUtil.toJsonString(arg)));
+            } else {
+                args[i] = JsonUtil.convertValue(arg, argType);
             }
-            args[i] = JsonUtil.convertValue(arg, argType);
         }
-        return args;
+        return before(expVo, args, httpServletRequest);
+    }
+
+    private Object[] before(ExpressionVo expVo, Object[] args, Object httpServletRequest) {
+        return RuntimeTestExprExecutor.evaluate(expVo, parameterTypeList, projectBasePath, args, httpServletRequest);
     }
 }

@@ -52,8 +52,6 @@
         <java.programPatcher implementation="com.zj.runtimetest.listener.RuntimeTestJavaProgramPatcher"/>
 <!--        idea version 243-->
 <!--        <notificationGroup id="RuntimeTest" displayType="BALLOON"/>-->
-        <xdebugger.breakpointType implementation="com.zj.runtimetest.ui.debug.RuntimeTestBreakpointType"/>
-        <debugger.javaBreakpointHandlerFactory implementation="com.zj.runtimetest.ui.debug.RuntimeTestBreakpointHandlerFactoryImpl"/>
     </extensions>
     <actions>
         <action id="RuntimeTest.RuntimeTestAction"

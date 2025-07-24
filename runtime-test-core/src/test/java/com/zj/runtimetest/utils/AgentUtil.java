@@ -1,12 +1,16 @@
 package com.zj.runtimetest.utils;
 
+import com.zj.runtimetest.exp.RuntimeTestExprExecutor;
 import com.zj.runtimetest.vo.MethodParamInfo;
+import com.zj.runtimetest.vo.MethodParamTypeInfo;
 import com.zj.runtimetest.vo.RequestInfo;
 
 import java.io.File;
 import java.lang.management.ManagementFactory;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -61,6 +65,18 @@ public class AgentUtil {
         );
         requestInfo.setRequestJson(requestJson);
         run(requestInfo);
+    }
+
+    public static RuntimeTestExprExecutor.ExpressionExecutor getExecutor(Method method, RequestInfo requestInfo) throws Exception {
+        Type[] parameterTypes = method.getGenericParameterTypes();
+        List<MethodParamInfo> parameterList = requestInfo.getParameterTypeList();
+        List<MethodParamTypeInfo> parameterTypeList = new ArrayList<>();
+        for (int i = 0; i < parameterTypes.length; i++) {
+            MethodParamInfo methodParamInfo = parameterList.get(i);
+            Type argType = parameterTypes[i];
+            parameterTypeList.add(new MethodParamTypeInfo(methodParamInfo.getParamName(), methodParamInfo.getParamType(), argType));
+        }
+        return RuntimeTestExprExecutor.getExecutor(requestInfo.getExpVo(), parameterTypeList, requestInfo.getProjectBasePath());
     }
 
 }

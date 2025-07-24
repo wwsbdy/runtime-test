@@ -1,7 +1,10 @@
 package com.zj.runtimetest.vo;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.intellij.lang.java.JavaLanguage;
 import com.intellij.xdebugger.XExpression;
+import com.intellij.xdebugger.evaluation.EvaluationMode;
+import com.intellij.xdebugger.impl.breakpoints.XExpressionImpl;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -33,9 +36,6 @@ public class CacheVo extends RequestInfo implements Serializable {
     @JsonIgnore
     private List<String> history;
 
-    @JsonIgnore
-    private ExpressionVo expressionVo;
-
 
     public void addHistory(String s) {
         if (Objects.isNull(history)) {
@@ -64,15 +64,34 @@ public class CacheVo extends RequestInfo implements Serializable {
     }
 
     public void setExpression(@NotNull XExpression expression) {
-        this.expressionVo = ExpressionVo.fromExpression(expression);
+        super.setExpVo(fromExpression(expression));
     }
 
     @JsonIgnore
     public @NotNull XExpression getExpression() {
-        if (Objects.isNull(expressionVo)) {
-            return ExpressionVo.EmptyXExpression.INSTANCE;
+        if (Objects.isNull(getExpVo())) {
+            return EmptyXExpression.INSTANCE;
         }
-        return expressionVo.toExpression();
+        return toExpression(getExpVo());
+    }
+
+    private XExpression toExpression(ExpressionVo expVo) {
+        return new XExpressionImpl(expVo.getMyExpression(), JavaLanguage.INSTANCE, expVo.getMyCustomInfo(), EvaluationMode.CODE_FRAGMENT);
+    }
+
+    private ExpressionVo fromExpression(XExpression expression) {
+        ExpressionVo vo = new ExpressionVo();
+        vo.setMyExpression(expression.getExpression());
+        vo.setMyCustomInfo(expression.getCustomInfo());
+        return vo;
+    }
+
+    public static class EmptyXExpression {
+        public static final XExpression INSTANCE;
+        static {
+            INSTANCE = new XExpressionImpl("", JavaLanguage.INSTANCE, null, EvaluationMode.CODE_FRAGMENT);
+//            INSTANCE = XExpressionImpl.fromText("", EvaluationMode.CODE_FRAGMENT);
+        }
     }
 
 
