@@ -5,7 +5,7 @@ import com.zj.runtimetest.exp.PureECJCompiler;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 
@@ -16,11 +16,11 @@ import java.util.Objects;
 public class HttpServletRequestUtil {
 
     public static Object setRequestAttributes(Object httpServletRequest, Map<String, Object> attributes, Map<String, Object> headers) {
-        if (attributes == null) {
-            attributes = Collections.emptyMap();
+        if (attributes == null || attributes.isEmpty()) {
+            attributes = new LinkedHashMap<>();
         }
-        if (headers == null) {
-            headers = Collections.emptyMap();
+        if (headers == null || headers.isEmpty()) {
+            headers = new LinkedHashMap<>();
         }
         if (Objects.isNull(httpServletRequest)) {
             return setRequestAttributes(attributes, headers);
@@ -45,11 +45,11 @@ public class HttpServletRequestUtil {
     }
 
     public static Object setRequestAttributes(Map<String, Object> attributes, Map<String, Object> headers) {
-        if (attributes == null) {
-            attributes = Collections.emptyMap();
+        if (attributes == null || attributes.isEmpty()) {
+            attributes = new LinkedHashMap<>();
         }
-        if (headers == null) {
-            headers = Collections.emptyMap();
+        if (headers == null || headers.isEmpty()) {
+            headers = new LinkedHashMap<>();
         }
         Constructor<?> constructor = FakeHttpServletRequestBuilder.CONSTRUCTOR;
         if (Objects.isNull(constructor)) {

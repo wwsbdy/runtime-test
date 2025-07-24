@@ -81,9 +81,10 @@ public class RuntimeTestExprExecutor {
             return args;
         }
         ExpressionExecutor executor = getExecutor(expVo, parameterTypeList, projectBasePath);
-        HttpServletRequestUtil.setRequestAttributes(httpServletRequest, executor.getAttributes(), executor.getHeaders());
         try {
-            return executor.eval(args);
+            Object[] resultArgs = executor.eval(args);
+            HttpServletRequestUtil.setRequestAttributes(httpServletRequest, executor.getAttributes(), executor.getHeaders());
+            return resultArgs;
         } catch (Throwable t) {
             put(expVo.getMyExpression(), ExpressionExecutorFactory.ERROR);
             throw new RuntimeException(t);

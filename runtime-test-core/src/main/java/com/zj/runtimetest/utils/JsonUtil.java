@@ -19,6 +19,7 @@ package com.zj.runtimetest.utils;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.json.JsonReadFeature;
+import com.fasterxml.jackson.core.json.JsonWriteFeature;
 import com.fasterxml.jackson.databind.*;
 
 import java.lang.reflect.Type;
@@ -44,6 +45,8 @@ public class JsonUtil {
         // 单引号处理
         objectMapper.configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
         objectMapper.configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
+        // 防止中文乱码
+        objectMapper.configure(JsonWriteFeature.ESCAPE_NON_ASCII.mappedFeature(), true);
         // 启用美化输出
         objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
     }
