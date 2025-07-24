@@ -13,32 +13,29 @@ import com.intellij.openapi.ui.ComboBox;
 import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.util.Disposer;
-import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiMethod;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.util.ui.JBUI;
-import com.intellij.xdebugger.breakpoints.XLineBreakpoint;
 import com.zj.runtimetest.cache.RuntimeTestState;
 import com.zj.runtimetest.json.JsonEditorField;
 import com.zj.runtimetest.json.JsonLanguage;
 import com.zj.runtimetest.language.PluginBundle;
-import com.zj.runtimetest.utils.BreakpointUtil;
 import com.zj.runtimetest.utils.ExecutorUtil;
+import com.zj.runtimetest.utils.JsonUtil;
 import com.zj.runtimetest.utils.RunUtil;
 import com.zj.runtimetest.vo.CacheVo;
 import com.zj.runtimetest.vo.ProcessVo;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
-import org.jetbrains.java.debugger.breakpoints.properties.JavaMethodBreakpointProperties;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Function;
 
 /**
  * @author arthur_zhou
@@ -67,11 +64,7 @@ public class RuntimeTestDialog extends DialogWrapper {
     private ComboBox<String> historyComboBox;
     private JButton preMethodButton;
 
-    private Function<Boolean, XLineBreakpoint<JavaMethodBreakpointProperties>> breakpointFunc;
-
-    public RuntimeTestDialog(Project project, String cacheKey, CacheVo cache, String defaultJson,
-                             Function<Boolean, XLineBreakpoint<JavaMethodBreakpointProperties>> breakpointFunc,
-                             VirtualFile virtualFile, Integer lineNumber, PsiMethod psiMethod) {
+    public RuntimeTestDialog(Project project, String cacheKey, CacheVo cache, String defaultJson, PsiMethod psiMethod) {
         super(true);
         // 是否允许拖拽的方式扩大或缩小
         setResizable(true);
@@ -86,25 +79,19 @@ public class RuntimeTestDialog extends DialogWrapper {
         this.cacheKey = cacheKey;
         this.cache = cache;
         this.defaultJson = defaultJson;
-        this.breakpointFunc = breakpointFunc;
-        if (StringUtils.isNotBlank(cache.getExpression().getExpression())) {
-            breakpointFunc.apply(true).setConditionExpression(cache.getExpression());
-        }
 
-        if (Objects.nonNull(virtualFile) && Objects.nonNull(lineNumber)) {
-            this.preMethodButton = new JButton(AllIcons.Nodes.Function);
-            preMethodButton.setToolTipText(PluginBundle.get("dialog.preMethodFunction.title"));
-            preMethodButton.addActionListener(event -> {
-                PreMethodExpressionDialog<?> expressionDialog = new PreMethodExpressionDialog<>(project, breakpointFunc, cache, virtualFile, lineNumber);
-                Disposer.register(getDisposable(), expressionDialog.getDisposable());
-                expressionDialog.show();
-            });
-        }
+        this.preMethodButton = new JButton(AllIcons.Nodes.Function);
+        this.preMethodButton.setToolTipText(PluginBundle.get("dialog.preMethodFunction.title"));
+        this.preMethodButton.addActionListener(event -> {
+            PreMethodExpressionDialog expressionDialog = new PreMethodExpressionDialog(project, cache, psiMethod);
+            Disposer.register(getDisposable(), expressionDialog.getDisposable());
+            expressionDialog.show();
+        });
 
-        jsonContent = new JsonEditorField(JsonLanguage.INSTANCE, project, content);
-        jsonContent.setPreferredSize(new Dimension(500, 700));
+        this.jsonContent = new JsonEditorField(JsonLanguage.INSTANCE, project, content, !defaultJson.isEmpty());
+        this.jsonContent.setPreferredSize(new Dimension(500, 700));
         // 触发一下init方法，否则swing样式将无法展示在会话框
-        Disposer.register(getDisposable(), jsonContent);
+        Disposer.register(getDisposable(), this.jsonContent);
         init();
     }
 
@@ -191,13 +178,25 @@ public class RuntimeTestDialog extends DialogWrapper {
             return;
         }
         String jsonContentText = jsonContent.getText();
+        if (!jsonContentText.isEmpty()) {
+            try {
+                Map<String, Object> map = JsonUtil.toMap(jsonContentText);
+                if (map.isEmpty()) {
+                    jsonContentText = "";
+                }
+            } catch (Exception e) {
+                jsonContentText = "";
+            }
+        }
         cache.setPid(pid);
         cache.setRequestJson(jsonContentText);
-        cache.addHistory(jsonContentText);
+        if (!jsonContentText.isEmpty()) {
+            cache.addHistory(jsonContentText);
+        }
 
         RuntimeTestState.getInstance(project).putCache(cacheKey, cache);
         toFrontRunContent(pid);
-        CompletableFuture.runAsync(() -> RunUtil.run(project, cache, breakpointFunc))
+        CompletableFuture.runAsync(() -> RunUtil.run(project, cache))
                 .exceptionally(throwable -> {
                     log.error("run error", throwable);
                     return null;
@@ -213,12 +212,12 @@ public class RuntimeTestDialog extends DialogWrapper {
         cache.setPid(pid);
         cache.setRequestJson(jsonContentText);
         RuntimeTestState.getInstance(project).putCache(cacheKey, cache);
-        BreakpointUtil.removeBreakpoint(project, breakpointFunc.apply(false));
         super.doCancelAction();
     }
 
     /**
      * 跳转指定的Run/Debug窗口
+     *
      * @param pid 进程id
      */
     private void toFrontRunContent(Long pid) {
@@ -268,7 +267,6 @@ public class RuntimeTestDialog extends DialogWrapper {
             cache = null;
             defaultJson = null;
             preMethodButton = null;
-            breakpointFunc = null;
         }
         super.dispose();
     }

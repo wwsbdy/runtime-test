@@ -21,13 +21,14 @@ public class JsonEditorField extends LanguageTextField implements Disposable {
 
     private boolean disposed = false;
 
-    public JsonEditorField(Language language, @Nullable Project project, @NotNull String value) {
+    public JsonEditorField(Language language, @Nullable Project project, @NotNull String value, boolean enabled) {
         super(language, project, value);
         TabComponentAdapter tabComponentAdapter = new TabComponentAdapter(this);
         addComponentListener(tabComponentAdapter);
         Disposer.register(this, tabComponentAdapter);
         // 关闭只能一行编辑
         setOneLineMode(false);
+        setEnabled(enabled);
     }
 
     @Override

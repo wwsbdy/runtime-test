@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.instrument.Instrumentation;
 import java.net.URLDecoder;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -51,8 +52,15 @@ public class RuntimeTestAttach {
                 return;
             }
         }
-        System.out.println("[Agent] agentmain invoked with args: " + args);
         RequestInfo requestInfo = JsonUtil.toJavaBean(args, RequestInfo.class);
+        System.out.println("[Agent] agentmain invoked with class: " + requestInfo.getClassName());
+        System.out.println("[Agent] agentmain invoked with method: " + requestInfo.getMethodName());
+        if (Objects.nonNull(requestInfo.getRequestJson()) && !requestInfo.getRequestJson().isEmpty()) {
+            System.out.println("[Agent] agentmain invoked with requestJson: " + requestInfo.getRequestJson());
+        }
+        if (Objects.nonNull(requestInfo.getParameterTypeList()) && !requestInfo.getParameterTypeList().isEmpty()) {
+            System.out.println("[Agent] agentmain invoked with parameterTypeList: " + JsonUtil.toJsonString(requestInfo.getParameterTypeList()));
+        }
         CompletableFuture.runAsync(() -> {
                     try {
                         AgentContextHolder.invoke(requestInfo);
