@@ -84,7 +84,9 @@ Notes:<br>
 - Remove dependency on breakpoints for pre-processing
 - Add support for printing pre-processing methods (call <b>printPreProcessingMethod()</b> during pre-processing)
 - Now supports pre-processing in <b>non-Debug mode</b>
+- Support for HttpServletRequest (in pre-processing, allows calling <b>addHeader()</b> and <b>setAttribute()</b>; supports passing headers in JSON format through parameters)
 
 - 移除前置处理对断点对依赖
 - 支持打印前置处理方法（在前置处理中调用 <b>printPreProcessingMethod()</b> ）
-- 现在支持<b>非Debug模式</b>前置处理
+- 现在支持 <b>非Debug模式</b> 前置处理
+- 支持 <b>HttpServletRequest</b> （在前置处理中调用 <b>addHeader()</b> 和 <b>setAttribute()</b> ；参数里支持用json格式填入header）
