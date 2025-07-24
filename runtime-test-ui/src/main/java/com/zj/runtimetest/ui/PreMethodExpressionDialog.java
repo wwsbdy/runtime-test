@@ -114,6 +114,10 @@ public class PreMethodExpressionDialog extends DialogWrapper {
         builder.append("    }\n");
         // printPreProcessingMethod
         builder.append("    private void printPreProcessingMethod() {}\n");
+        // addHeader
+        builder.append("    private void addHeader(String name, Object value) {}\n");
+        // setAttribute
+        builder.append("    private void setAttribute(String name, Object value) {}\n");
         builder.append("}\n");
 
         return builder.toString();
