@@ -1,5 +1,6 @@
 package com.zj.runtimetest;
 
+import com.zj.runtimetest.utils.Base64Util;
 import com.zj.runtimetest.utils.IOUtil;
 import com.zj.runtimetest.utils.JsonUtil;
 import com.zj.runtimetest.utils.ThrowUtil;
@@ -54,7 +55,7 @@ public class RuntimeTestAttach {
         }
         RequestInfo requestInfo;
         try {
-            requestInfo = JsonUtil.toJavaBean(args, RequestInfo.class);
+            requestInfo = JsonUtil.toJavaBean(Base64Util.decode(args), RequestInfo.class);
         } catch (Exception e) {
             System.err.println("[Agent] " + ThrowUtil.printStackTrace(e));
             return;

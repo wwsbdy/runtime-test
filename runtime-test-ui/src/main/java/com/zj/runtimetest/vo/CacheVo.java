@@ -8,6 +8,7 @@ import com.intellij.xdebugger.impl.breakpoints.XExpressionImpl;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.Serializable;
@@ -76,10 +77,16 @@ public class CacheVo extends RequestInfo implements Serializable {
     }
 
     private XExpression toExpression(ExpressionVo expVo) {
+        if (Objects.isNull(expVo)) {
+            return EmptyXExpression.INSTANCE;
+        }
         return new XExpressionImpl(expVo.getMyExpression(), JavaLanguage.INSTANCE, expVo.getMyCustomInfo(), EvaluationMode.CODE_FRAGMENT);
     }
 
     private ExpressionVo fromExpression(XExpression expression) {
+        if (StringUtils.isBlank(expression.getExpression())) {
+            return null;
+        }
         ExpressionVo vo = new ExpressionVo();
         vo.setMyExpression(expression.getExpression());
         vo.setMyCustomInfo(expression.getCustomInfo());

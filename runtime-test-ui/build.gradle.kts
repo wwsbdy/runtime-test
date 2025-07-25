@@ -26,6 +26,17 @@ tasks {
         untilBuild.set(properties("until.build"))
         changeNotes.set(
             """
+            <b>1.4.*</b><br>
+            <ul>
+                <li>Removed dependency on <b>HttpServletRequest</b> in <b>non-Spring</b> projects</li>
+                <li>Fixed errors after converting static methods to instance methods</li>
+                <li>Support <b>LocalDate</b>, <b>LocalDateTime</b></li>
+            </ul>
+            <ul>
+                <li>移除 <b>非Spring</b> 项目对 <b>HttpServletRequest</b> 的依赖</li>
+                <li>调整静态方法改为非静态方法后报错问题</li>
+                <li>支持 <b>LocalDate</b>、<b>LocalDateTime</b></li>
+            </ul>
             <b>1.3.*</b><br>
             <ul>
                 <li>Remove dependency on breakpoints for pre-processing</li>

@@ -14,7 +14,7 @@ import java.util.Date;
  * @author : jie.zhou
  * @date : 2025/7/25
  */
-public interface DateSerializer {
+public interface Serializer {
     JsonSerializer<LocalDateTime> LOCAL_DATE_TIME_SERIALIZER = new JsonSerializer<LocalDateTime>() {
         @Override
         public void serialize(LocalDateTime value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
@@ -28,7 +28,7 @@ public interface DateSerializer {
             gen.writeString(DateUtil.formatDateTime(date));
         }
     };
-    JsonSerializer<LocalDate> LOCAL_DAME_SERIALIZER = new JsonSerializer<LocalDate>() {
+    JsonSerializer<LocalDate> LOCAL_DATE_SERIALIZER = new JsonSerializer<LocalDate>() {
         @Override
         public void serialize(LocalDate value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
             if (value == null) {
@@ -40,7 +40,7 @@ public interface DateSerializer {
             gen.writeString(DateUtil.formatDateTime(date));
         }
     };
-    JsonSerializer<Date> DAME_SERIALIZER = new JsonSerializer<Date>() {
+    JsonSerializer<Date> DATE_SERIALIZER = new JsonSerializer<Date>() {
         @Override
         public void serialize(Date value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
             if (value == null) {

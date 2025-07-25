@@ -15,7 +15,7 @@ import java.util.Objects;
  * @author : jie.zhou
  * @date : 2025/7/25
  */
-public interface DateDeserializer {
+public interface Deserializer {
     JsonDeserializer<LocalDateTime> LOCAL_DATE_TIME_DESERIALIZER = new JsonDeserializer<LocalDateTime>() {
         @Override
         public LocalDateTime deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
