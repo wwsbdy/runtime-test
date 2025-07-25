@@ -1,5 +1,6 @@
 package com.zj.runtimetest.utils;
 
+import com.zj.runtimetest.AgentContextHolder;
 import com.zj.runtimetest.exp.PureECJCompiler;
 
 import java.lang.reflect.Constructor;
@@ -67,6 +68,18 @@ public class HttpServletRequestUtil {
 
     public static boolean isHttpServletRequest(Class<?> aClass) {
         return "javax.servlet.http.HttpServletRequest".equals(aClass.getName());
+    }
+
+    public static boolean hasHttpServletRequest() {
+        try {
+            Class<?> aClass = ClassUtil.getClass("javax.servlet.http.HttpServletRequest", AgentContextHolder.DEFAULT_CLASS_LOADER);
+            if (Objects.nonNull(aClass)) {
+                return true;
+            }
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
+        return false;
     }
 
     public static class FakeHttpServletRequestBuilder {

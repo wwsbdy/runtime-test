@@ -107,10 +107,11 @@ public class MethodInvokeInfo {
             } else {
                 argType = methodParamTypeInfo.getType();
             }
-            if (arg == null) {
+            if (HttpServletRequestUtil.isHttpServletRequest(paramClazzArr[i])) {
+                args[i] = httpServletRequest =
+                        HttpServletRequestUtil.setRequestAttributes(null, Objects.isNull(arg) ? null : JsonUtil.toMap(JsonUtil.toJsonString(arg)));
+            } else if (arg == null) {
                 args[i] = FiledUtil.getFieldNullValue(paramClazzArr[i]);
-            } else if (HttpServletRequestUtil.isHttpServletRequest(paramClazzArr[i])) {
-                args[i] = httpServletRequest = HttpServletRequestUtil.setRequestAttributes(null, JsonUtil.toMap(JsonUtil.toJsonString(arg)));
             } else {
                 args[i] = JsonUtil.convertValue(arg, argType);
             }
