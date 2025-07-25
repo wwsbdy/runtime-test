@@ -1,5 +1,6 @@
 package com.zj.runtimetest;
 
+import com.zj.runtimetest.utils.Base64Util;
 import com.zj.runtimetest.utils.IOUtil;
 import com.zj.runtimetest.utils.JsonUtil;
 import com.zj.runtimetest.utils.ThrowUtil;
@@ -52,7 +53,13 @@ public class RuntimeTestAttach {
                 return;
             }
         }
-        RequestInfo requestInfo = JsonUtil.toJavaBean(args, RequestInfo.class);
+        RequestInfo requestInfo;
+        try {
+            requestInfo = JsonUtil.toJavaBean(Base64Util.decode(args), RequestInfo.class);
+        } catch (Exception e) {
+            System.err.println("[Agent] " + ThrowUtil.printStackTrace(e));
+            return;
+        }
         System.out.println("[Agent] agentmain invoked with class: " + requestInfo.getClassName());
         System.out.println("[Agent] agentmain invoked with method: " + requestInfo.getMethodName());
         if (Objects.nonNull(requestInfo.getRequestJson()) && !requestInfo.getRequestJson().isEmpty()) {

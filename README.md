@@ -86,7 +86,19 @@ Notes:<br>
 - Now supports pre-processing in <b>non-Debug mode</b>
 - Support for HttpServletRequest (in pre-processing, allows calling <b>addHeader()</b> and <b>setAttribute()</b>; supports passing headers in JSON format through parameters)
 
+
 - 移除前置处理对断点对依赖
 - 支持打印前置处理方法（在前置处理中调用 <b>printPreProcessingMethod()</b> ）
 - 现在支持 <b>非Debug模式</b> 前置处理
 - 支持 <b>HttpServletRequest</b> （在前置处理中调用 <b>addHeader()</b> 和 <b>setAttribute()</b> ；参数里支持用json格式填入header）
+
+### 1.4.*
+
+- Removed dependency on <b>HttpServletRequest</b> in <b>non-Spring</b> projects
+- Fixed errors after converting static methods to instance methods
+- Support <b>LocalDate</b>, <b>LocalDateTime</b>
+
+
+- 移除 <b>非Spring</b> 项目对 <b>HttpServletRequest</b> 的依赖
+- 调整静态方法改为非静态方法后报错问题
+- 支持 <b>LocalDate</b>、<b>LocalDateTime</b>
