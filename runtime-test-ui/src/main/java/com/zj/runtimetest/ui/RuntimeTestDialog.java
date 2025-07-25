@@ -28,6 +28,7 @@ import com.zj.runtimetest.vo.CacheVo;
 import com.zj.runtimetest.vo.ProcessVo;
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.swing.*;
@@ -90,8 +91,10 @@ public class RuntimeTestDialog extends DialogWrapper {
 
         this.jsonContent = new JsonEditorField(JsonLanguage.INSTANCE, project, content, !defaultJson.isEmpty());
         this.jsonContent.setPreferredSize(new Dimension(500, 700));
-        // 触发一下init方法，否则swing样式将无法展示在会话框
         Disposer.register(getDisposable(), this.jsonContent);
+        // 没有进程禁用ok按钮
+        setOKActionEnabled(CollectionUtils.isNotEmpty(RuntimeTestState.getInstance(project).getPids()));
+        // 触发一下init方法，否则swing样式将无法展示在会话框
         init();
     }
 

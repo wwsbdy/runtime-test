@@ -35,6 +35,7 @@ public class PluginCacheUtil extends CacheUtil {
     public static @NotNull CacheVo getCacheOrDefault(PsiMethod psiMethod, Project project, String defaultJson) {
         CacheVo cache = getCache(psiMethod);
         if (Objects.nonNull(cache)) {
+            cache.setStaticMethod(MethodUtil.isStaticMethod(psiMethod));
             return cache;
         }
         cache = new CacheVo();

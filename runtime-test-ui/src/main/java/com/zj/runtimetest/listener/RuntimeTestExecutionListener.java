@@ -1,7 +1,7 @@
 package com.zj.runtimetest.listener;
 
 import com.intellij.execution.ExecutionListener;
-import com.intellij.execution.process.KillableColoredProcessHandler;
+import com.intellij.execution.process.BaseProcessHandler;
 import com.intellij.execution.process.ProcessHandler;
 import com.intellij.execution.runners.ExecutionEnvironment;
 import com.intellij.execution.ui.RunContentDescriptor;
@@ -25,8 +25,8 @@ public class RuntimeTestExecutionListener implements ExecutionListener {
         // TODO 是否可以在启动完成后再放入pid，防止启动未完成就点运行
         Project project = env.getProject();
         try {
-            if (handler instanceof KillableColoredProcessHandler.Silent) {
-                long pid = ((KillableColoredProcessHandler.Silent) handler).getProcess().pid();
+            if (handler instanceof BaseProcessHandler) {
+                long pid = ((BaseProcessHandler<?>) handler).getProcess().pid();
                 Long executionId = Optional.ofNullable(RunContentManager.getInstance(project).getSelectedContent())
                         .map(RunContentDescriptor::getExecutionId)
                         .orElse(null);
@@ -40,8 +40,8 @@ public class RuntimeTestExecutionListener implements ExecutionListener {
     public void processTerminated(@NotNull String executorId, @NotNull ExecutionEnvironment env, @NotNull ProcessHandler handler, int exitCode) {
         Project project = env.getProject();
         try {
-            if (handler instanceof KillableColoredProcessHandler.Silent) {
-                long pid = ((KillableColoredProcessHandler.Silent) handler).getProcess().pid();
+            if (handler instanceof BaseProcessHandler) {
+                long pid = ((BaseProcessHandler<?>) handler).getProcess().pid();
                 RuntimeTestState.getInstance(project).removePidProcessMap(pid);
             }
         } catch (Exception ignored) {

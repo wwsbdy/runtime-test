@@ -21,11 +21,17 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.json.JsonReadFeature;
 import com.fasterxml.jackson.core.json.JsonWriteFeature;
 import com.fasterxml.jackson.databind.*;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import java.lang.reflect.Type;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.temporal.Temporal;
 import java.util.*;
 
+/**
+ * @author 19242
+ */
 public class JsonUtil {
 
     public static ObjectMapper objectMapper = new ObjectMapper();
@@ -46,9 +52,17 @@ public class JsonUtil {
         objectMapper.configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
         objectMapper.configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
         // 防止中文乱码
-        objectMapper.configure(JsonWriteFeature.ESCAPE_NON_ASCII.mappedFeature(), true);
+        objectMapper.configure(JsonWriteFeature.ESCAPE_NON_ASCII.mappedFeature(), false);
         // 启用美化输出
         objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
+        JavaTimeModule javaTimeModule = new JavaTimeModule();
+        javaTimeModule.addDeserializer(LocalDateTime.class, Deserializer.LOCAL_DATE_TIME_DESERIALIZER);
+        javaTimeModule.addSerializer(LocalDateTime.class, Serializer.LOCAL_DATE_TIME_SERIALIZER);
+        javaTimeModule.addDeserializer(LocalDate.class, Deserializer.LOCAL_DATE_DESERIALIZER);
+        javaTimeModule.addSerializer(LocalDate.class, Serializer.LOCAL_DATE_SERIALIZER);
+        javaTimeModule.addDeserializer(Date.class, Deserializer.DATE_DESERIALIZER);
+        javaTimeModule.addSerializer(Date.class, Serializer.DATE_SERIALIZER);
+        objectMapper.registerModule(javaTimeModule);
     }
 
     @SuppressWarnings("unchecked")
