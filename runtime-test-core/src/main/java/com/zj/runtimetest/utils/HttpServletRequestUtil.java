@@ -31,14 +31,16 @@ public class HttpServletRequestUtil {
         }
         Method addHeader = FakeHttpServletRequestBuilder.ADD_HEADER;
         Method setAttribute = FakeHttpServletRequestBuilder.SET_ATTRIBUTE;
-        for (Map.Entry<String, Object> entry : headers.entrySet()) {
-            if (Objects.nonNull(addHeader)) {
+        if (Objects.nonNull(addHeader)) {
+            for (Map.Entry<String, Object> entry : headers.entrySet()) {
                 try {
                     addHeader.invoke(httpServletRequest, entry.getKey(), entry.getValue());
                 } catch (IllegalAccessException | InvocationTargetException ignored) {
                 }
             }
-            if (Objects.nonNull(setAttribute)) {
+        }
+        if (Objects.nonNull(setAttribute)) {
+            for (Map.Entry<String, Object> entry : attributes.entrySet()) {
                 try {
                     setAttribute.invoke(httpServletRequest, entry.getKey(), entry.getValue());
                 } catch (IllegalAccessException | InvocationTargetException ignored) {
