@@ -16,6 +16,9 @@ import java.util.Objects;
  */
 public class HttpServletRequestUtil {
 
+    private static Boolean HAS_HTTP_SERVLET_REQUEST;
+
+
     public static Object setRequestAttributes(Object httpServletRequest, Map<String, Object> attributes, Map<String, Object> headers) {
         if (attributes == null || attributes.isEmpty()) {
             attributes = new LinkedHashMap<>();
@@ -28,14 +31,16 @@ public class HttpServletRequestUtil {
         }
         Method addHeader = FakeHttpServletRequestBuilder.ADD_HEADER;
         Method setAttribute = FakeHttpServletRequestBuilder.SET_ATTRIBUTE;
-        for (Map.Entry<String, Object> entry : headers.entrySet()) {
-            if (Objects.nonNull(addHeader)) {
+        if (Objects.nonNull(addHeader)) {
+            for (Map.Entry<String, Object> entry : headers.entrySet()) {
                 try {
                     addHeader.invoke(httpServletRequest, entry.getKey(), entry.getValue());
                 } catch (IllegalAccessException | InvocationTargetException ignored) {
                 }
             }
-            if (Objects.nonNull(setAttribute)) {
+        }
+        if (Objects.nonNull(setAttribute)) {
+            for (Map.Entry<String, Object> entry : attributes.entrySet()) {
                 try {
                     setAttribute.invoke(httpServletRequest, entry.getKey(), entry.getValue());
                 } catch (IllegalAccessException | InvocationTargetException ignored) {
@@ -67,19 +72,25 @@ public class HttpServletRequestUtil {
 
 
     public static boolean isHttpServletRequest(Class<?> aClass) {
-        return "javax.servlet.http.HttpServletRequest".equals(aClass.getName());
+        return hasHttpServletRequest() && "javax.servlet.http.HttpServletRequest".equals(aClass.getName());
     }
 
-    public static boolean hasHttpServletRequest() {
-        try {
-            Class<?> aClass = ClassUtil.getClass("javax.servlet.http.HttpServletRequest", AgentContextHolder.DEFAULT_CLASS_LOADER);
-            if (Objects.nonNull(aClass)) {
-                return true;
-            }
-        } catch (ClassNotFoundException e) {
-            return false;
+    public static synchronized boolean hasHttpServletRequest() {
+        if (Objects.nonNull(HAS_HTTP_SERVLET_REQUEST)) {
+            return HAS_HTTP_SERVLET_REQUEST;
         }
-        return false;
+        try {
+            Class<?> httpServletRequestClass = ClassUtil.getClass("javax.servlet.http.HttpServletRequest", AgentContextHolder.DEFAULT_CLASS_LOADER);
+            Class<?> requestContextHolderClass = ClassUtil.getClass("org.springframework.web.context.request.RequestContextHolder", AgentContextHolder.DEFAULT_CLASS_LOADER);
+            Class<?> servletRequestAttributesClass = ClassUtil.getClass("org.springframework.web.context.request.ServletRequestAttributes", AgentContextHolder.DEFAULT_CLASS_LOADER);
+            if (Objects.nonNull(httpServletRequestClass) && Objects.nonNull(requestContextHolderClass) && Objects.nonNull(servletRequestAttributesClass)) {
+                return HAS_HTTP_SERVLET_REQUEST = true;
+            }
+        } catch (Exception e) {
+//            System.out.println(ThrowUtil.printStackTrace(e));
+            return HAS_HTTP_SERVLET_REQUEST = false;
+        }
+        return HAS_HTTP_SERVLET_REQUEST = false;
     }
 
     public static class FakeHttpServletRequestBuilder {
@@ -104,7 +115,7 @@ public class HttpServletRequestUtil {
                         "    @Override public long getDateHeader(String s) { Object value = headers.get(s); if (Objects.isNull(value)) { return -1; } if (value instanceof Date) { return ((Date) value).getTime(); } else if (value instanceof Number) { return ((Number) value).longValue(); } else if (value instanceof String) { return parseDateHeader(s, (String) value); } throw new IllegalArgumentException( \"Value for header '\" + s + \"' is not a Date, Number, or String: \" + value); }\n" +
                         "    private long parseDateHeader(String name, String value) { for (String dateFormat : DATE_FORMATS) { SimpleDateFormat simpleDateFormat = new SimpleDateFormat(dateFormat, Locale.US); simpleDateFormat.setTimeZone(GMT); try { return simpleDateFormat.parse(value).getTime(); }  catch (ParseException ignored) { } } throw new IllegalArgumentException(\"Cannot parse date value '\" + value + \"' for '\" + name + \"' header\"); }\n" +
                         "    @Override public String getHeader(String s) { return Objects.toString(headers.get(s), null); }\n" +
-                        "    @Override public void addHeader(String name, Object value) { headers.put(name, value); }\n" +
+                        "    public void addHeader(String name, Object value) { headers.put(name, value); }\n" +
                         "    @Override public Enumeration<String> getHeaders(String s) { return Collections.enumeration((Collection<String>) headers.get(s)); }\n" +
                         "    @Override public Enumeration<String> getHeaderNames() { return Collections.enumeration(headers.keySet()); }\n" +
                         "    @Override public int getIntHeader(String s) { return headers.get(s) instanceof Number ? ((Number) headers.get(s)).intValue() : -1; }\n" +

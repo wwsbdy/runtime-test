@@ -1,25 +1,16 @@
-//package com.zj.runtimetest.utils;
-//
-//import org.springframework.web.context.request.RequestContextHolder;
-//import org.springframework.web.context.request.ServletRequestAttributes;
-//
-//import javax.servlet.*;
-//import javax.servlet.http.*;
-//import java.io.BufferedReader;
-//import java.security.Principal;
-//import java.text.ParseException;
-//import java.text.SimpleDateFormat;
-//import java.util.*;
-//
+//package agent;
+//import org.springframework.web.context.request.RequestContextHolder;import org.springframework.web.context.request.ServletRequestAttributes;import javax.servlet.*;import javax.servlet.http.*;import java.io.BufferedReader;import java.security.Principal;import java.text.ParseException;import java.text.SimpleDateFormat;import java.util.*;
 //public class FakeHttpServletRequest implements HttpServletRequest {
 //    private final Map<String, Object> attributes, headers;
 //    private static final TimeZone GMT = TimeZone.getTimeZone("GMT");
 //    private static final String[] DATE_FORMATS = {"EEE, dd MMM yyyy HH:mm:ss zzz", "EEE, dd-MMM-yy HH:mm:ss zzz", "EEE MMM dd HH:mm:ss yyyy"};
-//    public FakeHttpServletRequest(Map<String, Object> attributes, Map<String, Object> headers) { this.attributes = attributes;this.headers = headers;RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(this));}
+//    public FakeHttpServletRequest(Map<String, Object> attributes, Map<String, Object> headers) { this.attributes = attributes;this.headers = headers;RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(this), true);}
 //    @Override public String getAuthType() { return ""; }
 //    @Override public Cookie[] getCookies() { return new Cookie[0]; }
-//    @Override public long getDateHeader(String s) { return headers.get(s) instanceof Date ? ((Date) headers.get(s)).getTime() : headers.get(s) instanceof Number ? ((Number) headers.get(s)).longValue() : headers.get(s) instanceof String ? Arrays.stream(DATE_FORMATS).mapToLong(fmt -> { try { return new SimpleDateFormat(fmt, Locale.US) {{ setTimeZone(GMT); }}.parse((String) headers.get(s)).getTime(); } catch (ParseException e) { return -1L; } }).filter(v -> v != -1L).findFirst().orElseThrow(() -> new IllegalArgumentException("Cannot parse date value '" + headers.get(s) + "' for '" + s + "' header")) : headers.get(s) == null ? -1L : throw new IllegalArgumentException("Value for header '" + s + "' is not a Date, Number, or String: " + headers.get(s)); }
+//    @Override public long getDateHeader(String s) { Object value = headers.get(s); if (Objects.isNull(value)) { return -1; } if (value instanceof Date) { return ((Date) value).getTime(); } else if (value instanceof Number) { return ((Number) value).longValue(); } else if (value instanceof String) { return parseDateHeader(s, (String) value); } throw new IllegalArgumentException( "Value for header '" + s + "' is not a Date, Number, or String: " + value); }
+//    private long parseDateHeader(String name, String value) { for (String dateFormat : DATE_FORMATS) { SimpleDateFormat simpleDateFormat = new SimpleDateFormat(dateFormat, Locale.US); simpleDateFormat.setTimeZone(GMT); try { return simpleDateFormat.parse(value).getTime(); }  catch (ParseException ignored) { } } throw new IllegalArgumentException("Cannot parse date value '" + value + "' for '" + name + "' header"); }
 //    @Override public String getHeader(String s) { return Objects.toString(headers.get(s), null); }
+//    public void addHeader(String name, Object value) { headers.put(name, value); }
 //    @Override public Enumeration<String> getHeaders(String s) { return Collections.enumeration((Collection<String>) headers.get(s)); }
 //    @Override public Enumeration<String> getHeaderNames() { return Collections.enumeration(headers.keySet()); }
 //    @Override public int getIntHeader(String s) { return headers.get(s) instanceof Number ? ((Number) headers.get(s)).intValue() : -1; }

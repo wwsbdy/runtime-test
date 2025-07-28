@@ -102,3 +102,10 @@ Notes:<br>
 - 移除 <b>非Spring</b> 项目对 <b>HttpServletRequest</b> 的依赖
 - 调整静态方法改为非静态方法后报错问题
 - 支持 <b>LocalDate</b>、<b>LocalDateTime</b>
+
+### 1.5.*
+
+- Adjusted some logic and error issues
+
+
+- 调整了一些逻辑和报错问题

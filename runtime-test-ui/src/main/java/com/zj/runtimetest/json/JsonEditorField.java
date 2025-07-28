@@ -6,6 +6,7 @@ import com.intellij.openapi.editor.EditorSettings;
 import com.intellij.openapi.editor.ex.EditorEx;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Disposer;
+import com.intellij.testFramework.LightVirtualFile;
 import com.intellij.ui.LanguageTextField;
 import com.zj.runtimetest.utils.ExecutorUtil;
 import org.jetbrains.annotations.NotNull;
@@ -50,6 +51,7 @@ public class JsonEditorField extends LanguageTextField implements Disposable {
         settings.setAllowSingleLogicalLineFolding(true);
         // 显示右边缘线
         settings.setRightMarginShown(true);
+        editor.setFile(new LightVirtualFile("edit.json", JsonLanguage.INSTANCE, ""));
         return editor;
     }
 

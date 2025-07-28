@@ -38,6 +38,10 @@ public class RuntimeTestExprExecutor {
         }
 
         protected void addHeader(String name, Object value) {
+            if (!HttpServletRequestUtil.hasHttpServletRequest()) {
+                System.err.println("[Agent] java.lang.ClassNotFoundException: javax.servlet.http.HttpServletRequest");
+                return;
+            }
             if (Objects.isNull(headers)) {
                 headers = new LinkedHashMap<>();
             }
@@ -45,6 +49,10 @@ public class RuntimeTestExprExecutor {
         }
 
         protected void setAttribute(String name, Object value) {
+            if (!HttpServletRequestUtil.hasHttpServletRequest()) {
+                System.err.println("[Agent] java.lang.ClassNotFoundException: javax.servlet.http.HttpServletRequest");
+                return;
+            }
             if (Objects.isNull(attributes)) {
                 attributes = new LinkedHashMap<>();
             }
@@ -58,7 +66,7 @@ public class RuntimeTestExprExecutor {
             return ExpressionExecutorFactory.EMPTY;
         }
         String expr = expVo.getMyExpression();
-        ExpressionExecutor compiled = CACHE.get(expr);
+        ExpressionExecutor compiled = get(expr);
         if (Objects.nonNull(compiled)) {
             return compiled;
         }
@@ -68,7 +76,7 @@ public class RuntimeTestExprExecutor {
             t.printStackTrace();
             compiled = ExpressionExecutorFactory.ERROR;
         }
-        CACHE.put(expr, compiled);
+        put(expr, compiled);
         return compiled;
     }
 
@@ -82,10 +90,12 @@ public class RuntimeTestExprExecutor {
         }
         ExpressionExecutor executor = getExecutor(expVo, parameterTypeList, projectBasePath);
         try {
+            System.out.println("[Agent] pre-processing begins to execute");
             Object[] resultArgs = executor.eval(args);
             if (HttpServletRequestUtil.hasHttpServletRequest()) {
                 HttpServletRequestUtil.setRequestAttributes(httpServletRequest, executor.getAttributes(), executor.getHeaders());
             }
+            System.out.println("[Agent] pre-processing execution succeeded");
             return resultArgs;
         } catch (Throwable t) {
             put(expVo.getMyExpression(), ExpressionExecutorFactory.ERROR);
@@ -99,6 +109,10 @@ public class RuntimeTestExprExecutor {
 
     public static void remove(String expr) {
         CACHE.remove(expr);
+    }
+
+    public static ExpressionExecutor get(String expr) {
+        return CACHE.get(expr);
     }
 
     public static void put(String expr, ExpressionExecutor executor) {
@@ -155,7 +169,6 @@ public class RuntimeTestExprExecutor {
         }
         sb.append("        try {\n").append(expr)
                 .append(";\n        } catch (Throwable t) { throw new RuntimeException(t); }\n")
-                .append("        System.out.println(\"[Agent] pre-processing execution succeeded\");\n")
                 .append("        return new Object[]{");
         for (int i = 0; i < parameterTypes.size(); i++) {
             sb.append(parameterTypes.get(i).getParamName());
