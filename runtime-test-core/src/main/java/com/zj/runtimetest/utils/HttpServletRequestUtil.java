@@ -87,7 +87,7 @@ public class HttpServletRequestUtil {
                 return HAS_HTTP_SERVLET_REQUEST = true;
             }
         } catch (Exception e) {
-            System.out.println(ThrowUtil.printStackTrace(e));
+//            System.out.println(ThrowUtil.printStackTrace(e));
             return HAS_HTTP_SERVLET_REQUEST = false;
         }
         return HAS_HTTP_SERVLET_REQUEST = false;
