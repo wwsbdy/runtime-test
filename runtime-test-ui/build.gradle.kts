@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "com.zj"
-version = "1.4.222"
+version = "1.5.222"
 
 intellij {
     version.set(properties("intellij.version"))
@@ -26,12 +26,19 @@ tasks {
         untilBuild.set(properties("until.build"))
         changeNotes.set(
             """
+            <b>1.5.*</b><br>
+            <ul>
+                <li>Adjusted some logic and error issues</li>
+            </ul><br>
+            <ul>
+                <li>调整了一些逻辑和报错问题</li>
+            </ul>
             <b>1.4.*</b><br>
             <ul>
                 <li>Removed dependency on <b>HttpServletRequest</b> in <b>non-Spring</b> projects</li>
                 <li>Fixed errors after converting static methods to instance methods</li>
                 <li>Support <b>LocalDate</b>, <b>LocalDateTime</b></li>
-            </ul>
+            </ul><br>
             <ul>
                 <li>移除 <b>非Spring</b> 项目对 <b>HttpServletRequest</b> 的依赖</li>
                 <li>调整静态方法改为非静态方法后报错问题</li>
@@ -44,7 +51,7 @@ tasks {
                 <li>Now supports pre-processing in <b>non-Debug mode</b></li>
                 <li>Support for HttpServletRequest (in pre-processing, allows calling <b>addHeader()</b> and <b>setAttribute()</b>; supports passing headers in JSON format through parameters)</li>
                 <li>Support <b>LocalDate</b>, <b>LocalDateTime</b></li>
-            </ul>
+            </ul><br>
             <ul>
                 <li>移除前置处理对断点对依赖</li>
                 <li>支持打印前置处理方法（在前置处理中调用 <b>printPreProcessingMethod()</b> ）</li>
@@ -57,7 +64,7 @@ tasks {
                 <li>Save entered information even when canceled</li>
                 <li>Fix cases where breakpoints were not properly removed</li>
                 <li>Skip breakpoint interception for proxy classes</li>
-            </ul>
+            </ul><br>
             <ul>
                 <li>取消也保存填写的信息</li>
                 <li>调整一些情况下断点未删除情况</li>
@@ -67,7 +74,7 @@ tasks {
             <ul>
                 <li>Maintain compatibility with other versions</li>
                 <li>Fix project freeze issue (when resuming execution after breakpoint pause in RuntimeTest)</li>
-            </ul>
+            </ul><br>
             <ul>
                 <li>兼容其他版本</li>
                 <li>防止项目卡死</li>
