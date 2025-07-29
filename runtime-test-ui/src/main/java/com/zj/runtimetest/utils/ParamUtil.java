@@ -3,8 +3,8 @@ package com.zj.runtimetest.utils;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.intellij.psi.PsiParameter;
 import com.intellij.psi.PsiParameterList;
-import com.zj.runtimetest.vo.MethodParamInfo;
 import com.zj.runtimetest.json.parser.POJO2JSONParser;
+import com.zj.runtimetest.vo.MethodParamInfo;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
@@ -20,7 +20,6 @@ public class ParamUtil {
 
     /**
      * 获取参数类型列表（去掉范型）
-     *
      */
     public static List<MethodParamInfo> getParamTypeNameList(PsiParameterList parameterList) {
         if (parameterList == null) {
@@ -44,7 +43,6 @@ public class ParamUtil {
 
     /**
      * 获取参数类型列表（包含范型）
-     *
      */
     public static List<MethodParamInfo> getParamGenericsTypeNameList(PsiParameterList parameterList) {
         if (parameterList == null || parameterList.getParametersCount() == 0) {

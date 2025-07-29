@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
  * 2. [限制递归层数]
  * Source: <a href="https://github.com/organics2016/pojo2json">pojo2json</a>
  * License: [Apache 2.0]
+ *
  * @date : 2025/7/2
  */
 public class POJO2JSONParser {
@@ -91,7 +92,7 @@ public class POJO2JSONParser {
     /**
      * 解析字段值
      *
-     * @param type 字段类型
+     * @param type           字段类型
      * @param recursionLevel 递归层级, 递归层级超过 4 层则不再递归
      * @return 解析后的字段值
      */
