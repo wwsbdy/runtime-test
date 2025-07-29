@@ -173,15 +173,21 @@ public class RuntimeTestExprExecutor {
         }
         sb.append("        try {\n").append(expr)
                 .append(";\n        } catch (Throwable t) { throw new RuntimeException(t); }\n")
-                .append("        System.out.println(\"[Agent] pre-processing execution succeeded\");\n")
-                .append("        return new Object[]{");
-        for (int i = 0; i < parameterTypes.size(); i++) {
-            sb.append(parameterTypes.get(i).getParamName());
-            if (i < parameterTypes.size() - 1) {
-                sb.append(", ");
+                .append("        System.out.println(\"[Agent] pre-processing execution succeeded\");\n");
+
+        if (parameterTypes.isEmpty())  {
+            sb.append("        return null;\n");
+        } else {
+            sb.append("        return new Object[]{");
+            for (int i = 0; i < parameterTypes.size(); i++) {
+                sb.append(parameterTypes.get(i).getParamName());
+                if (i < parameterTypes.size() - 1) {
+                    sb.append(", ");
+                }
             }
+            sb.append("};\n");
         }
-        sb.append("};\n    }\n");
+        sb.append("    }\n");
         sb.append("}\n");
         return sb;
     }
