@@ -3,7 +3,10 @@ package com.zj.runtimetest.exp;
 import com.zj.runtimetest.utils.HttpServletRequestUtil;
 import com.zj.runtimetest.vo.ExpressionVo;
 import com.zj.runtimetest.vo.MethodParamTypeInfo;
-import lombok.Data;
+import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -18,11 +21,13 @@ import java.util.stream.Stream;
 public class RuntimeTestExprExecutor {
     public static final Map<String, ExpressionExecutor> CACHE = new ConcurrentHashMap<>();
 
-    @Data
+    @EqualsAndHashCode
     public abstract static class ExpressionExecutor {
+        @Setter(AccessLevel.PRIVATE)
         private String classStr;
-
+        @Getter(AccessLevel.PRIVATE)
         private Map<String, Object> headers;
+        @Getter(AccessLevel.PRIVATE)
         private Map<String, Object> attributes;
 
         public abstract Object[] eval(Object[] args);
@@ -90,12 +95,10 @@ public class RuntimeTestExprExecutor {
         }
         ExpressionExecutor executor = getExecutor(expVo, parameterTypeList, projectBasePath);
         try {
-            System.out.println("[Agent] pre-processing begins to execute");
             Object[] resultArgs = executor.eval(args);
             if (HttpServletRequestUtil.hasHttpServletRequest()) {
                 HttpServletRequestUtil.setRequestAttributes(httpServletRequest, executor.getAttributes(), executor.getHeaders());
             }
-            System.out.println("[Agent] pre-processing execution succeeded");
             return resultArgs;
         } catch (Throwable t) {
             put(expVo.getMyExpression(), ExpressionExecutorFactory.ERROR);
@@ -158,7 +161,8 @@ public class RuntimeTestExprExecutor {
         sb.append("import com.zj.runtimetest.exp.RuntimeTestExprExecutor.ExpressionExecutor;\n\n");
         sb.append("public class ").append(className)
                 .append(" extends ExpressionExecutor {\n")
-                .append("    public Object[] eval(Object[] args) {\n");
+                .append("    public Object[] eval(Object[] args) {\n")
+                .append("        System.out.println(\"[Agent] pre-processing begins to execute\");");
 
         for (int i = 0; i < parameterTypes.size(); i++) {
             MethodParamTypeInfo methodParamTypeInfo = parameterTypes.get(i);
@@ -169,6 +173,7 @@ public class RuntimeTestExprExecutor {
         }
         sb.append("        try {\n").append(expr)
                 .append(";\n        } catch (Throwable t) { throw new RuntimeException(t); }\n")
+                .append("        System.out.println(\"[Agent] pre-processing execution succeeded\");")
                 .append("        return new Object[]{");
         for (int i = 0; i < parameterTypes.size(); i++) {
             sb.append(parameterTypes.get(i).getParamName());
