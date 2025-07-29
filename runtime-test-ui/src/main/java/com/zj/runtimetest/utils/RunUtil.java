@@ -27,7 +27,7 @@ public class RunUtil {
         String coreJarPath = PathManager.getPluginsPath() + File.separator + "runtime-test-ui" + File.separator + "lib" + File.separator + "runtime-test-core.jar";
         String pid = cache.getPid().toString();
         String requestJson = JsonUtil.toJsonString(cache);
-        requestJson = Base64Util.encode(requestJson.getBytes(StandardCharsets.UTF_8));
+        requestJson = Base64Util.encode(requestJson);
         String jsonPath = project.getBasePath() + "/.idea/runtime-test/RequestInfo.json";
         if (requestJson.length() > 600 && PluginIOUtil.flushFile(jsonPath, requestJson)) {
             requestJson = "file://" + URLEncoder.encode(jsonPath, StandardCharsets.UTF_8);

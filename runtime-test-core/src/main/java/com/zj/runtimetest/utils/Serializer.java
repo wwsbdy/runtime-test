@@ -37,7 +37,7 @@ public interface Serializer {
             }
             // 转换为Date
             Date date = Date.from(value.atStartOfDay(ZoneId.systemDefault()).toInstant());
-            gen.writeString(DateUtil.formatDateTime(date));
+            gen.writeString(DateUtil.formatDate(date));
         }
     };
     JsonSerializer<Date> DATE_SERIALIZER = new JsonSerializer<Date>() {
