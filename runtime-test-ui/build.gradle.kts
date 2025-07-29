@@ -41,9 +41,11 @@ tasks {
             <b>1.5.*</b><br>
             <ul>
                 <li>Adjusted some logic and error issues</li>
+                <li>Compatible inner class</li>
             </ul><br>
             <ul>
                 <li>调整了一些逻辑和报错问题</li>
+                <li>兼容内部类</li>
             </ul>
             <b>1.4.*</b><br>
             <ul>
@@ -98,7 +100,7 @@ tasks {
 }
 
 dependencies {
-    implementation(project(":runtime-test-core"))
+    implementation(files("../dist/runtime-test-core.jar"))
 }
 
 tasks.assemble {
@@ -121,4 +123,8 @@ tasks.clean {
 
 tasks.withType<Test>().configureEach {
     enabled = false
+}
+
+tasks.compileJava {
+    dependsOn(":runtime-test-core:jar")
 }

@@ -106,6 +106,8 @@ Notes:<br>
 ### 1.5.*
 
 - Adjusted some logic and error issues
+- Compatible inner class
 
 
 - 调整了一些逻辑和报错问题
+- 兼容内部类

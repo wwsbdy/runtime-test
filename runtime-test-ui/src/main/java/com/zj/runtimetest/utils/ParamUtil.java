@@ -1,11 +1,15 @@
 package com.zj.runtimetest.utils;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiParameter;
 import com.intellij.psi.PsiParameterList;
+import com.intellij.psi.PsiType;
+import com.intellij.psi.util.PsiUtil;
 import com.zj.runtimetest.json.parser.POJO2JSONParser;
 import com.zj.runtimetest.vo.MethodParamInfo;
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -22,21 +26,9 @@ public class ParamUtil {
      * 获取参数类型列表（去掉范型）
      */
     public static List<MethodParamInfo> getParamTypeNameList(PsiParameterList parameterList) {
-        if (parameterList == null) {
-            return Collections.emptyList();
-        }
-        if (parameterList.getParametersCount() == 0) {
-            return Collections.emptyList();
-        }
-        List<MethodParamInfo> parameterTypeList = new ArrayList<>();
-        for (int i = 0; i < parameterList.getParametersCount(); i++) {
-            PsiParameter parameter = Objects.requireNonNull(parameterList.getParameter(i));
-            String canonicalText = parameter.getType().getCanonicalText();
-            if (!canonicalText.contains(".")) {
-                canonicalText = "java.lang.Object";
-            }
-            String classType = StringUtils.substringBefore(canonicalText, "<");
-            parameterTypeList.add(new MethodParamInfo(parameter.getName(), classType));
+        List<MethodParamInfo> parameterTypeList = getParamGenericsTypeNameList(parameterList);
+        for (MethodParamInfo methodParamInfo : parameterTypeList) {
+            methodParamInfo.setParamType(StringUtils.substringBefore(methodParamInfo.getParamType(), "<"));
         }
         return parameterTypeList;
     }
@@ -51,13 +43,57 @@ public class ParamUtil {
         List<MethodParamInfo> parameterTypeList = new ArrayList<>();
         for (int i = 0; i < parameterList.getParametersCount(); i++) {
             PsiParameter parameter = Objects.requireNonNull(parameterList.getParameter(i));
-            String canonicalText = parameter.getType().getCanonicalText();
-            if (!canonicalText.contains(".")) {
+            String canonicalText;
+            if (!parameter.getType().getCanonicalText().contains(".")) {
                 canonicalText = "java.lang.Object";
+            } else {
+                // 兼容内部类，用$
+                canonicalText = getJvmQualifiedClassName(parameter.getType());
             }
             parameterTypeList.add(new MethodParamInfo(parameter.getName(), canonicalText));
         }
         return parameterTypeList;
+    }
+
+    /**
+     * 获取 PsiType 对应的 JVM 类名（可用于 Class.forName），支持内部类用 $
+     *
+     * @param type PsiType 对象（例如来自 PsiParameter.getType()）
+     * @return JVM 格式的类名，例如 com.example.Outer$Inner
+     */
+    public static String getJvmQualifiedClassName(PsiType type) {
+        PsiClass psiClass = PsiUtil.resolveClassInType(type);
+        if (psiClass == null) {
+            // fallback，一般为原始文本
+            return type.getCanonicalText();
+        }
+        return getJvmQualifiedClassName(psiClass);
+    }
+
+    /**
+     * 获取 PsiType 对应的 JVM 类名（可用于 Class.forName），支持内部类用 $
+     *
+     * @param psiClass 对象
+     * @return JVM 格式的类名，例如 com.example.Outer$Inner
+     */
+    public static String getJvmQualifiedClassName(@NotNull PsiClass psiClass) {
+        StringBuilder nameBuilder = new StringBuilder();
+        buildJvmClassName(psiClass, nameBuilder);
+        return nameBuilder.toString();
+    }
+
+    // 递归构建 $ 分隔的 JVM 类型名
+    private static void buildJvmClassName(PsiClass psiClass, StringBuilder builder) {
+        PsiClass outerClass = psiClass.getContainingClass();
+        if (outerClass != null) {
+            buildJvmClassName(outerClass, builder);
+            builder.append('$').append(psiClass.getName());
+        } else {
+            String qName = psiClass.getQualifiedName();
+            if (qName != null) {
+                builder.append(qName);
+            }
+        }
     }
 
 
