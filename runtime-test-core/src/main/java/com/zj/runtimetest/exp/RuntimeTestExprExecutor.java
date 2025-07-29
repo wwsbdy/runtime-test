@@ -162,7 +162,7 @@ public class RuntimeTestExprExecutor {
         sb.append("public class ").append(className)
                 .append(" extends ExpressionExecutor {\n")
                 .append("    public Object[] eval(Object[] args) {\n")
-                .append("        System.out.println(\"[Agent] pre-processing begins to execute\");");
+                .append("        System.out.println(\"[Agent] pre-processing begins to execute\");\n");
 
         for (int i = 0; i < parameterTypes.size(); i++) {
             MethodParamTypeInfo methodParamTypeInfo = parameterTypes.get(i);
@@ -173,7 +173,7 @@ public class RuntimeTestExprExecutor {
         }
         sb.append("        try {\n").append(expr)
                 .append(";\n        } catch (Throwable t) { throw new RuntimeException(t); }\n")
-                .append("        System.out.println(\"[Agent] pre-processing execution succeeded\");")
+                .append("        System.out.println(\"[Agent] pre-processing execution succeeded\");\n")
                 .append("        return new Object[]{");
         for (int i = 0; i < parameterTypes.size(); i++) {
             sb.append(parameterTypes.get(i).getParamName());
