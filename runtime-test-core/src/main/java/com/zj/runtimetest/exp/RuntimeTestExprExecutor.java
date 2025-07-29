@@ -166,7 +166,8 @@ public class RuntimeTestExprExecutor {
 
         for (int i = 0; i < parameterTypes.size(); i++) {
             MethodParamTypeInfo methodParamTypeInfo = parameterTypes.get(i);
-            String typeName = methodParamTypeInfo.getType().getTypeName();
+            // 把内部类的 $ 替换成 .
+            String typeName = methodParamTypeInfo.getType().getTypeName().replaceAll("(?<!\\$)\\$(?!\\$)", ".");
             String paramName = methodParamTypeInfo.getParamName();
             sb.append("        ").append(typeName).append(" ").append(paramName)
                     .append(" = (").append(typeName).append(") args[").append(i).append("];\n");

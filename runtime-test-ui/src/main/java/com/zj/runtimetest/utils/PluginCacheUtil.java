@@ -15,16 +15,12 @@ import java.util.Objects;
  */
 public class PluginCacheUtil extends CacheUtil {
 
-    public static String genCacheKey(PsiClass psiClass, PsiMethod psiMethod) {
+    public static String genCacheKey(PsiMethod psiMethod) {
         return genCacheKey(
-                psiClass.getQualifiedName(),
+                ParamUtil.getJvmQualifiedClassName(((PsiClass) psiMethod.getParent())),
                 psiMethod.getName(),
                 ParamUtil.getParamGenericsTypeNameList(psiMethod.getParameterList())
         );
-    }
-
-    public static String genCacheKey(PsiMethod psiMethod) {
-        return genCacheKey((PsiClass) psiMethod.getParent(), psiMethod);
     }
 
     public static CacheVo getCache(PsiMethod psiMethod) {
@@ -40,7 +36,7 @@ public class PluginCacheUtil extends CacheUtil {
         }
         cache = new CacheVo();
         PsiParameterList parameterList = psiMethod.getParameterList();
-        cache.setClassName(((PsiClass) psiMethod.getParent()).getQualifiedName());
+        cache.setClassName(ParamUtil.getJvmQualifiedClassName(((PsiClass) psiMethod.getParent())));
         cache.setMethodName(psiMethod.getName());
         cache.setParameterTypeList(ParamUtil.getParamTypeNameList(parameterList));
         cache.setProjectBasePath(project.getBasePath());
