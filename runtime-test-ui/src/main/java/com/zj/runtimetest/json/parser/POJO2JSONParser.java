@@ -103,7 +103,7 @@ public class POJO2JSONParser {
 
         } else if (type instanceof PsiArrayType) {
 
-            PsiType typeToDeepType = type.getDeepComponentType();
+            PsiType typeToDeepType = ((PsiArrayType) type).getComponentType();
             Object obj = parseFieldValue(typeToDeepType, MAX_RECURSION_LEVEL + (recursionLevel == MAX_RECURSION_LEVEL ? 1 : 0));
             return obj != null ? Collections.singletonList(obj) : Collections.emptyList();
 
