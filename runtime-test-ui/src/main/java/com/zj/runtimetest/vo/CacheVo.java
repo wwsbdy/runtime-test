@@ -95,6 +95,7 @@ public class CacheVo extends RequestInfo implements Serializable {
 
     public static class EmptyXExpression {
         public static final XExpression INSTANCE;
+
         static {
             INSTANCE = new XExpressionImpl("", JavaLanguage.INSTANCE, null, EvaluationMode.CODE_FRAGMENT);
 //            INSTANCE = XExpressionImpl.fromText("", EvaluationMode.CODE_FRAGMENT);

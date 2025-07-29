@@ -10,6 +10,7 @@ public class SampleTarget {
     public void target(String param) {
         System.out.println("original logic: " + param);
     }
+
     public void target1(List<String> param) {
         System.out.println("original logic: " + param);
     }
