@@ -1,10 +1,7 @@
 package com.zj.runtimetest.utils;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.intellij.psi.PsiClass;
-import com.intellij.psi.PsiParameter;
-import com.intellij.psi.PsiParameterList;
-import com.intellij.psi.PsiType;
+import com.intellij.psi.*;
 import com.intellij.psi.util.PsiUtil;
 import com.zj.runtimetest.json.parser.POJO2JSONParser;
 import com.zj.runtimetest.vo.MethodParamInfo;
@@ -56,18 +53,34 @@ public class ParamUtil {
     }
 
     /**
-     * 获取 PsiType 对应的 JVM 类名（可用于 Class.forName），支持内部类用 $
+     * 获取 PsiType 对应的 JVM 格式类名（可直接用于 Class.forName）
+     * 支持数组、多维数组、内部类（用 $ 分隔），可变参数视为数组
      *
-     * @param type PsiType 对象（例如来自 PsiParameter.getType()）
-     * @return JVM 格式的类名，例如 com.example.Outer$Inner
+     * @param type PsiType（参数类型）
+     * @return JVM 格式的类名字符串
      */
     public static String getJvmQualifiedClassName(PsiType type) {
+        int arrayDimensions = 0;
+        // 展开数组类型
+        while (type instanceof PsiArrayType) {
+            arrayDimensions++;
+            type = ((PsiArrayType) type).getComponentType();
+        }
+        // 解析基本类型（int, boolean 等）
+        if (type instanceof PsiPrimitiveType) {
+            String base = type.getCanonicalText();
+            return base + "[]".repeat(arrayDimensions);
+        }
+        // 解析引用类型（类）
         PsiClass psiClass = PsiUtil.resolveClassInType(type);
         if (psiClass == null) {
-            // fallback，一般为原始文本
             return type.getCanonicalText();
         }
-        return getJvmQualifiedClassName(psiClass);
+        StringBuilder builder = new StringBuilder();
+        buildJvmClassName(psiClass, builder);
+        // 添加数组维度
+        builder.append("[]".repeat(Math.max(0, arrayDimensions)));
+        return builder.toString();
     }
 
     /**
