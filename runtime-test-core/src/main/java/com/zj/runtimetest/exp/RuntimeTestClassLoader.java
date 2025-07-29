@@ -23,6 +23,7 @@ public class RuntimeTestClassLoader extends URLClassLoader {
     public static class Default {
         static final RuntimeTestClassLoader INSTANCE = new RuntimeTestClassLoader(AgentContextHolder.DEFAULT_CLASS_LOADER);
     }
+
     public static RuntimeTestClassLoader defaultClassLoader() {
         return Default.INSTANCE;
     }

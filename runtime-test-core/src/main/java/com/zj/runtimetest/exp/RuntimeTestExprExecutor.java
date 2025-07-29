@@ -175,7 +175,7 @@ public class RuntimeTestExprExecutor {
                 .append(";\n        } catch (Throwable t) { throw new RuntimeException(t); }\n")
                 .append("        System.out.println(\"[Agent] pre-processing execution succeeded\");\n");
 
-        if (parameterTypes.isEmpty())  {
+        if (parameterTypes.isEmpty()) {
             sb.append("        return null;\n");
         } else {
             sb.append("        return new Object[]{");

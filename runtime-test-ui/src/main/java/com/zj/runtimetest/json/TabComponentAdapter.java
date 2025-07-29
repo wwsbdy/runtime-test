@@ -88,7 +88,7 @@ public class TabComponentAdapter extends ComponentAdapter implements Disposable 
         if (!disposed) {
             disposed = true;
             ExecutorUtil.removeListener(submit);
-            submit  = null;
+            submit = null;
         }
 //        if (Objects.nonNull(this.editor.getEditor()) && !this.editor.getEditor().isDisposed()) {
 //            EditorFactory.getInstance().releaseEditor(this.editor.getEditor());

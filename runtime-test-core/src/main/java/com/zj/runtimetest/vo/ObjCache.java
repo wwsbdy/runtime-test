@@ -6,6 +6,7 @@ import java.util.function.Function;
 
 /**
  * 缓存对象，先进先出
+ *
  * @author 19242
  */
 public class ObjCache<K, V> {

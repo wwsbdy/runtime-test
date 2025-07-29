@@ -87,6 +87,7 @@ public class PreMethodExpressionDialog extends DialogWrapper {
         component.setPreferredSize(new JBDimension(700, 300));
         return component;
     }
+
     public static String generateFakeClassText(PsiMethod psiMethod) {
         StringBuilder builder = new StringBuilder();
         builder.append("public class TempClass {\n");
