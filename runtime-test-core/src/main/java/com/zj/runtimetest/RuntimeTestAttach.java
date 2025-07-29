@@ -78,7 +78,6 @@ public class RuntimeTestAttach {
                 .exceptionally(throwable -> {
                     System.err.println("[Agent] " + ThrowUtil.printStackTrace(throwable));
                     return null;
-                })
-                .thenAccept(aVoid -> System.out.println("[Agent] agentmain finished"));
+                });
     }
 }
