@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "com.zj"
-version = "1.5-SNAPSHOT"
+version = "1.6-SNAPSHOT"
 
 intellij {
     version.set(properties("intellij.version"))
@@ -26,6 +26,13 @@ tasks {
         untilBuild.set(properties("until.build"))
         changeNotes.set(
             """
+            <b>1.6.*</b><br>
+            <ul>
+                <li>Fixed cache issues in pre-processing classes</li>
+            </ul><br>
+            <ul>
+                <li>调整前置处理类缓存问题</li>
+            </ul>
             <b>1.5.*</b><br>
             <ul>
                 <li>Adjusted some logic and error issues</li>

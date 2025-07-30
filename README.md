@@ -111,3 +111,10 @@ Notes:<br>
 
 - 调整了一些逻辑和报错问题
 - 兼容内部类
+
+### 1.6.*
+
+- Fixed cache issues in pre-processing classes
+
+
+- 调整前置处理类缓存问题

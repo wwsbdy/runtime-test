@@ -70,18 +70,13 @@ public class RuntimeTestExprExecutor {
         if (Objects.isNull(expVo)) {
             return ExpressionExecutorFactory.EMPTY;
         }
-        String expr = expVo.getMyExpression();
-        ExpressionExecutor compiled = get(expr);
-        if (Objects.nonNull(compiled)) {
-            return compiled;
-        }
+        ExpressionExecutor compiled;
         try {
             compiled = compileInMemory(expVo, parameterTypeList);
         } catch (Throwable t) {
             t.printStackTrace();
             compiled = ExpressionExecutorFactory.ERROR;
         }
-        put(expr, compiled);
         return compiled;
     }
 
@@ -93,7 +88,8 @@ public class RuntimeTestExprExecutor {
         if (Objects.isNull(expVo)) {
             return args;
         }
-        ExpressionExecutor executor = getExecutor(expVo, parameterTypeList, projectBasePath);
+        String key = getKey(expVo, parameterTypeList);
+        ExpressionExecutor executor = CACHE.computeIfAbsent(key, k -> getExecutor(expVo, parameterTypeList, projectBasePath));
         try {
             Object[] resultArgs = executor.eval(args);
             if (HttpServletRequestUtil.hasHttpServletRequest()) {
@@ -101,25 +97,23 @@ public class RuntimeTestExprExecutor {
             }
             return resultArgs;
         } catch (Throwable t) {
-            put(expVo.getMyExpression(), ExpressionExecutorFactory.ERROR);
+            CACHE.put(key, ExpressionExecutorFactory.ERROR);
             throw new RuntimeException(t);
         }
     }
 
-    public static void clear() {
-        CACHE.clear();
-    }
-
-    public static void remove(String expr) {
-        CACHE.remove(expr);
-    }
-
-    public static ExpressionExecutor get(String expr) {
-        return CACHE.get(expr);
-    }
-
-    public static void put(String expr, ExpressionExecutor executor) {
-        CACHE.put(expr, executor);
+    private static String getKey(ExpressionVo expVo, List<MethodParamTypeInfo> methodParamTypeInfoList) {
+        StringBuilder cacheKey = new StringBuilder();
+        for (MethodParamTypeInfo methodParamTypeInfo : methodParamTypeInfoList) {
+            cacheKey.append(methodParamTypeInfo.getParamName())
+                    .append("|")
+                    .append(methodParamTypeInfo.getType().getTypeName())
+                    .append("|");
+        }
+        cacheKey.append(expVo.getMyExpression());
+        cacheKey.append("|");
+        cacheKey.append(expVo.getMyCustomInfo());
+        return String.valueOf(cacheKey.toString().hashCode());
     }
 
     public static RuntimeTestExprExecutor.ExpressionExecutor compileInMemory(ExpressionVo expVo, List<MethodParamTypeInfo> parameterTypes) throws Exception {
@@ -136,7 +130,7 @@ public class RuntimeTestExprExecutor {
                 .orElse(Collections.emptyList());
 
 
-        String className = "ExprDynamic_" + Math.abs(expr.hashCode());
+        String className = "ExprDynamic_" + Math.abs(expr.hashCode()) + "_" + System.currentTimeMillis();
         String packageName = "agent";
         String fullName = packageName + "." + className;
         // 构建 Java 源码
