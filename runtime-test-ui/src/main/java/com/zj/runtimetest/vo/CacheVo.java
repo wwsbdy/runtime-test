@@ -30,6 +30,10 @@ public class CacheVo extends RequestInfo implements Serializable {
     private static final long serialVersionUID = -574377082031667607L;
     private static final int SIZE = 5;
 
+    /**
+     * 进程id
+     * 不缓存
+     */
     @JsonIgnore
     private Long pid;
 
@@ -117,5 +121,29 @@ public class CacheVo extends RequestInfo implements Serializable {
     @Transient
     public Long getPid() {
         return pid;
+    }
+
+    @Transient
+    @Override
+    public String getClassName() {
+        return super.getClassName();
+    }
+
+    @Transient
+    @Override
+    public String getMethodName() {
+        return super.getMethodName();
+    }
+
+    @Transient
+    @Override
+    public List<MethodParamInfo> getParameterTypeList() {
+        return super.getParameterTypeList();
+    }
+
+    @Transient
+    @Override
+    public String getRequestJson() {
+        return super.getRequestJson();
     }
 }
