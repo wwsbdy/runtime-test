@@ -113,7 +113,7 @@ public class RuntimeTestExprExecutor {
         cacheKey.append(expVo.getMyExpression());
         cacheKey.append("|");
         cacheKey.append(expVo.getMyCustomInfo());
-        return String.valueOf(cacheKey.toString().hashCode());
+        return cacheKey.toString();
     }
 
     public static RuntimeTestExprExecutor.ExpressionExecutor compileInMemory(ExpressionVo expVo, List<MethodParamTypeInfo> parameterTypes) throws Exception {
