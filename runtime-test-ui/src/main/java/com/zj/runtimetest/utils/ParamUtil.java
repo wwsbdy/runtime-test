@@ -5,7 +5,6 @@ import com.intellij.psi.*;
 import com.intellij.psi.util.PsiUtil;
 import com.zj.runtimetest.json.parser.POJO2JSONParser;
 import com.zj.runtimetest.vo.MethodParamInfo;
-import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -18,17 +17,6 @@ import java.util.Objects;
  * @date : 2025/6/30
  */
 public class ParamUtil {
-
-    /**
-     * 获取参数类型列表（去掉范型）
-     */
-    public static List<MethodParamInfo> getParamTypeNameList(PsiParameterList parameterList) {
-        List<MethodParamInfo> parameterTypeList = getParamGenericsTypeNameList(parameterList);
-        for (MethodParamInfo methodParamInfo : parameterTypeList) {
-            methodParamInfo.setParamType(StringUtils.substringBefore(methodParamInfo.getParamType(), "<"));
-        }
-        return parameterTypeList;
-    }
 
     /**
      * 获取参数类型列表（包含范型）

@@ -1,10 +1,7 @@
 package com.zj.runtimetest.vo;
 
 import com.zj.runtimetest.exp.RuntimeTestExprExecutor;
-import com.zj.runtimetest.utils.ClassUtil;
-import com.zj.runtimetest.utils.FiledUtil;
-import com.zj.runtimetest.utils.HttpServletRequestUtil;
-import com.zj.runtimetest.utils.JsonUtil;
+import com.zj.runtimetest.utils.*;
 import lombok.Getter;
 
 import java.lang.reflect.InvocationTargetException;
@@ -23,20 +20,19 @@ public class MethodInvokeInfo {
     private final boolean staticMethod;
     private final String className;
     private final String methodName;
-    private final ClassLoader classLoader;
-    private final Object bean;
     private Class<?>[] paramClazzArr;
     private Method method;
     private final List<MethodParamTypeInfo> parameterTypeList;
     private boolean returnValue;
     private final String projectBasePath;
+    private final BeanInfo beanInfo;
 
-    public MethodInvokeInfo(RequestInfo requestInfo, ClassLoader classLoader, Object bean) {
+    public MethodInvokeInfo(RequestInfo requestInfo, BeanInfo beanInfo) {
         if (Objects.nonNull(requestInfo.getParameterTypeList()) && !requestInfo.getParameterTypeList().isEmpty()) {
             paramClazzArr = requestInfo.getParameterTypeList().stream().map(MethodParamInfo::getParamType).map(clsStr -> {
                         try {
                             if (clsStr.contains(".")) {
-                                return ClassUtil.getClass(clsStr, classLoader);
+                                return ClassUtil.getClass(clsStr, beanInfo.getClassLoader());
                             }
                             // 兼容范型
                             return Object.class;
@@ -56,12 +52,13 @@ public class MethodInvokeInfo {
                         .collect(Collectors.toList())
                 )
                 .orElse(Collections.emptyList());
-        this.classLoader = classLoader;
-        this.bean = bean;
+        this.beanInfo = beanInfo;
     }
 
 
     public Object invoke(ExpressionVo expVo, String requestJson) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, ClassNotFoundException {
+        Object bean = beanInfo.getBean();
+        ClassLoader classLoader = beanInfo.getClassLoader();
         if (Objects.isNull(method)) {
             synchronized (this) {
                 if (Objects.nonNull(method)) {
@@ -83,6 +80,7 @@ public class MethodInvokeInfo {
     private Object[] getArgs(ExpressionVo expVo, String requestJson) {
         Type[] parameterTypes = method.getGenericParameterTypes();
         if (parameterTypes.length == 0) {
+            LogUtil.log("[Agent more] method no params");
             return before(expVo, null, null);
         }
         if (parameterTypeList.size() != parameterTypes.length
@@ -91,6 +89,7 @@ public class MethodInvokeInfo {
         }
         Map<String, Object> map;
         if (Objects.isNull(requestJson) || requestJson.isEmpty()) {
+            LogUtil.log("[Agent more] requestJson is empty");
             map = Collections.emptyMap();
         } else {
             map = JsonUtil.toMap(requestJson);

@@ -63,7 +63,9 @@ public class HttpServletRequestUtil {
             return null;
         }
         try {
-            return constructor.newInstance(attributes, headers);
+            Object fakeHttpServletRequest = constructor.newInstance(attributes, headers);
+            LogUtil.log("[Agent more] FakeHttpServletRequest build success");
+            return fakeHttpServletRequest;
         } catch (Exception e) {
             System.err.println("[Agent] FakeHttpServletRequest build fail");
         }
