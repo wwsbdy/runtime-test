@@ -20,20 +20,19 @@ public class MethodInvokeInfo {
     private final boolean staticMethod;
     private final String className;
     private final String methodName;
-    private final ClassLoader classLoader;
-    private final Object bean;
     private Class<?>[] paramClazzArr;
     private Method method;
     private final List<MethodParamTypeInfo> parameterTypeList;
     private boolean returnValue;
     private final String projectBasePath;
+    private final BeanInfo beanInfo;
 
-    public MethodInvokeInfo(RequestInfo requestInfo, ClassLoader classLoader, Object bean) {
+    public MethodInvokeInfo(RequestInfo requestInfo, BeanInfo beanInfo) {
         if (Objects.nonNull(requestInfo.getParameterTypeList()) && !requestInfo.getParameterTypeList().isEmpty()) {
             paramClazzArr = requestInfo.getParameterTypeList().stream().map(MethodParamInfo::getParamType).map(clsStr -> {
                         try {
                             if (clsStr.contains(".")) {
-                                return ClassUtil.getClass(clsStr, classLoader);
+                                return ClassUtil.getClass(clsStr, beanInfo.getClassLoader());
                             }
                             // 兼容范型
                             return Object.class;
@@ -53,12 +52,13 @@ public class MethodInvokeInfo {
                         .collect(Collectors.toList())
                 )
                 .orElse(Collections.emptyList());
-        this.classLoader = classLoader;
-        this.bean = bean;
+        this.beanInfo = beanInfo;
     }
 
 
     public Object invoke(ExpressionVo expVo, String requestJson) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException, ClassNotFoundException {
+        Object bean = beanInfo.getBean();
+        ClassLoader classLoader = beanInfo.getClassLoader();
         if (Objects.isNull(method)) {
             synchronized (this) {
                 if (Objects.nonNull(method)) {

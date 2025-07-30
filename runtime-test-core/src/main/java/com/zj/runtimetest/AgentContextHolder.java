@@ -34,27 +34,31 @@ public class AgentContextHolder {
         String cacheKey = CacheUtil.genCacheKey(className, methodName, requestInfo.getParameterTypeList());
         // 打印cacheKey
         LogUtil.log("[Agent more] cacheKey: " + cacheKey);
-        MethodInvokeInfo methodInvokeInfo = LogUtil.isDetailLogEnabled() ? null : METHOD_CACHE.get(cacheKey);
+        MethodInvokeInfo methodInvokeInfo = METHOD_CACHE.get(cacheKey);
         if (Objects.isNull(methodInvokeInfo)) {
-            ClassLoader classLoader;
-            Object bean = null;
             if (requestInfo.isStaticMethod()) {
                 LogUtil.log("[Agent more] " + className + "." + methodName + "() is static.");
-                classLoader = DEFAULT_CLASS_LOADER;
+                methodInvokeInfo = new MethodInvokeInfo(requestInfo, new BeanInfo(className, null, DEFAULT_CLASS_LOADER));
             } else {
                 BeanInfo beanInfo = getBean(className);
-                bean = beanInfo.getBean();
+                Object bean = beanInfo.getBean();
                 if (Objects.isNull(bean)) {
                     System.err.println("[Agent] Bean not found: " + className);
                     return;
                 }
-                classLoader = beanInfo.getClassLoader();
+                methodInvokeInfo = new MethodInvokeInfo(requestInfo, beanInfo);
                 LogUtil.log("[Agent more] Bean from: " + bean);
             }
-            methodInvokeInfo = new MethodInvokeInfo(requestInfo, classLoader, bean);
             METHOD_CACHE.put(cacheKey, methodInvokeInfo);
         } else {
-            System.out.println("[Agent] " + className + "." + methodName + "() is cached.");
+            LogUtil.log("[Agent more] " + className + "." + methodName + "() is cached.");
+            if (requestInfo.isStaticMethod()) {
+                LogUtil.log("[Agent more] " + className + "." + methodName + "() is a static method.");
+            } else if (methodInvokeInfo.getBeanInfo() instanceof NoSpringBeanInfo) {
+                LogUtil.log("[Agent more] " + className + "." + methodName + "() is not a method of spring bean.");
+            } else if (Objects.nonNull(methodInvokeInfo.getBeanInfo().getBean())) {
+                LogUtil.log("[Agent more] " + className + "." + methodName + "() is a method of spring bean.");
+            }
         }
         LogUtil.log("[Agent more] " + className + "." + methodName + "() is invoked.");
         Object result = methodInvokeInfo.invoke(requestInfo.getExpVo(), requestInfo.getRequestJson());
@@ -66,10 +70,15 @@ public class AgentContextHolder {
             System.err.println("[Agent] className is null.");
             return BeanInfo.empty();
         }
-        BeanInfo o = LogUtil.isDetailLogEnabled() ? null : BEAN_CACHE.get(className);
-        if (Objects.nonNull(o)) {
-            System.out.println("[Agent] getBean from cache: " + className);
-            return o;
+        BeanInfo cacheBeanInfo = BEAN_CACHE.get(className);
+        if (Objects.nonNull(cacheBeanInfo)) {
+            LogUtil.log("[Agent more] getBean from cache: " + className);
+            if (cacheBeanInfo instanceof NoSpringBeanInfo) {
+                LogUtil.log("[Agent more] " + className + " is not a spring bean.");
+            } else if (Objects.nonNull(cacheBeanInfo.getBean())) {
+                LogUtil.log("[Agent more] " + className + " is a spring bean.");
+            }
+            return cacheBeanInfo;
         }
         if (!isInit) {
             try {

@@ -53,7 +53,11 @@ public class RuntimeTestAttach {
         try {
             String requestInfoStr = Base64Util.decode(args);
             requestInfo = JsonUtil.toJavaBean(Base64Util.decode(args), RequestInfo.class);
-            LogUtil.log(requestInfo.isDetailLog(), "[Agent more] agentmain invoked with args: " + requestInfoStr);
+            if (requestInfo.isDetailLog()) {
+                LogUtil.log(true, "[Agent more] agentmain invoked with args: " + requestInfoStr);
+            } else if (requestInfo.getRequestJson() != null && !requestInfo.getRequestJson().isEmpty()){
+                System.out.println("[Agent] agentmain invoked with requestJson: " + requestInfo.getRequestJson());
+            }
         } catch (Exception e) {
             System.err.println("[Agent] " + ThrowUtil.printStackTrace(e));
             return;
