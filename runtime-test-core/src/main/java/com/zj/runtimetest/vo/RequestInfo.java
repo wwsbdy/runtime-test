@@ -76,6 +76,7 @@ public class RequestInfo implements Serializable {
 
     /**
      * 是否打印详细日志
+     * 不缓存
      */
     private boolean detailLog;
 

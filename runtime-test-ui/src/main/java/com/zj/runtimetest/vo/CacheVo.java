@@ -146,4 +146,10 @@ public class CacheVo extends RequestInfo implements Serializable {
     public String getRequestJson() {
         return super.getRequestJson();
     }
+
+    @Transient
+    @Override
+    public void setDetailLog(boolean detailLog) {
+        super.setDetailLog(detailLog);
+    }
 }
