@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "com.zj"
-version = "1.5.201"
+version = "1.6.201"
 
 intellij {
     // idea version 243
@@ -38,6 +38,13 @@ tasks {
         untilBuild.set("221.*")
         changeNotes.set(
             """
+            <b>1.6.*</b><br>
+            <ul>
+                <li>Fixed cache issues in pre-processing classes</li>
+            </ul><br>
+            <ul>
+                <li>调整前置处理类缓存问题</li>
+            </ul>
             <b>1.5.*</b><br>
             <ul>
                 <li>Adjusted some logic and error issues</li>

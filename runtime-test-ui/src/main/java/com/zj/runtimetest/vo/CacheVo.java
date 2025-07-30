@@ -88,7 +88,7 @@ public class CacheVo extends RequestInfo implements Serializable {
             return null;
         }
         ExpressionVo vo = new ExpressionVo();
-        vo.setMyExpression(expression.getExpression());
+        vo.setMyExpression(expression.getExpression().trim());
         vo.setMyCustomInfo(expression.getCustomInfo());
         return vo;
     }
