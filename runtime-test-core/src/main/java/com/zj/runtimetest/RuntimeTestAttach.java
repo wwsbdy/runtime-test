@@ -7,7 +7,6 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.instrument.Instrumentation;
 import java.net.URLDecoder;
-import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -54,18 +53,7 @@ public class RuntimeTestAttach {
         try {
             String requestInfoStr = Base64Util.decode(args);
             requestInfo = JsonUtil.toJavaBean(Base64Util.decode(args), RequestInfo.class);
-            if (requestInfo.isDetailLog()) {
-                LogUtil.log(true, "[Agent more] agentmain invoked with args: " + requestInfoStr);
-            } else {
-                System.out.println("[Agent] agentmain invoked with class: " + requestInfo.getClassName());
-                System.out.println("[Agent] agentmain invoked with method: " + requestInfo.getMethodName());
-                if (Objects.nonNull(requestInfo.getRequestJson()) && !requestInfo.getRequestJson().isEmpty()) {
-                    System.out.println("[Agent] agentmain invoked with requestJson: " + requestInfo.getRequestJson());
-                }
-                if (Objects.nonNull(requestInfo.getParameterTypeList()) && !requestInfo.getParameterTypeList().isEmpty()) {
-                    System.out.println("[Agent] agentmain invoked with parameterTypeList: " + JsonUtil.toJsonString(requestInfo.getParameterTypeList()));
-                }
-            }
+            LogUtil.log(requestInfo.isDetailLog(), "[Agent more] agentmain invoked with args: " + requestInfoStr);
         } catch (Exception e) {
             System.err.println("[Agent] " + ThrowUtil.printStackTrace(e));
             return;

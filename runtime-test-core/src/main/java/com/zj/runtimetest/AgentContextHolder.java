@@ -34,7 +34,7 @@ public class AgentContextHolder {
         String cacheKey = CacheUtil.genCacheKey(className, methodName, requestInfo.getParameterTypeList());
         // 打印cacheKey
         LogUtil.log("[Agent more] cacheKey: " + cacheKey);
-        MethodInvokeInfo methodInvokeInfo = METHOD_CACHE.get(cacheKey);
+        MethodInvokeInfo methodInvokeInfo = LogUtil.isDetailLogEnabled() ? null : METHOD_CACHE.get(cacheKey);
         if (Objects.isNull(methodInvokeInfo)) {
             ClassLoader classLoader;
             Object bean = null;
@@ -54,7 +54,7 @@ public class AgentContextHolder {
             methodInvokeInfo = new MethodInvokeInfo(requestInfo, classLoader, bean);
             METHOD_CACHE.put(cacheKey, methodInvokeInfo);
         } else {
-            LogUtil.log("[Agent more] " + className + "." + methodName + "() is cached.");
+            System.out.println("[Agent] " + className + "." + methodName + "() is cached.");
         }
         LogUtil.log("[Agent more] " + className + "." + methodName + "() is invoked.");
         Object result = methodInvokeInfo.invoke(requestInfo.getExpVo(), requestInfo.getRequestJson());
@@ -66,9 +66,9 @@ public class AgentContextHolder {
             System.err.println("[Agent] className is null.");
             return BeanInfo.empty();
         }
-        BeanInfo o = BEAN_CACHE.get(className);
+        BeanInfo o = LogUtil.isDetailLogEnabled() ? null : BEAN_CACHE.get(className);
         if (Objects.nonNull(o)) {
-            LogUtil.log("[Agent more] getBean from cache: " + className);
+            System.out.println("[Agent] getBean from cache: " + className);
             return o;
         }
         if (!isInit) {

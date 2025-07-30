@@ -5,7 +5,9 @@ package com.zj.runtimetest.utils;
  * @date : 2025/7/30
  */
 public class LogUtil {
-
+    public static final String RED_START = "\u001B[31m";
+//    public static final String GREEN_START = "\u001B[32m";
+    public static final String END = "\u001B[0m";
     private static final ThreadLocal<Boolean> DETAIL_LOG = ThreadLocal.withInitial(() -> false);
 
     public static void setDetailLog(boolean detailLog) {
@@ -44,7 +46,7 @@ public class LogUtil {
 
     public static void err(boolean detailLog, String message) {
         if (detailLog) {
-            System.err.println(message);
+            System.out.println(RED_START + message + END);
         }
     }
 }

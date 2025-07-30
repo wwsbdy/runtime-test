@@ -64,6 +64,14 @@ public class RuntimeTestExprExecutor {
             }
             attributes.put(name, value);
         }
+
+        protected void printBegin() {
+            LogUtil.log("[Agent more] pre-processing begin");
+        }
+
+        protected void printEnd() {
+            LogUtil.log("[Agent more] pre-processing end");
+        }
     }
 
     public static ExpressionExecutor getExecutor(ExpressionVo expVo, List<MethodParamTypeInfo> parameterTypeList, String projectBasePath) {
@@ -172,7 +180,7 @@ public class RuntimeTestExprExecutor {
         sb.append("public class ").append(className)
                 .append(" extends ExpressionExecutor {\n")
                 .append("    public Object[] eval(Object[] args) {\n")
-                .append("        System.out.println(\"[Agent] pre-processing begins to execute\");\n");
+                .append("        printBegin();\n");
 
         for (int i = 0; i < parameterTypes.size(); i++) {
             MethodParamTypeInfo methodParamTypeInfo = parameterTypes.get(i);
@@ -184,7 +192,7 @@ public class RuntimeTestExprExecutor {
         }
         sb.append("        try {\n").append(expr)
                 .append(";\n        } catch (Throwable t) { throw new RuntimeException(t); }\n")
-                .append("        System.out.println(\"[Agent] pre-processing execution succeeded\");\n");
+                .append("        printEnd();\n");
 
         if (parameterTypes.isEmpty()) {
             sb.append("        return null;\n");
