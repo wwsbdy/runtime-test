@@ -93,14 +93,15 @@ public class RuntimeTestExprExecutor {
         ExpressionExecutor executor = CACHE.get(key);
         if (Objects.nonNull(executor)) {
             if (ExpressionExecutorFactory.ERROR == executor) {
-                LogUtil.log("[Agent more] build pre-processing class is error");
+                LogUtil.log("[Agent more] build pre-processing class is cached, error");
             } else if (executor == ExpressionExecutorFactory.EMPTY) {
-                LogUtil.log("[Agent more] build pre-processing class is empty");
+                LogUtil.log("[Agent more] build pre-processing class is cached, empty");
             } else {
-                LogUtil.log("[Agent more] build pre-processing class code: " + executor.getClassStr());
+                LogUtil.log("[Agent more] build pre-processing class is cached, code: " + executor.getClassStr());
             }
         } else {
             executor = getExecutor(expVo, parameterTypeList, projectBasePath);
+            CACHE.put(key, executor);
         }
         try {
             Object[] resultArgs = executor.eval(args);
