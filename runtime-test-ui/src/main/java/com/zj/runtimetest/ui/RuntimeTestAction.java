@@ -17,6 +17,7 @@ import com.intellij.psi.PsiMethod;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.zj.runtimetest.utils.ParamUtil;
 import com.zj.runtimetest.utils.PluginCacheUtil;
+import com.zj.runtimetest.vo.CacheAndKeyVo;
 import com.zj.runtimetest.vo.CacheVo;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -60,10 +61,11 @@ public class RuntimeTestAction extends AnAction implements Disposable {
                 }
             }
 
-            String cacheKey = PluginCacheUtil.genCacheKey(psiMethod);
             String defaultJson = ParamUtil.getDefaultJson(psiMethod.getParameterList());
-            CacheVo cache = PluginCacheUtil.getCacheOrDefault(psiMethod, project, defaultJson);
 
+            CacheAndKeyVo cacheAndKeyVo = PluginCacheUtil.getCacheOrDefault(psiMethod, project, defaultJson);
+            String cacheKey = cacheAndKeyVo.getCacheKey();
+            CacheVo cache = cacheAndKeyVo.getCache();
             RuntimeTestDialog runtimeTestDialog = new RuntimeTestDialog(project, cacheKey, cache, defaultJson, psiMethod);
 //            Disposer.register(this, runtimeTestDialog.getDisposable());
             runtimeTestDialog.show();

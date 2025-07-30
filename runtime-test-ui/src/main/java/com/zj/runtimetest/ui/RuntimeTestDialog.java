@@ -14,6 +14,7 @@ import com.intellij.openapi.ui.DialogWrapper;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.util.Disposer;
 import com.intellij.psi.PsiMethod;
+import com.intellij.ui.components.JBCheckBox;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.util.ui.JBUI;
@@ -33,6 +34,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -64,6 +66,7 @@ public class RuntimeTestDialog extends DialogWrapper {
     private JButton resetButton;
     private ComboBox<String> historyComboBox;
     private JButton preMethodButton;
+    private JBCheckBox logDetailCheckBox;
 
     public RuntimeTestDialog(Project project, String cacheKey, CacheVo cache, String defaultJson, PsiMethod psiMethod) {
         super(true);
@@ -147,6 +150,17 @@ public class RuntimeTestDialog extends DialogWrapper {
         if (Objects.nonNull(preMethodButton)) {
             jPanel.add(preMethodButton);
         }
+
+        this.logDetailCheckBox = new JBCheckBox();
+        logDetailCheckBox.setToolTipText(PluginBundle.get("dialog.logDetail.title"));
+        logDetailCheckBox.setSelected(cache.isDetailLog());
+        logDetailCheckBox.addActionListener(new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                cache.setDetailLog(logDetailCheckBox.isSelected());
+            }
+        });
+        jPanel.add(logDetailCheckBox);
         return jPanel;
     }
 
@@ -263,6 +277,7 @@ public class RuntimeTestDialog extends DialogWrapper {
             ExecutorUtil.removeListener(resetButton);
             ExecutorUtil.removeListener(historyComboBox);
             ExecutorUtil.removeListener(preMethodButton);
+            ExecutorUtil.removeListener(logDetailCheckBox);
             pidComboBox = null;
             resetButton = null;
             historyComboBox = null;
@@ -270,6 +285,7 @@ public class RuntimeTestDialog extends DialogWrapper {
             cache = null;
             defaultJson = null;
             preMethodButton = null;
+            logDetailCheckBox = null;
         }
         super.dispose();
     }

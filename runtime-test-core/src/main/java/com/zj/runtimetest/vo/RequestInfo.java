@@ -34,32 +34,50 @@ public class RequestInfo implements Serializable {
     private static final long serialVersionUID = 4675988165854842908L;
     /**
      * 全链路名
+     * 不缓存
      */
     private String className;
 
     /**
      * 方法名
+     * 不缓存
      */
     private String methodName;
 
     /**
      * 入参
+     * 不缓存
      */
     private String requestJson;
 
     /**
      * 项目路径
+     * 不缓存
      */
     private String projectBasePath;
 
 
     /**
      * 参数类型
+     * 不缓存
      */
     private List<MethodParamInfo> parameterTypeList;
 
+    /**
+     * 是否静态方法
+     * 不缓存
+     */
     private boolean staticMethod;
 
+    /**
+     * 前置处理表达式
+     */
     private ExpressionVo expVo;
+
+    /**
+     * 是否打印详细日志
+     * 不缓存
+     */
+    private boolean detailLog;
 
 }

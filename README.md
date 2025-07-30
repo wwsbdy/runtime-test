@@ -115,6 +115,8 @@ Notes:<br>
 ### 1.6.*
 
 - Fixed cache issues in pre-processing classes
+- Added option to print detail logs
 
 
 - 调整前置处理类缓存问题
+- 新增打印详细日志选项
