@@ -62,4 +62,9 @@ public class RequestInfo implements Serializable {
 
     private ExpressionVo expVo;
 
+    /**
+     * 是否打印详细日志
+     */
+    private boolean detailLog;
+
 }

@@ -2,6 +2,7 @@ package com.zj.runtimetest.vo;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.intellij.lang.java.JavaLanguage;
+import com.intellij.util.xmlb.annotations.Transient;
 import com.intellij.xdebugger.XExpression;
 import com.intellij.xdebugger.evaluation.EvaluationMode;
 import com.intellij.xdebugger.impl.breakpoints.XExpressionImpl;
@@ -27,12 +28,10 @@ import java.util.function.Consumer;
 public class CacheVo extends RequestInfo implements Serializable {
 
     private static final long serialVersionUID = -574377082031667607L;
+    private static final int SIZE = 5;
 
     @JsonIgnore
     private Long pid;
-
-    @JsonIgnore
-    private final int size = 5;
 
     @JsonIgnore
     private List<String> history;
@@ -47,7 +46,7 @@ public class CacheVo extends RequestInfo implements Serializable {
             history.add(s);
             return;
         }
-        if (history.size() >= size) {
+        if (history.size() >= SIZE) {
             history.remove(history.get(0));
         }
         history.add(s);
@@ -103,4 +102,20 @@ public class CacheVo extends RequestInfo implements Serializable {
     }
 
 
+    @Transient
+    @Override
+    public boolean isStaticMethod() {
+        return super.isStaticMethod();
+    }
+
+    @Transient
+    @Override
+    public String getProjectBasePath() {
+        return super.getProjectBasePath();
+    }
+
+    @Transient
+    public Long getPid() {
+        return pid;
+    }
 }

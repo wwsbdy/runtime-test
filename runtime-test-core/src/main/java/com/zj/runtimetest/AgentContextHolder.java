@@ -3,6 +3,7 @@ package com.zj.runtimetest;
 import com.zj.runtimetest.utils.CacheUtil;
 import com.zj.runtimetest.utils.ClassUtil;
 import com.zj.runtimetest.utils.JsonUtil;
+import com.zj.runtimetest.utils.LogUtil;
 import com.zj.runtimetest.vo.*;
 
 import java.lang.reflect.InvocationTargetException;
@@ -31,12 +32,14 @@ public class AgentContextHolder {
         String className = requestInfo.getClassName();
         String methodName = requestInfo.getMethodName();
         String cacheKey = CacheUtil.genCacheKey(className, methodName, requestInfo.getParameterTypeList());
+        // 打印cacheKey
+        LogUtil.log("[Agent more] cacheKey: " + cacheKey);
         MethodInvokeInfo methodInvokeInfo = METHOD_CACHE.get(cacheKey);
         if (Objects.isNull(methodInvokeInfo)) {
             ClassLoader classLoader;
             Object bean = null;
             if (requestInfo.isStaticMethod()) {
-                System.out.println("[Agent] " + className + "." + methodName + "() is static.");
+                LogUtil.log("[Agent more] " + className + "." + methodName + "() is static.");
                 classLoader = DEFAULT_CLASS_LOADER;
             } else {
                 BeanInfo beanInfo = getBean(className);
@@ -46,12 +49,12 @@ public class AgentContextHolder {
                     return;
                 }
                 classLoader = beanInfo.getClassLoader();
-                System.out.println("[Agent] Bean from: " + bean);
+                LogUtil.log("[Agent more] Bean from: " + bean);
             }
             methodInvokeInfo = new MethodInvokeInfo(requestInfo, classLoader, bean);
             METHOD_CACHE.put(cacheKey, methodInvokeInfo);
         } else {
-            System.out.println("[Agent] " + className + "." + methodName + "() is cached.");
+            LogUtil.log("[Agent more] " + className + "." + methodName + "() is cached.");
         }
         Object result = methodInvokeInfo.invoke(requestInfo.getExpVo(), requestInfo.getRequestJson());
         System.out.println("[Agent] " + methodName + "() invoked successfully." + (methodInvokeInfo.isReturnValue() ? " result: " + JsonUtil.toJsonString(result) : ""));
@@ -59,23 +62,23 @@ public class AgentContextHolder {
 
     public static BeanInfo getBean(String className) {
         if (Objects.isNull(className) || className.isEmpty()) {
-            System.out.println("[Agent] className is null.");
+            System.err.println("[Agent] className is null.");
             return BeanInfo.empty();
         }
         BeanInfo o = BEAN_CACHE.get(className);
         if (Objects.nonNull(o)) {
-            System.out.println("[Agent] getBean from cache: " + className);
+            LogUtil.log("[Agent more] getBean from cache: " + className);
             return o;
         }
         if (!isInit) {
             try {
                 initContextClassLoaderMap();
             } catch (Exception e) {
-                System.out.println("[Agent] init context classLoader map failed: " + e.getMessage());
+                System.err.println("[Agent] init context classLoader map failed: " + e.getMessage());
             }
         }
         if (CLASS_LOADER_CONTEXT_MAP.isEmpty()) {
-            System.out.println("[Agent] context classLoader map is empty.");
+            LogUtil.log("[Agent more] context classLoader map is empty.");
             NoSpringBeanInfo noSpringBeanInfo = new NoSpringBeanInfo(className, DEFAULT_CLASS_LOADER);
             BEAN_CACHE.put(className, noSpringBeanInfo);
             return noSpringBeanInfo;
@@ -87,7 +90,7 @@ public class AgentContextHolder {
             try {
                 clazz = ClassUtil.getClass(className, classLoader);
             } catch (Exception e) {
-//                System.err.println("[Agent] find class fail: " + className);
+                LogUtil.err("[Agent more] find class fail: " + className);
                 continue;
             }
             if (Objects.isNull(contextCache) || contextCache.isEmpty()) {
@@ -98,7 +101,7 @@ public class AgentContextHolder {
                 try {
                     bean = context.getClass().getMethod("getBean", Class.class).invoke(context, clazz);
                 } catch (Exception e) {
-//                    System.err.println("[Agent] getBean fail: " + className);
+                    LogUtil.err("[Agent more] getBean fail: " + className);
                     continue;
                 }
                 if (Objects.nonNull(bean)) {
@@ -109,7 +112,7 @@ public class AgentContextHolder {
             }
         }
         // 如果spring中没有这个bean，new一个调用该方法
-        System.out.println("[Agent] not found Bean from context: " + className);
+        LogUtil.log("[Agent more] not found Bean from context: " + className);
         NoSpringBeanInfo noSpringBeanInfo = new NoSpringBeanInfo(className, DEFAULT_CLASS_LOADER);
         BEAN_CACHE.put(className, noSpringBeanInfo);
         return noSpringBeanInfo;

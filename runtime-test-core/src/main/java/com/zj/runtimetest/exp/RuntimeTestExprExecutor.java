@@ -1,6 +1,8 @@
 package com.zj.runtimetest.exp;
 
 import com.zj.runtimetest.utils.HttpServletRequestUtil;
+import com.zj.runtimetest.utils.LogUtil;
+import com.zj.runtimetest.utils.ThrowUtil;
 import com.zj.runtimetest.vo.ExpressionVo;
 import com.zj.runtimetest.vo.MethodParamTypeInfo;
 import lombok.AccessLevel;
@@ -21,13 +23,12 @@ import java.util.stream.Stream;
 public class RuntimeTestExprExecutor {
     public static final Map<String, ExpressionExecutor> CACHE = new ConcurrentHashMap<>();
 
+    @Getter(AccessLevel.PRIVATE)
     @EqualsAndHashCode
     public abstract static class ExpressionExecutor {
         @Setter(AccessLevel.PRIVATE)
         private String classStr;
-        @Getter(AccessLevel.PRIVATE)
         private Map<String, Object> headers;
-        @Getter(AccessLevel.PRIVATE)
         private Map<String, Object> attributes;
 
         public abstract Object[] eval(Object[] args);
@@ -65,7 +66,6 @@ public class RuntimeTestExprExecutor {
         }
     }
 
-
     public static ExpressionExecutor getExecutor(ExpressionVo expVo, List<MethodParamTypeInfo> parameterTypeList, String projectBasePath) {
         if (Objects.isNull(expVo)) {
             return ExpressionExecutorFactory.EMPTY;
@@ -89,7 +89,19 @@ public class RuntimeTestExprExecutor {
             return args;
         }
         String key = getKey(expVo, parameterTypeList);
-        ExpressionExecutor executor = CACHE.computeIfAbsent(key, k -> getExecutor(expVo, parameterTypeList, projectBasePath));
+        LogUtil.log("[Agent more] pre-processing class cache key: " + key);
+        ExpressionExecutor executor = CACHE.get(key);
+        if (Objects.nonNull(executor)) {
+            if (ExpressionExecutorFactory.ERROR == executor) {
+                LogUtil.log("[Agent more] build pre-processing class is error");
+            } else if (executor == ExpressionExecutorFactory.EMPTY) {
+                LogUtil.log("[Agent more] build pre-processing class is empty");
+            } else {
+                LogUtil.log("[Agent more] build pre-processing class code: " + executor.getClassStr());
+            }
+        } else {
+            executor = getExecutor(expVo, parameterTypeList, projectBasePath);
+        }
         try {
             Object[] resultArgs = executor.eval(args);
             if (HttpServletRequestUtil.hasHttpServletRequest()) {
@@ -135,10 +147,12 @@ public class RuntimeTestExprExecutor {
         String fullName = packageName + "." + className;
         // 构建 Java 源码
         String source = buildClassStr(parameterTypes, imports, className, expr).toString();
+        LogUtil.log("[Agent more] build pre-processing class code: " + source);
         Class<?> clazz;
         try {
             clazz = PureECJCompiler.buildClass(fullName, source);
         } catch (Exception e) {
+            LogUtil.err("[Agent more] build pre-processing class fail: " + ThrowUtil.printStackTrace(e));
             return ExpressionExecutorFactory.ERROR;
         }
         RuntimeTestExprExecutor.ExpressionExecutor expressionExecutor = (RuntimeTestExprExecutor.ExpressionExecutor) clazz.getDeclaredConstructor().newInstance();

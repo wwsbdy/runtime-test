@@ -30,18 +30,16 @@ public class PluginCacheUtil extends CacheUtil {
 
     public static @NotNull CacheVo getCacheOrDefault(PsiMethod psiMethod, Project project, String defaultJson) {
         CacheVo cache = getCache(psiMethod);
-        if (Objects.nonNull(cache)) {
-            cache.setStaticMethod(MethodUtil.isStaticMethod(psiMethod));
-            return cache;
+        if (Objects.isNull(cache)) {
+            cache = new CacheVo();
+            PsiParameterList parameterList = psiMethod.getParameterList();
+            cache.setClassName(ParamUtil.getJvmQualifiedClassName(((PsiClass) psiMethod.getParent())));
+            cache.setMethodName(psiMethod.getName());
+            cache.setParameterTypeList(ParamUtil.getParamTypeNameList(parameterList));
+            cache.setRequestJson(defaultJson);
         }
-        cache = new CacheVo();
-        PsiParameterList parameterList = psiMethod.getParameterList();
-        cache.setClassName(ParamUtil.getJvmQualifiedClassName(((PsiClass) psiMethod.getParent())));
-        cache.setMethodName(psiMethod.getName());
-        cache.setParameterTypeList(ParamUtil.getParamTypeNameList(parameterList));
         cache.setProjectBasePath(project.getBasePath());
         cache.setStaticMethod(MethodUtil.isStaticMethod(psiMethod));
-        cache.setRequestJson(defaultJson);
         return cache;
     }
 }

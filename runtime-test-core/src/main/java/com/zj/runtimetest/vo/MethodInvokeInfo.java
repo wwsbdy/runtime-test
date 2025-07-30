@@ -1,10 +1,7 @@
 package com.zj.runtimetest.vo;
 
 import com.zj.runtimetest.exp.RuntimeTestExprExecutor;
-import com.zj.runtimetest.utils.ClassUtil;
-import com.zj.runtimetest.utils.FiledUtil;
-import com.zj.runtimetest.utils.HttpServletRequestUtil;
-import com.zj.runtimetest.utils.JsonUtil;
+import com.zj.runtimetest.utils.*;
 import lombok.Getter;
 
 import java.lang.reflect.InvocationTargetException;
@@ -83,6 +80,7 @@ public class MethodInvokeInfo {
     private Object[] getArgs(ExpressionVo expVo, String requestJson) {
         Type[] parameterTypes = method.getGenericParameterTypes();
         if (parameterTypes.length == 0) {
+            LogUtil.log("[Agent more] no params");
             return before(expVo, null, null);
         }
         if (parameterTypeList.size() != parameterTypes.length
@@ -91,6 +89,7 @@ public class MethodInvokeInfo {
         }
         Map<String, Object> map;
         if (Objects.isNull(requestJson) || requestJson.isEmpty()) {
+            LogUtil.log("[Agent more] requestJson is empty");
             map = Collections.emptyMap();
         } else {
             map = JsonUtil.toMap(requestJson);

@@ -62,6 +62,7 @@ public class RuntimeTestAction extends AnAction implements Disposable {
 
             String cacheKey = PluginCacheUtil.genCacheKey(psiMethod);
             String defaultJson = ParamUtil.getDefaultJson(psiMethod.getParameterList());
+
             CacheVo cache = PluginCacheUtil.getCacheOrDefault(psiMethod, project, defaultJson);
 
             RuntimeTestDialog runtimeTestDialog = new RuntimeTestDialog(project, cacheKey, cache, defaultJson, psiMethod);

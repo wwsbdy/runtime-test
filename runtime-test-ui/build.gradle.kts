@@ -29,9 +29,11 @@ tasks {
             <b>1.6.*</b><br>
             <ul>
                 <li>Fixed cache issues in pre-processing classes</li>
+                <li>Added option to print detail logs</li>
             </ul><br>
             <ul>
                 <li>调整前置处理类缓存问题</li>
+                <li>新增打印详细日志选项</li>
             </ul>
             <b>1.5.*</b><br>
             <ul>

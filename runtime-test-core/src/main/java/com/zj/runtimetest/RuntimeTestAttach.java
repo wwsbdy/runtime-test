@@ -1,9 +1,6 @@
 package com.zj.runtimetest;
 
-import com.zj.runtimetest.utils.Base64Util;
-import com.zj.runtimetest.utils.IOUtil;
-import com.zj.runtimetest.utils.JsonUtil;
-import com.zj.runtimetest.utils.ThrowUtil;
+import com.zj.runtimetest.utils.*;
 import com.zj.runtimetest.vo.RequestInfo;
 
 import java.io.File;
@@ -55,24 +52,32 @@ public class RuntimeTestAttach {
         }
         RequestInfo requestInfo;
         try {
+            String requestInfoStr = Base64Util.decode(args);
             requestInfo = JsonUtil.toJavaBean(Base64Util.decode(args), RequestInfo.class);
+            if (requestInfo.isDetailLog()) {
+                LogUtil.log(true, "[Agent more] agentmain invoked with args: " + requestInfoStr);
+            } else {
+                System.out.println("[Agent] agentmain invoked with class: " + requestInfo.getClassName());
+                System.out.println("[Agent] agentmain invoked with method: " + requestInfo.getMethodName());
+                if (Objects.nonNull(requestInfo.getRequestJson()) && !requestInfo.getRequestJson().isEmpty()) {
+                    System.out.println("[Agent] agentmain invoked with requestJson: " + requestInfo.getRequestJson());
+                }
+                if (Objects.nonNull(requestInfo.getParameterTypeList()) && !requestInfo.getParameterTypeList().isEmpty()) {
+                    System.out.println("[Agent] agentmain invoked with parameterTypeList: " + JsonUtil.toJsonString(requestInfo.getParameterTypeList()));
+                }
+            }
         } catch (Exception e) {
             System.err.println("[Agent] " + ThrowUtil.printStackTrace(e));
             return;
         }
-        System.out.println("[Agent] agentmain invoked with class: " + requestInfo.getClassName());
-        System.out.println("[Agent] agentmain invoked with method: " + requestInfo.getMethodName());
-        if (Objects.nonNull(requestInfo.getRequestJson()) && !requestInfo.getRequestJson().isEmpty()) {
-            System.out.println("[Agent] agentmain invoked with requestJson: " + requestInfo.getRequestJson());
-        }
-        if (Objects.nonNull(requestInfo.getParameterTypeList()) && !requestInfo.getParameterTypeList().isEmpty()) {
-            System.out.println("[Agent] agentmain invoked with parameterTypeList: " + JsonUtil.toJsonString(requestInfo.getParameterTypeList()));
-        }
         CompletableFuture.runAsync(() -> {
                     try {
+                        LogUtil.setDetailLog(requestInfo.isDetailLog());
                         AgentContextHolder.invoke(requestInfo);
                     } catch (Exception e) {
                         throw new RuntimeException(e);
+                    } finally {
+                        LogUtil.clear();
                     }
                 })
                 .exceptionally(throwable -> {
