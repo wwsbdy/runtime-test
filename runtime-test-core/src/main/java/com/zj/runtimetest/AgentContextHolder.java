@@ -102,11 +102,11 @@ public class AgentContextHolder {
                 try {
                     bean = context.getClass().getMethod("getBean", Class.class).invoke(context, clazz);
                 } catch (Exception e) {
-                    LogUtil.err("[Agent more] getBean fail: " + className + " from spring context: " + context);
+                    LogUtil.err("[Agent more] getBean fail: " + className + " from spring context: " + context + "; classLoader: " + classLoader);
                     continue;
                 }
                 if (Objects.nonNull(bean)) {
-                    LogUtil.log("[Agent more] getBean from spring context: " + className + " from " + context);
+                    LogUtil.log("[Agent more] getBean from spring context: " + className + " from spring context: " + context + "; classLoader: " + classLoader);
                     BeanInfo beanInfo = new BeanInfo(className, bean, classLoader);
                     BEAN_CACHE.put(className, beanInfo);
                     return beanInfo;
