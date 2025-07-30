@@ -104,6 +104,7 @@ public class RuntimeTestExprExecutor {
         }
         try {
             Object[] resultArgs = executor.eval(args);
+            // 设置 HttpServletRequest到上下文 防止空指针
             if (HttpServletRequestUtil.hasHttpServletRequest()) {
                 HttpServletRequestUtil.setRequestAttributes(httpServletRequest, executor.getAttributes(), executor.getHeaders());
             }

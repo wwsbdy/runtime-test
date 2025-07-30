@@ -80,7 +80,7 @@ public class MethodInvokeInfo {
     private Object[] getArgs(ExpressionVo expVo, String requestJson) {
         Type[] parameterTypes = method.getGenericParameterTypes();
         if (parameterTypes.length == 0) {
-            LogUtil.log("[Agent more] no params");
+            LogUtil.log("[Agent more] method no params");
             return before(expVo, null, null);
         }
         if (parameterTypeList.size() != parameterTypes.length

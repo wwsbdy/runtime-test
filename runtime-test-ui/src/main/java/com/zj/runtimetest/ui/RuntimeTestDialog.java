@@ -277,6 +277,7 @@ public class RuntimeTestDialog extends DialogWrapper {
             ExecutorUtil.removeListener(resetButton);
             ExecutorUtil.removeListener(historyComboBox);
             ExecutorUtil.removeListener(preMethodButton);
+            ExecutorUtil.removeListener(logDetailCheckBox);
             pidComboBox = null;
             resetButton = null;
             historyComboBox = null;
@@ -284,6 +285,7 @@ public class RuntimeTestDialog extends DialogWrapper {
             cache = null;
             defaultJson = null;
             preMethodButton = null;
+            logDetailCheckBox = null;
         }
         super.dispose();
     }

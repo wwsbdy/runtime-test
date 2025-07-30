@@ -56,6 +56,7 @@ public class AgentContextHolder {
         } else {
             LogUtil.log("[Agent more] " + className + "." + methodName + "() is cached.");
         }
+        LogUtil.log("[Agent more] " + className + "." + methodName + "() is invoked.");
         Object result = methodInvokeInfo.invoke(requestInfo.getExpVo(), requestInfo.getRequestJson());
         System.out.println("[Agent] " + methodName + "() invoked successfully." + (methodInvokeInfo.isReturnValue() ? " result: " + JsonUtil.toJsonString(result) : ""));
     }
@@ -78,7 +79,7 @@ public class AgentContextHolder {
             }
         }
         if (CLASS_LOADER_CONTEXT_MAP.isEmpty()) {
-            LogUtil.log("[Agent more] context classLoader map is empty.");
+            LogUtil.log("[Agent more] context classLoader map is empty. it will be created through a constructor");
             NoSpringBeanInfo noSpringBeanInfo = new NoSpringBeanInfo(className, DEFAULT_CLASS_LOADER);
             BEAN_CACHE.put(className, noSpringBeanInfo);
             return noSpringBeanInfo;
@@ -101,10 +102,11 @@ public class AgentContextHolder {
                 try {
                     bean = context.getClass().getMethod("getBean", Class.class).invoke(context, clazz);
                 } catch (Exception e) {
-                    LogUtil.err("[Agent more] getBean fail: " + className);
+                    LogUtil.err("[Agent more] getBean fail: " + className + " from spring context: " + context);
                     continue;
                 }
                 if (Objects.nonNull(bean)) {
+                    LogUtil.log("[Agent more] getBean from spring context: " + className + " from " + context);
                     BeanInfo beanInfo = new BeanInfo(className, bean, classLoader);
                     BEAN_CACHE.put(className, beanInfo);
                     return beanInfo;
@@ -112,7 +114,7 @@ public class AgentContextHolder {
             }
         }
         // 如果spring中没有这个bean，new一个调用该方法
-        LogUtil.log("[Agent more] not found Bean from context: " + className);
+        LogUtil.log("[Agent more] not found Bean from context, it will be created through a constructor: " + className);
         NoSpringBeanInfo noSpringBeanInfo = new NoSpringBeanInfo(className, DEFAULT_CLASS_LOADER);
         BEAN_CACHE.put(className, noSpringBeanInfo);
         return noSpringBeanInfo;
