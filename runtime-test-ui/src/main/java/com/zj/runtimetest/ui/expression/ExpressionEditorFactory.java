@@ -7,6 +7,8 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.*;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.testFramework.LightVirtualFile;
+import com.intellij.util.ui.JBUI;
+import com.intellij.util.ui.components.BorderLayoutPanel;
 import com.intellij.xdebugger.XExpression;
 import com.intellij.xdebugger.XSourcePosition;
 import com.intellij.xdebugger.impl.XSourcePositionImpl;
@@ -14,6 +16,7 @@ import com.intellij.xdebugger.impl.ui.XDebuggerExpressionEditor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import javax.swing.*;
 import java.util.Objects;
 
 /**
@@ -43,7 +46,18 @@ public class ExpressionEditorFactory {
         // 创建 SourcePosition（控制作用域）
         XSourcePosition position = XSourcePositionImpl.createByOffset(virtualFile, offset);
         // 构建 XDebuggerExpressionEditor
-        return new XDebuggerExpressionEditor(project, MyDebuggerEditorsProvider.INSTANCE, null, position, xExpression, true, true, false);
+        return new XDebuggerExpressionEditor(project, MyDebuggerEditorsProvider.INSTANCE, null, position, xExpression, true, true, false) {
+            @Override
+            protected JComponent decorate(JComponent component, boolean multiline, boolean showEditor) {
+                // 移除语言选择器和最底下的Use {0} to navigate through the history
+                BorderLayoutPanel panel = JBUI.Panels.simplePanel();
+                if (!multiline && showEditor) {
+                    component = this.addExpand(component, false);
+                }
+                panel.addToCenter(component);
+                return panel;
+            }
+        };
     }
 
     public static String generateFakeClassText(PsiMethod psiMethod) {
