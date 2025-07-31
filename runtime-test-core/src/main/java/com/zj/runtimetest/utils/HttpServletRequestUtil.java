@@ -59,7 +59,7 @@ public class HttpServletRequestUtil {
         }
         Constructor<?> constructor = FakeHttpServletRequestBuilder.CONSTRUCTOR;
         if (Objects.isNull(constructor)) {
-            System.err.println("[Agent] FakeHttpServletRequest constructor build fail");
+            LogUtil.alwaysErr("[Agent] FakeHttpServletRequest constructor build fail");
             return null;
         }
         try {
@@ -67,7 +67,7 @@ public class HttpServletRequestUtil {
             LogUtil.log("[Agent more] FakeHttpServletRequest build success");
             return fakeHttpServletRequest;
         } catch (Exception e) {
-            System.err.println("[Agent] FakeHttpServletRequest build fail");
+            LogUtil.alwaysErr("[Agent] FakeHttpServletRequest build fail");
         }
         return null;
     }
@@ -89,7 +89,7 @@ public class HttpServletRequestUtil {
                 return HAS_HTTP_SERVLET_REQUEST = true;
             }
         } catch (Exception e) {
-//            System.out.println(ThrowUtil.printStackTrace(e));
+//            LogUtil.alwaysLog(ThrowUtil.printStackTrace(e));
             return HAS_HTTP_SERVLET_REQUEST = false;
         }
         return HAS_HTTP_SERVLET_REQUEST = false;
@@ -191,7 +191,7 @@ public class HttpServletRequestUtil {
                 // setAttribute(String s, Object o)
                 setAttribute = clazz.getMethod("setAttribute", String.class, Object.class);
             } catch (NoSuchMethodException e) {
-                System.err.println("[Agent] FakeHttpServletRequestClass init fail");
+                LogUtil.alwaysErr("[Agent] FakeHttpServletRequestClass init fail");
             }
             CONSTRUCTOR = constructor;
             ADD_HEADER = addHeader;

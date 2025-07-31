@@ -13,8 +13,8 @@ public class StringSourceCompilationUnit implements ICompilationUnit {
     private final String sourceCode;
 
     public StringSourceCompilationUnit(String className, String sourceCode) {
-//        System.out.println("className: " + className);
-//        System.out.println("sourceCode: " + sourceCode);
+//        LogUtil.alwaysLog("className: " + className);
+//        LogUtil.alwaysLog("sourceCode: " + sourceCode);
         this.className = className;
         this.sourceCode = sourceCode;
     }

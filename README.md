@@ -120,3 +120,14 @@ Notes:<br>
 
 - 调整前置处理类缓存问题
 - 新增打印详细日志选项
+
+### 1.7.*
+
+- Save entered information even when canceled
+- Remove unnecessary cached data
+- Fixed the error log sequence issue
+
+
+- 取消也保存填写的信息
+- 去掉不必要的缓存信息
+- 解决error日志顺序问题

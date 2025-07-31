@@ -28,10 +28,12 @@ public class PluginCacheUtil {
         if (Objects.isNull(cache)) {
             cache = new CacheVo();
             cache.setRequestJson(defaultJson);
-        } else if (CollectionUtils.isNotEmpty(cache.getHistory())) {
-            cache.setRequestJson(cache.getHistory().get(cache.getHistory().size() - 1));
-        } else {
-            cache.setRequestJson(defaultJson);
+        } else if (StringUtils.isBlank(cache.getRequestJson())) {
+            if (CollectionUtils.isNotEmpty(cache.getHistory())) {
+                cache.setRequestJson(cache.getHistory().get(cache.getHistory().size() - 1));
+            } else {
+                cache.setRequestJson(defaultJson);
+            }
         }
         cache.setClassName(ParamUtil.getJvmQualifiedClassName(((PsiClass) psiMethod.getParent())));
         cache.setMethodName(psiMethod.getName());

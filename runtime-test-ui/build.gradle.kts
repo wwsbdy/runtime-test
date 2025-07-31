@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "com.zj"
-version = "1.6-SNAPSHOT"
+version = "1.7-SNAPSHOT"
 
 intellij {
     version.set(properties("intellij.version"))
@@ -26,6 +26,17 @@ tasks {
         untilBuild.set(properties("until.build"))
         changeNotes.set(
             """
+            <b>1.7.*</b><br>
+            <ul>
+                <li>Save entered information even when canceled</li>
+                <li>Remove unnecessary cached data</li>
+                <li>Fixed the error log sequence issue</li>
+            </ul><br>
+            <ul>
+                <li>取消也保存填写的信息</li>
+                <li>去掉不必要的缓存信息</li>
+                <li>解决error日志顺序问题</li>
+            </ul>
             <b>1.6.*</b><br>
             <ul>
                 <li>Fixed cache issues in pre-processing classes</li>

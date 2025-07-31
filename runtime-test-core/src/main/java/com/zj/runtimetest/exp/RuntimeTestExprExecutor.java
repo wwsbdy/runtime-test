@@ -34,18 +34,18 @@ public class RuntimeTestExprExecutor {
         public abstract Object[] eval(Object[] args);
 
         protected void fakeMethod(Object... args) {
-            System.err.println("[Agent] Don not execute me");
+            LogUtil.alwaysErr("[Agent] Don not execute me");
         }
 
         protected void printPreProcessingMethod() {
             if (Objects.nonNull(classStr) && !classStr.isEmpty()) {
-                System.out.println(classStr);
+                LogUtil.alwaysLog(classStr);
             }
         }
 
         protected void addHeader(String name, Object value) {
             if (!HttpServletRequestUtil.hasHttpServletRequest()) {
-                System.err.println("[Agent] java.lang.ClassNotFoundException: javax.servlet.http.HttpServletRequest");
+                LogUtil.alwaysErr("[Agent] java.lang.ClassNotFoundException: javax.servlet.http.HttpServletRequest");
                 return;
             }
             if (Objects.isNull(headers)) {
@@ -56,7 +56,7 @@ public class RuntimeTestExprExecutor {
 
         protected void setAttribute(String name, Object value) {
             if (!HttpServletRequestUtil.hasHttpServletRequest()) {
-                System.err.println("[Agent] java.lang.ClassNotFoundException: javax.servlet.http.HttpServletRequest");
+                LogUtil.alwaysErr("[Agent] java.lang.ClassNotFoundException: javax.servlet.http.HttpServletRequest");
                 return;
             }
             if (Objects.isNull(attributes)) {
@@ -82,7 +82,7 @@ public class RuntimeTestExprExecutor {
         try {
             compiled = compileInMemory(expVo, parameterTypeList);
         } catch (Throwable t) {
-            t.printStackTrace();
+            LogUtil.alwaysErr(ThrowUtil.printStackTrace(t));
             compiled = ExpressionExecutorFactory.ERROR;
         }
         return compiled;
@@ -101,8 +101,8 @@ public class RuntimeTestExprExecutor {
         ExpressionExecutor executor = CACHE.get(key);
         if (Objects.nonNull(executor)) {
             if (ExpressionExecutorFactory.ERROR == executor) {
-                LogUtil.log("[Agent more] build pre-processing class is cached, error");
-            } else if (executor == ExpressionExecutorFactory.EMPTY) {
+                LogUtil.err("[Agent more] build pre-processing class is cached, error");
+            } else if (ExpressionExecutorFactory.EMPTY == executor) {
                 LogUtil.log("[Agent more] build pre-processing class is cached, empty");
             } else {
                 LogUtil.log("[Agent more] build pre-processing class is cached, code: " + executor.getClassStr());
