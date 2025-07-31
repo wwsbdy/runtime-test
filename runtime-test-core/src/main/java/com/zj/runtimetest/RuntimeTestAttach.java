@@ -23,7 +23,7 @@ public class RuntimeTestAttach {
      * @param inst 仪表
      */
     public static void premain(String args, Instrumentation inst) {
-        System.out.println("[Agent] premain started");
+        LogUtil.alwaysLog("[Agent] premain started");
         // 使用byte-buddy作为插桩，不同版本jdk不兼容，使用asm
 //        new AgentBuilder.Default()
 ////                .with(AgentBuilder.Listener.StreamWriting.toSystemOut())
@@ -45,7 +45,7 @@ public class RuntimeTestAttach {
             try {
                 args = IOUtil.getTextFileAsString(new File(URLDecoder.decode(args.substring(7), "UTF-8")));
             } catch (IOException e) {
-                System.out.println(ThrowUtil.printStackTrace(e));
+                LogUtil.alwaysLog(ThrowUtil.printStackTrace(e));
                 return;
             }
         }
@@ -54,12 +54,12 @@ public class RuntimeTestAttach {
             String requestInfoStr = Base64Util.decode(args);
             requestInfo = JsonUtil.toJavaBean(Base64Util.decode(args), RequestInfo.class);
             if (requestInfo.isDetailLog()) {
-                LogUtil.log(true, "[Agent more] agentmain invoked with args: " + requestInfoStr);
-            } else if (requestInfo.getRequestJson() != null && !requestInfo.getRequestJson().isEmpty()){
-                System.out.println("[Agent] agentmain invoked with requestJson: " + requestInfo.getRequestJson());
+                LogUtil.alwaysLog("[Agent more] agentmain invoked with args: " + requestInfoStr);
+            } else if (requestInfo.getRequestJson() != null && !requestInfo.getRequestJson().isEmpty()) {
+                LogUtil.alwaysLog("[Agent] agentmain invoked with requestJson: " + requestInfo.getRequestJson());
             }
         } catch (Exception e) {
-            System.err.println("[Agent] " + ThrowUtil.printStackTrace(e));
+            LogUtil.alwaysErr("[Agent] " + ThrowUtil.printStackTrace(e));
             return;
         }
         CompletableFuture.runAsync(() -> {
@@ -73,7 +73,7 @@ public class RuntimeTestAttach {
                     }
                 })
                 .exceptionally(throwable -> {
-                    System.err.println("[Agent] " + ThrowUtil.printStackTrace(throwable));
+                    LogUtil.alwaysErr("[Agent] " + ThrowUtil.printStackTrace(throwable));
                     return null;
                 });
     }

@@ -87,7 +87,7 @@ Notes:<br>
 - Support for HttpServletRequest (in pre-processing, allows calling <b>addHeader()</b> and <b>setAttribute()</b>; supports passing headers in JSON format through parameters)
 
 
-- 移除前置处理对断点对依赖
+- 移除前置处理对断点的依赖
 - 支持打印前置处理方法（在前置处理中调用 <b>printPreProcessingMethod()</b> ）
 - 现在支持 <b>非Debug模式</b> 前置处理
 - 支持 <b>HttpServletRequest</b> （在前置处理中调用 <b>addHeader()</b> 和 <b>setAttribute()</b> ；参数里支持用json格式填入header）
@@ -120,3 +120,20 @@ Notes:<br>
 
 - 调整前置处理类缓存问题
 - 新增打印详细日志选项
+
+### 1.7.*
+
+- Save entered information even when canceled
+- Remove unnecessary cached data
+- Fixed the error log sequence issue
+- The <b>getBean()</b> method can now be invoked pre-processing to obtain bean objects
+- Added a new window for executing scripts on the right side
+- Added some methods in pre-processing
+
+
+- 取消也保存填写的信息
+- 去掉不必要的缓存信息
+- 解决error日志顺序问题
+- 可在前置处理中调用 <b>getBean()</b> 获取bean对象
+- 右边侧边栏新增执行脚本窗口
+- 在前置处理中添加了一些方法

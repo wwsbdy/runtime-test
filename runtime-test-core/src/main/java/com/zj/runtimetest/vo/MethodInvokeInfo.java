@@ -81,7 +81,7 @@ public class MethodInvokeInfo {
         Type[] parameterTypes = method.getGenericParameterTypes();
         if (parameterTypes.length == 0) {
             LogUtil.log("[Agent more] method no params");
-            return before(expVo, null, null);
+            return before(expVo, null);
         }
         if (parameterTypeList.size() != parameterTypes.length
                 && parameterTypeList.size() != paramClazzArr.length) {
@@ -95,7 +95,6 @@ public class MethodInvokeInfo {
             map = JsonUtil.toMap(requestJson);
         }
         Object[] args = new Object[parameterTypes.length];
-        Object httpServletRequest = null;
         for (int i = 0; i < parameterTypes.length; i++) {
             MethodParamTypeInfo methodParamTypeInfo = parameterTypeList.get(i);
             Object arg = map.get(methodParamTypeInfo.getParamName());
@@ -107,18 +106,22 @@ public class MethodInvokeInfo {
                 argType = methodParamTypeInfo.getType();
             }
             if (HttpServletRequestUtil.isHttpServletRequest(paramClazzArr[i])) {
-                args[i] = httpServletRequest =
-                        HttpServletRequestUtil.setRequestAttributes(null, Objects.isNull(arg) ? null : JsonUtil.toMap(JsonUtil.toJsonString(arg)));
+                IHttpServletRequest httpServletRequest = HttpServletRequestUtil.getHttpServletRequest();
+                args[i] = HttpServletRequestUtil.getHttpServletRequest();
+                if (Objects.nonNull(httpServletRequest) && Objects.nonNull(arg)) {
+                    Map<String, Object> headers = JsonUtil.toMap(JsonUtil.toJsonString(arg));
+                    headers.forEach(httpServletRequest::addHeader);
+                }
             } else if (arg == null) {
                 args[i] = FiledUtil.getFieldNullValue(paramClazzArr[i]);
             } else {
                 args[i] = JsonUtil.convertValue(arg, argType);
             }
         }
-        return before(expVo, args, httpServletRequest);
+        return before(expVo, args);
     }
 
-    private Object[] before(ExpressionVo expVo, Object[] args, Object httpServletRequest) {
-        return RuntimeTestExprExecutor.evaluate(expVo, parameterTypeList, projectBasePath, args, httpServletRequest);
+    private Object[] before(ExpressionVo expVo, Object[] args) {
+        return RuntimeTestExprExecutor.evaluate(expVo, parameterTypeList, projectBasePath, args);
     }
 }

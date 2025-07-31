@@ -20,7 +20,7 @@
 // * @date : 2025/7/22
 // */
 //public class RuntimeTestExpCompiler {
-//    public static RuntimeTestExprExecutor.ExpressionExecutor compileInMemory(ExpressionVo expVo, List<MethodParamTypeInfo> parameterTypes) throws Exception {
+//    public static ExpressionExecutor compileInMemory(ExpressionVo expVo, List<MethodParamTypeInfo> parameterTypes) throws Exception {
 //
 //        String expr = expVo.getMyExpression();
 //        if (expr == null || expr.isEmpty()) {
@@ -65,7 +65,7 @@
 //        defineClass.setAccessible(true);
 //        Class<?> clazz = (Class<?>) defineClass.invoke(appCl, fullName, classBytes, 0, classBytes.length);
 //
-//        return (RuntimeTestExprExecutor.ExpressionExecutor) clazz.getDeclaredConstructor().newInstance();
+//        return (ExpressionExecutor) clazz.getDeclaredConstructor().newInstance();
 //    }
 //
 //    private static StringBuilder buildClassStr(List<MethodParamTypeInfo> parameterTypes, List<String> imports, String className, String expr) {
@@ -76,7 +76,7 @@
 //        }
 //
 //        sb.append("public class ").append(className)
-//                .append(" implements com.zj.runtimetest.exp.RuntimeTestExprExecutor.ExpressionExecutor {\n")
+//                .append(" implements com.zj.runtimetest.exp.ExpressionExecutor {\n")
 //                .append("  public Object[] eval(Object[] args) {\n");
 //
 //        for (int i = 0; i < parameterTypes.size(); i++) {

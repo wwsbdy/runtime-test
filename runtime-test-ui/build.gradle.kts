@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "com.zj"
-version = "1.6.222"
+version = "1.7.222"
 
 intellij {
     version.set(properties("intellij.version"))
@@ -26,6 +26,23 @@ tasks {
         untilBuild.set(properties("until.build"))
         changeNotes.set(
             """
+            <b>1.7.*</b><br>
+            <ul>
+                <li>Save entered information even when canceled</li>
+                <li>Remove unnecessary cached data</li>
+                <li>Fixed the error log sequence issue</li>
+                <li>The <b>getBean()</b> method can now be invoked pre-processing to obtain bean objects</li>
+                <li>Added a new window for executing scripts on the right side</li>
+                <li>Added some methods in pre-processing</li>
+            </ul><br>
+            <ul>
+                <li>取消也保存填写的信息</li>
+                <li>去掉不必要的缓存信息</li>
+                <li>解决error日志顺序问题</li>
+                <li>可在前置处理中调用 <b>getBean()</b> 获取bean对象</li>
+                <li>右边侧边栏新增执行脚本窗口</li>
+                <li>在前置处理中添加了一些方法</li>
+            </ul>
             <b>1.6.*</b><br>
             <ul>
                 <li>Fixed cache issues in pre-processing classes</li>
@@ -61,14 +78,12 @@ tasks {
                 <li>Add support for printing pre-processing methods (call <b>printPreProcessingMethod()</b> during pre-processing)</li>
                 <li>Now supports pre-processing in <b>non-Debug mode</b></li>
                 <li>Support for HttpServletRequest (in pre-processing, allows calling <b>addHeader()</b> and <b>setAttribute()</b>; supports passing headers in JSON format through parameters)</li>
-                <li>Support <b>LocalDate</b>, <b>LocalDateTime</b></li>
             </ul><br>
             <ul>
-                <li>移除前置处理对断点对依赖</li>
+                <li>移除前置处理对断点的依赖</li>
                 <li>支持打印前置处理方法（在前置处理中调用 <b>printPreProcessingMethod()</b> ）</li>
                 <li>现在支持 <b>非Debug模式</b> 前置处理</li>
                 <li>支持 <b>HttpServletRequest</b> （在前置处理中调用 <b>addHeader()</b> 和 <b>setAttribute()</b> ；参数里支持用json格式填入header）</li>
-                <li>支持 <b>LocalDate</b>、<b>LocalDateTime</b></li>
             </ul>
             <b>1.2.*</b><br>
             <ul>

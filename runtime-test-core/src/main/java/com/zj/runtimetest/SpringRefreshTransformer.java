@@ -1,5 +1,6 @@
 package com.zj.runtimetest;
 
+import com.zj.runtimetest.utils.LogUtil;
 import org.objectweb.asm.*;
 
 import java.lang.instrument.ClassFileTransformer;
@@ -26,11 +27,11 @@ public class SpringRefreshTransformer implements ClassFileTransformer {
                 @Override
                 public MethodVisitor visitMethod(int access, String name, String descriptor,
                                                  String signature, String[] exceptions) {
-//                    System.out.println("[Agent] visitMethod: " + name + " " + descriptor);
+//                    LogUtil.alwaysLog("[Agent] visitMethod: " + name + " " + descriptor);
                     MethodVisitor mv = super.visitMethod(access, name, descriptor, signature, exceptions);
 
                     if ("refresh".equals(name) && "()V".equals(descriptor)) {
-                        System.out.println("[Agent] Found method: refresh");
+                        LogUtil.alwaysLog("[Agent] Found method: refresh");
                         return new MethodVisitor(Opcodes.ASM9, mv) {
                             @Override
                             public void visitInsn(int opcode) {
@@ -55,7 +56,7 @@ public class SpringRefreshTransformer implements ClassFileTransformer {
             return cw.toByteArray();
 
         } catch (Exception e) {
-            System.err.println("[Agent] Error: " + e.getMessage());
+            LogUtil.alwaysErr("[Agent] Error: " + e.getMessage());
             return null;
         }
     }

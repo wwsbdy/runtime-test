@@ -28,10 +28,12 @@ public class PluginCacheUtil {
         if (Objects.isNull(cache)) {
             cache = new CacheVo();
             cache.setRequestJson(defaultJson);
-        } else if (CollectionUtils.isNotEmpty(cache.getHistory())) {
-            cache.setRequestJson(cache.getHistory().get(cache.getHistory().size() - 1));
-        } else {
-            cache.setRequestJson(defaultJson);
+        } else if (StringUtils.isBlank(cache.getRequestJson())) {
+            if (CollectionUtils.isNotEmpty(cache.getHistory())) {
+                cache.setRequestJson(cache.getHistory().get(cache.getHistory().size() - 1));
+            } else {
+                cache.setRequestJson(defaultJson);
+            }
         }
         cache.setClassName(ParamUtil.getJvmQualifiedClassName(((PsiClass) psiMethod.getParent())));
         cache.setMethodName(psiMethod.getName());
@@ -43,5 +45,15 @@ public class PluginCacheUtil {
         cache.setProjectBasePath(project.getBasePath());
         cache.setStaticMethod(MethodUtil.isStaticMethod(psiMethod));
         return new CacheAndKeyVo(cacheKey, cache);
+    }
+
+
+    public static @NotNull CacheAndKeyVo getCacheOrDefault(@NotNull String key, Project project) {
+        CacheVo cache = RuntimeTestState.getInstance(project).getCache(key);
+        if (Objects.isNull(cache)) {
+            cache = new CacheVo();
+        }
+        cache.setProjectBasePath(project.getBasePath());
+        return new CacheAndKeyVo(key, cache);
     }
 }
