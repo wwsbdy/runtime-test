@@ -72,14 +72,12 @@ tasks {
                 <li>Add support for printing pre-processing methods (call <b>printPreProcessingMethod()</b> during pre-processing)</li>
                 <li>Now supports pre-processing in <b>non-Debug mode</b></li>
                 <li>Support for HttpServletRequest (in pre-processing, allows calling <b>addHeader()</b> and <b>setAttribute()</b>; supports passing headers in JSON format through parameters)</li>
-                <li>Support <b>LocalDate</b>, <b>LocalDateTime</b></li>
             </ul><br>
             <ul>
-                <li>移除前置处理对断点对依赖</li>
+                <li>移除前置处理对断点的依赖</li>
                 <li>支持打印前置处理方法（在前置处理中调用 <b>printPreProcessingMethod()</b> ）</li>
                 <li>现在支持 <b>非Debug模式</b> 前置处理</li>
                 <li>支持 <b>HttpServletRequest</b> （在前置处理中调用 <b>addHeader()</b> 和 <b>setAttribute()</b> ；参数里支持用json格式填入header）</li>
-                <li>支持 <b>LocalDate</b>、<b>LocalDateTime</b></li>
             </ul>
             <b>1.2.*</b><br>
             <ul>
