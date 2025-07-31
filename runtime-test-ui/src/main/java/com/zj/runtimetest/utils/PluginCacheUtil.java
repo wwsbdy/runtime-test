@@ -46,4 +46,14 @@ public class PluginCacheUtil {
         cache.setStaticMethod(MethodUtil.isStaticMethod(psiMethod));
         return new CacheAndKeyVo(cacheKey, cache);
     }
+
+
+    public static @NotNull CacheAndKeyVo getCacheOrDefault(@NotNull String key, Project project) {
+        CacheVo cache = RuntimeTestState.getInstance(project).getCache(key);
+        if (Objects.isNull(cache)) {
+            cache = new CacheVo();
+        }
+        cache.setProjectBasePath(project.getBasePath());
+        return new CacheAndKeyVo(key, cache);
+    }
 }

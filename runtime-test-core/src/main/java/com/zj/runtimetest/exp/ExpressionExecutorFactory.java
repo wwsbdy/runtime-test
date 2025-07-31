@@ -7,7 +7,7 @@ import com.zj.runtimetest.utils.LogUtil;
  * @date : 2025/7/22
  */
 public class ExpressionExecutorFactory {
-    public static final RuntimeTestExprExecutor.ExpressionExecutor ERROR = new RuntimeTestExprExecutor.ExpressionExecutor() {
+    public static final ExpressionExecutor ERROR = new ExpressionExecutor() {
         @Override
         public Object[] eval(Object[] args) {
             LogUtil.alwaysErr("[Agent] expression execution failed");
@@ -15,7 +15,7 @@ public class ExpressionExecutorFactory {
         }
     };
 
-    public static final RuntimeTestExprExecutor.ExpressionExecutor EMPTY = new RuntimeTestExprExecutor.ExpressionExecutor() {
+    public static final ExpressionExecutor EMPTY = new ExpressionExecutor() {
         @Override
         public Object[] eval(Object[] args) {
             return args;

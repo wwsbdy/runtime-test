@@ -31,11 +31,17 @@ tasks {
                 <li>Save entered information even when canceled</li>
                 <li>Remove unnecessary cached data</li>
                 <li>Fixed the error log sequence issue</li>
+                <li>The <b>getBean()</b> method can now be invoked pre-processing to obtain bean objects</li>
+                <li>Added a new window for executing scripts on the right side</li>
+                <li>Added some methods in pre-processing</li>
             </ul><br>
             <ul>
                 <li>取消也保存填写的信息</li>
                 <li>去掉不必要的缓存信息</li>
                 <li>解决error日志顺序问题</li>
+                <li>可在前置处理中调用 <b>getBean()</b> 获取bean对象</li>
+                <li>右边侧边栏新增执行脚本窗口</li>
+                <li>在前置处理中添加了一些方法</li>
             </ul>
             <b>1.6.*</b><br>
             <ul>

@@ -43,7 +43,7 @@ public class ExpressionEditorFactory {
         // 创建 SourcePosition（控制作用域）
         XSourcePosition position = XSourcePositionImpl.createByOffset(virtualFile, offset);
         // 构建 XDebuggerExpressionEditor
-        return new XDebuggerExpressionEditor(project, new MyDebuggerEditorsProvider(), null, position, xExpression, true, true, false);
+        return new XDebuggerExpressionEditor(project, MyDebuggerEditorsProvider.INSTANCE, null, position, xExpression, true, true, false);
     }
 
     public static String generateFakeClassText(PsiMethod psiMethod) {
@@ -74,13 +74,17 @@ public class ExpressionEditorFactory {
         builder.append("        // cursor\n");
         builder.append("    }\n");
         // printPreProcessingMethod
-        builder.append("    private void printPreProcessingMethod() {}\n");
+        builder.append("    public void printPreProcessingMethod() {}\n");
         // addHeader
-        builder.append("    private void addHeader(String name, Object value) {}\n");
+        builder.append("    public void addHeader(String name, Object value) {}\n");
         // setAttribute
-        builder.append("    private void setAttribute(String name, Object value) {}\n");
+        builder.append("    public void setAttribute(String name, Object value) {}\n");
         // getBean
-        builder.append("    private <T> T getBean(Class<T> clz)) {}\n");
+        builder.append("    public <T> T getBean(Class<T> clz) { return null; }\n");
+        // getHttpServletRequest
+        builder.append("    public Object getHttpServletRequest() { return null; }\n");
+        // toJsonString
+        builder.append("    public String toJsonString(Object value) { return null; }\n");
         builder.append("}\n");
 
         return builder.toString();

@@ -34,7 +34,7 @@ public class AgentContextHolder {
         String methodName = requestInfo.getMethodName();
         if (Objects.isNull(className) || className.isEmpty()
                 || Objects.isNull(methodName) || methodName.isEmpty()) {
-            RuntimeTestExprExecutor.evaluate(requestInfo.getExpVo(), Collections.emptyList(), requestInfo.getProjectBasePath(), null, null);
+            RuntimeTestExprExecutor.evaluate(requestInfo.getExpVo(), Collections.emptyList(), requestInfo.getProjectBasePath(), null);
             return;
         }
         String cacheKey = CacheUtil.genCacheKey(className, methodName, requestInfo.getParameterTypeList());

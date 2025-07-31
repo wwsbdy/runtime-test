@@ -2,27 +2,25 @@ package com.zj.runtimetest.exp;
 
 import com.zj.runtimetest.AgentContextHolder;
 import com.zj.runtimetest.utils.HttpServletRequestUtil;
+import com.zj.runtimetest.utils.JsonUtil;
 import com.zj.runtimetest.utils.LogUtil;
+import com.zj.runtimetest.vo.IHttpServletRequest;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.Objects;
 
 /**
  * @author : jie.zhou
  * @date : 2025/7/31
  */
-@Getter(AccessLevel.PACKAGE)
 @EqualsAndHashCode
 public abstract class ExpressionExecutor {
+    @Getter(AccessLevel.PACKAGE)
     @Setter(AccessLevel.PACKAGE)
     private String classStr;
-    private Map<String, Object> headers;
-    private Map<String, Object> attributes;
 
     public abstract Object[] eval(Object[] args);
 
@@ -37,25 +35,11 @@ public abstract class ExpressionExecutor {
     }
 
     protected void addHeader(String name, Object value) {
-        if (!HttpServletRequestUtil.hasHttpServletRequest()) {
-            LogUtil.alwaysErr("[Agent] java.lang.ClassNotFoundException: javax.servlet.http.HttpServletRequest");
-            return;
-        }
-        if (Objects.isNull(headers)) {
-            headers = new LinkedHashMap<>();
-        }
-        headers.put(name, value);
+        HttpServletRequestUtil.addHeader(name, value);
     }
 
     protected void setAttribute(String name, Object value) {
-        if (!HttpServletRequestUtil.hasHttpServletRequest()) {
-            LogUtil.alwaysErr("[Agent] java.lang.ClassNotFoundException: javax.servlet.http.HttpServletRequest");
-            return;
-        }
-        if (Objects.isNull(attributes)) {
-            attributes = new LinkedHashMap<>();
-        }
-        attributes.put(name, value);
+        HttpServletRequestUtil.setAttribute(name, value);
     }
 
     protected void printBegin() {
@@ -73,5 +57,13 @@ public abstract class ExpressionExecutor {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    protected IHttpServletRequest getHttpServletRequest() {
+        return HttpServletRequestUtil.getHttpServletRequest();
+    }
+
+    protected String toJsonString(Object value) {
+        return JsonUtil.toJsonString(value);
     }
 }

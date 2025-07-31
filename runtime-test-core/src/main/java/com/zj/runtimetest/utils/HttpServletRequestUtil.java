@@ -2,13 +2,11 @@ package com.zj.runtimetest.utils;
 
 import com.zj.runtimetest.AgentContextHolder;
 import com.zj.runtimetest.exp.PureECJCompiler;
+import com.zj.runtimetest.vo.IHttpServletRequest;
 
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * @author : jie.zhou
@@ -17,61 +15,7 @@ import java.util.Objects;
 public class HttpServletRequestUtil {
 
     private static Boolean HAS_HTTP_SERVLET_REQUEST;
-
-
-    public static Object setRequestAttributes(Object httpServletRequest, Map<String, Object> attributes, Map<String, Object> headers) {
-        if (attributes == null || attributes.isEmpty()) {
-            attributes = new LinkedHashMap<>();
-        }
-        if (headers == null || headers.isEmpty()) {
-            headers = new LinkedHashMap<>();
-        }
-        if (Objects.isNull(httpServletRequest)) {
-            return setRequestAttributes(attributes, headers);
-        }
-        Method addHeader = FakeHttpServletRequestBuilder.ADD_HEADER;
-        Method setAttribute = FakeHttpServletRequestBuilder.SET_ATTRIBUTE;
-        if (Objects.nonNull(addHeader)) {
-            for (Map.Entry<String, Object> entry : headers.entrySet()) {
-                try {
-                    addHeader.invoke(httpServletRequest, entry.getKey(), entry.getValue());
-                } catch (IllegalAccessException | InvocationTargetException ignored) {
-                }
-            }
-        }
-        if (Objects.nonNull(setAttribute)) {
-            for (Map.Entry<String, Object> entry : attributes.entrySet()) {
-                try {
-                    setAttribute.invoke(httpServletRequest, entry.getKey(), entry.getValue());
-                } catch (IllegalAccessException | InvocationTargetException ignored) {
-                }
-            }
-        }
-        return httpServletRequest;
-    }
-
-    public static Object setRequestAttributes(Map<String, Object> attributes, Map<String, Object> headers) {
-        if (attributes == null || attributes.isEmpty()) {
-            attributes = new LinkedHashMap<>();
-        }
-        if (headers == null || headers.isEmpty()) {
-            headers = new LinkedHashMap<>();
-        }
-        Constructor<?> constructor = FakeHttpServletRequestBuilder.CONSTRUCTOR;
-        if (Objects.isNull(constructor)) {
-            LogUtil.alwaysErr("[Agent] FakeHttpServletRequest constructor build fail");
-            return null;
-        }
-        try {
-            Object fakeHttpServletRequest = constructor.newInstance(attributes, headers);
-            LogUtil.log("[Agent more] FakeHttpServletRequest build success");
-            return fakeHttpServletRequest;
-        } catch (Exception e) {
-            LogUtil.alwaysErr("[Agent] FakeHttpServletRequest build fail");
-        }
-        return null;
-    }
-
+    private static final ThreadLocal<IHttpServletRequest> HTTP_SERVLET_REQUEST = ThreadLocal.withInitial(() -> null);
 
     public static boolean isHttpServletRequest(Class<?> aClass) {
         return hasHttpServletRequest() && "javax.servlet.http.HttpServletRequest".equals(aClass.getName());
@@ -95,29 +39,67 @@ public class HttpServletRequestUtil {
         return HAS_HTTP_SERVLET_REQUEST = false;
     }
 
+    public static void addHeader(String name, Object value) {
+        if (!HttpServletRequestUtil.hasHttpServletRequest()) {
+            LogUtil.alwaysErr("[Agent] addHeader: java.lang.ClassNotFoundException: javax.servlet.http.HttpServletRequest");
+            return;
+        }
+        Optional.ofNullable(getHttpServletRequest()).ifPresent(request -> request.addHeader(name, value));
+    }
+
+    public static void setAttribute(String name, Object value) {
+        if (!HttpServletRequestUtil.hasHttpServletRequest()) {
+            LogUtil.alwaysErr("[Agent] setAttribute: java.lang.ClassNotFoundException: javax.servlet.http.HttpServletRequest");
+            return;
+        }
+        Optional.ofNullable(getHttpServletRequest()).ifPresent(request -> request.setAttribute(name, value));
+    }
+
+    public static synchronized IHttpServletRequest getHttpServletRequest() {
+        if (!HttpServletRequestUtil.hasHttpServletRequest()) {
+            LogUtil.alwaysErr("[Agent] getHttpServletRequest: java.lang.ClassNotFoundException: javax.servlet.http.HttpServletRequest");
+            return null;
+        }
+        IHttpServletRequest request = HTTP_SERVLET_REQUEST.get();
+        if (Objects.nonNull(request)) {
+            return request;
+        }
+        Constructor<IHttpServletRequest> constructor = FakeHttpServletRequestBuilder.CONSTRUCTOR;
+        if (Objects.isNull(constructor)) {
+            LogUtil.alwaysErr("[Agent] FakeHttpServletRequest constructor build fail");
+            return null;
+        }
+        try {
+            IHttpServletRequest fakeHttpServletRequest = constructor.newInstance();
+            LogUtil.log("[Agent more] FakeHttpServletRequest build success");
+            HTTP_SERVLET_REQUEST.set(fakeHttpServletRequest);
+            return fakeHttpServletRequest;
+        } catch (Exception e) {
+            LogUtil.alwaysErr("[Agent] FakeHttpServletRequest build fail: " + ThrowUtil.printStackTrace(e));
+        }
+        return null;
+    }
+
+    @SuppressWarnings("unchecked")
     public static class FakeHttpServletRequestBuilder {
-        static final Constructor<?> CONSTRUCTOR;
-        static final Method ADD_HEADER;
-        static final Method SET_ATTRIBUTE;
+        static final Constructor<IHttpServletRequest> CONSTRUCTOR;
 
         static {
-            Constructor<?> constructor = null;
-            Method addHeader = null;
-            Method setAttribute = null;
+            Constructor<IHttpServletRequest> constructor = null;
             try {
                 String fakeHttpServletRequestStr = "package agent;\n" +
                         "import org.springframework.web.context.request.RequestContextHolder;import org.springframework.web.context.request.ServletRequestAttributes;import javax.servlet.*;import javax.servlet.http.*;import java.io.BufferedReader;import java.security.Principal;import java.text.ParseException;import java.text.SimpleDateFormat;import java.util.*;\n" +
-                        "public class FakeHttpServletRequest implements HttpServletRequest {\n" +
+                        "public class FakeHttpServletRequest implements HttpServletRequest, com.zj.runtimetest.vo.IHttpServletRequest {\n" +
                         "    private final Map<String, Object> attributes, headers;\n" +
                         "    private static final TimeZone GMT = TimeZone.getTimeZone(\"GMT\");\n" +
                         "    private static final String[] DATE_FORMATS = {\"EEE, dd MMM yyyy HH:mm:ss zzz\", \"EEE, dd-MMM-yy HH:mm:ss zzz\", \"EEE MMM dd HH:mm:ss yyyy\"};\n" +
-                        "    public FakeHttpServletRequest(Map<String, Object> attributes, Map<String, Object> headers) { this.attributes = attributes;this.headers = headers;RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(this), true);}\n" +
+                        "    public FakeHttpServletRequest() { this.attributes = new LinkedHashMap<>();this.headers = new LinkedHashMap<>();RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(this), true);}\n" +
                         "    @Override public String getAuthType() { return \"\"; }\n" +
                         "    @Override public Cookie[] getCookies() { return new Cookie[0]; }\n" +
                         "    @Override public long getDateHeader(String s) { Object value = headers.get(s); if (Objects.isNull(value)) { return -1; } if (value instanceof Date) { return ((Date) value).getTime(); } else if (value instanceof Number) { return ((Number) value).longValue(); } else if (value instanceof String) { return parseDateHeader(s, (String) value); } throw new IllegalArgumentException( \"Value for header '\" + s + \"' is not a Date, Number, or String: \" + value); }\n" +
                         "    private long parseDateHeader(String name, String value) { for (String dateFormat : DATE_FORMATS) { SimpleDateFormat simpleDateFormat = new SimpleDateFormat(dateFormat, Locale.US); simpleDateFormat.setTimeZone(GMT); try { return simpleDateFormat.parse(value).getTime(); }  catch (ParseException ignored) { } } throw new IllegalArgumentException(\"Cannot parse date value '\" + value + \"' for '\" + name + \"' header\"); }\n" +
                         "    @Override public String getHeader(String s) { return Objects.toString(headers.get(s), null); }\n" +
-                        "    public void addHeader(String name, Object value) { headers.put(name, value); }\n" +
+                        "    @Override public void addHeader(String name, Object value) { headers.put(name, value); }\n" +
                         "    @Override public Enumeration<String> getHeaders(String s) { return Collections.enumeration((Collection<String>) headers.get(s)); }\n" +
                         "    @Override public Enumeration<String> getHeaderNames() { return Collections.enumeration(headers.keySet()); }\n" +
                         "    @Override public int getIntHeader(String s) { return headers.get(s) instanceof Number ? ((Number) headers.get(s)).intValue() : -1; }\n" +
@@ -184,18 +166,12 @@ public class HttpServletRequestUtil {
                         "    @Override public AsyncContext getAsyncContext() { return null; }\n" +
                         "    @Override public DispatcherType getDispatcherType() { return null; }\n" +
                         "}";
-                Class<?> clazz = PureECJCompiler.buildClass("agent.FakeHttpServletRequest", fakeHttpServletRequestStr);
-                constructor = clazz.getConstructor(Map.class, Map.class);
-                // addHeader(String name, Object value)
-                addHeader = clazz.getMethod("addHeader", String.class, Object.class);
-                // setAttribute(String s, Object o)
-                setAttribute = clazz.getMethod("setAttribute", String.class, Object.class);
+                Class<IHttpServletRequest> clazz = (Class<IHttpServletRequest>) PureECJCompiler.buildClass("agent.FakeHttpServletRequest", fakeHttpServletRequestStr);
+                constructor = clazz.getConstructor();
             } catch (NoSuchMethodException e) {
-                LogUtil.alwaysErr("[Agent] FakeHttpServletRequestClass init fail");
+                LogUtil.alwaysErr("[Agent] FakeHttpServletRequestClass init fail" + ThrowUtil.printStackTrace(e));
             }
             CONSTRUCTOR = constructor;
-            ADD_HEADER = addHeader;
-            SET_ATTRIBUTE = setAttribute;
         }
     }
 }

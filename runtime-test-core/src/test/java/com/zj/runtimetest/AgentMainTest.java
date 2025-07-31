@@ -1,6 +1,6 @@
 package com.zj.runtimetest;
 
-import com.zj.runtimetest.exp.RuntimeTestExprExecutor;
+import com.zj.runtimetest.exp.ExpressionExecutor;
 import com.zj.runtimetest.utils.AgentUtil;
 import com.zj.runtimetest.utils.JsonUtil;
 import com.zj.runtimetest.vo.*;
@@ -82,7 +82,7 @@ public class AgentMainTest {
         requestInfo.setParameterTypeList(Collections.singletonList(new MethodParamInfo("param", "java.lang.String")));
         requestInfo.setRequestJson("{\"param\":\"mmm\"}");
         requestInfo.setExpVo(new ExpressionVo("System.out.println(param.toUpperCase());param += param.toUpperCase()", null));
-        RuntimeTestExprExecutor.ExpressionExecutor executor = AgentUtil.getExecutor(method, requestInfo);
+        ExpressionExecutor executor = AgentUtil.getExecutor(method, requestInfo);
         if (executor != null) {
             Object[] eval = executor.eval(new Object[]{"abc"});
             System.out.println();
@@ -100,7 +100,7 @@ public class AgentMainTest {
         requestInfo.setParameterTypeList(Collections.singletonList(new MethodParamInfo("param", "java.util.List<java.lang.String>")));
         requestInfo.setRequestJson("{\"param\":\"mmm\"}");
         requestInfo.setExpVo(new ExpressionVo("System.out.println(param.get(0).toUpperCase());", null));
-        RuntimeTestExprExecutor.ExpressionExecutor executor = AgentUtil.getExecutor(method, requestInfo);
+        ExpressionExecutor executor = AgentUtil.getExecutor(method, requestInfo);
         if (executor != null) {
             Object[] eval = executor.eval(new Object[]{Collections.singletonList("abc")});
             System.out.println();

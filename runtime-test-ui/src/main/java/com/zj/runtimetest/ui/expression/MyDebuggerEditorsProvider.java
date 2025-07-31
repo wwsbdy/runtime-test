@@ -13,6 +13,8 @@ import org.jetbrains.java.debugger.JavaDebuggerEditorsProvider;
  */
 public class MyDebuggerEditorsProvider extends JavaDebuggerEditorsProvider {
 
+    public static final MyDebuggerEditorsProvider INSTANCE = new MyDebuggerEditorsProvider();
+
     @Override
     protected PsiFile createExpressionCodeFragment(@NotNull Project project, @NotNull String text, @Nullable PsiElement context, boolean isPhysical) {
         PsiFile expressionCodeFragment = super.createExpressionCodeFragment(project, text, context, isPhysical);
@@ -23,15 +25,17 @@ public class MyDebuggerEditorsProvider extends JavaDebuggerEditorsProvider {
     private void setChecker(PsiFile expressionCodeFragment) {
         if (expressionCodeFragment instanceof JavaCodeFragment) {
             ((JavaCodeFragment) expressionCodeFragment).setVisibilityChecker((psiElement, psiElement1) -> {
-                if (psiElement instanceof PsiMethod method1) {
-                    if (method1.hasModifierProperty(PsiModifier.PRIVATE)) {
-                        return JavaCodeFragment.VisibilityChecker.Visibility.NOT_VISIBLE;
+                if (psiElement instanceof PsiMethod) {
+                    if (((PsiMethod) psiElement).hasModifierProperty(PsiModifier.PUBLIC)) {
+                        return JavaCodeFragment.VisibilityChecker.Visibility.VISIBLE;
                     }
+                    return JavaCodeFragment.VisibilityChecker.Visibility.NOT_VISIBLE;
                 }
-                if (psiElement instanceof PsiField field) {
-                    if (field.hasModifierProperty(PsiModifier.PRIVATE)) {
-                        return JavaCodeFragment.VisibilityChecker.Visibility.NOT_VISIBLE;
+                if (psiElement instanceof PsiField) {
+                    if (((PsiField) psiElement).hasModifierProperty(PsiModifier.PUBLIC)) {
+                        return JavaCodeFragment.VisibilityChecker.Visibility.VISIBLE;
                     }
+                    return JavaCodeFragment.VisibilityChecker.Visibility.NOT_VISIBLE;
                 }
                 return JavaCodeFragment.VisibilityChecker.Visibility.VISIBLE;
             });
