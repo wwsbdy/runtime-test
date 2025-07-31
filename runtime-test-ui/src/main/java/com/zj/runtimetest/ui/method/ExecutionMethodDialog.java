@@ -16,7 +16,7 @@ import com.zj.runtimetest.cache.RuntimeTestState;
 import com.zj.runtimetest.json.JsonEditorField;
 import com.zj.runtimetest.json.JsonLanguage;
 import com.zj.runtimetest.language.PluginBundle;
-import com.zj.runtimetest.ui.ExpressionDialog;
+import com.zj.runtimetest.ui.expression.ExpressionDialog;
 import com.zj.runtimetest.utils.ExecutorUtil;
 import com.zj.runtimetest.utils.JsonUtil;
 import com.zj.runtimetest.utils.RunUtil;

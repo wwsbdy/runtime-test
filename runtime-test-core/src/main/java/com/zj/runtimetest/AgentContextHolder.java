@@ -1,5 +1,6 @@
 package com.zj.runtimetest;
 
+import com.zj.runtimetest.exp.RuntimeTestExprExecutor;
 import com.zj.runtimetest.utils.CacheUtil;
 import com.zj.runtimetest.utils.ClassUtil;
 import com.zj.runtimetest.utils.JsonUtil;
@@ -31,6 +32,11 @@ public class AgentContextHolder {
     public static void invoke(RequestInfo requestInfo) throws ClassNotFoundException, InvocationTargetException, NoSuchMethodException, IllegalAccessException {
         String className = requestInfo.getClassName();
         String methodName = requestInfo.getMethodName();
+        if (Objects.isNull(className) || className.isEmpty()
+                || Objects.isNull(methodName) || methodName.isEmpty()) {
+            RuntimeTestExprExecutor.evaluate(requestInfo.getExpVo(), Collections.emptyList(), requestInfo.getProjectBasePath(), null, null);
+            return;
+        }
         String cacheKey = CacheUtil.genCacheKey(className, methodName, requestInfo.getParameterTypeList());
         // 打印cacheKey
         LogUtil.log("[Agent more] cacheKey: " + cacheKey);

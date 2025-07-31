@@ -1,4 +1,4 @@
-package com.zj.runtimetest.ui;
+package com.zj.runtimetest.ui.expression;
 
 import com.intellij.ide.highlighter.JavaFileType;
 import com.intellij.lang.java.JavaLanguage;
@@ -13,7 +13,6 @@ import com.intellij.xdebugger.impl.XSourcePositionImpl;
 import com.intellij.xdebugger.impl.ui.XDebuggerExpressionEditor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jetbrains.java.debugger.JavaDebuggerEditorsProvider;
 
 import java.util.Objects;
 
@@ -44,7 +43,7 @@ public class ExpressionEditorFactory {
         // 创建 SourcePosition（控制作用域）
         XSourcePosition position = XSourcePositionImpl.createByOffset(virtualFile, offset);
         // 构建 XDebuggerExpressionEditor
-        return new XDebuggerExpressionEditor(project, new JavaDebuggerEditorsProvider(), null, position, xExpression, true, true, false);
+        return new XDebuggerExpressionEditor(project, new MyDebuggerEditorsProvider(), null, position, xExpression, true, true, false);
     }
 
     public static String generateFakeClassText(PsiMethod psiMethod) {
