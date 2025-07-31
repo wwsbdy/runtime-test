@@ -98,10 +98,14 @@ public class ScriptEditorPanel {
         AnAction runAction = new AnAction(AllIcons.Actions.Execute) {
             @Override
             public void actionPerformed(@NotNull AnActionEvent e) {
-                if (Objects.nonNull(pidComboBox.getItem())
+                // idea version 243
+//        Long pid = pidComboBox.getItem();
+                // idea version 201
+                Long pid = (Long) pidComboBox.getSelectedItem();
+                if (Objects.nonNull(pid)
                         && Objects.nonNull(expressionField.getExpression())
                         && StringUtils.isNotBlank(expressionField.getExpression().getExpression())) {
-                    cacheVo.setPid(pidComboBox.getItem());
+                    cacheVo.setPid(pid);
                     cacheVo.setExpression(expressionField.getExpression());
                     RunUtil.run(project, cacheVo);
                     runtimeTestState.putCache(KEY, cacheVo);
