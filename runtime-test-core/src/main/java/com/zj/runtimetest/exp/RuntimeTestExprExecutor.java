@@ -1,14 +1,9 @@
 package com.zj.runtimetest.exp;
 
-import com.zj.runtimetest.utils.HttpServletRequestUtil;
 import com.zj.runtimetest.utils.LogUtil;
 import com.zj.runtimetest.utils.ThrowUtil;
 import com.zj.runtimetest.vo.ExpressionVo;
 import com.zj.runtimetest.vo.MethodParamTypeInfo;
-import lombok.AccessLevel;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -23,57 +18,6 @@ import java.util.stream.Stream;
 public class RuntimeTestExprExecutor {
     public static final Map<String, ExpressionExecutor> CACHE = new ConcurrentHashMap<>();
 
-    @Getter(AccessLevel.PRIVATE)
-    @EqualsAndHashCode
-    public abstract static class ExpressionExecutor {
-        @Setter(AccessLevel.PRIVATE)
-        private String classStr;
-        private Map<String, Object> headers;
-        private Map<String, Object> attributes;
-
-        public abstract Object[] eval(Object[] args);
-
-        protected void fakeMethod(Object... args) {
-            System.err.println("[Agent] Don not execute me");
-        }
-
-        protected void printPreProcessingMethod() {
-            if (Objects.nonNull(classStr) && !classStr.isEmpty()) {
-                System.out.println(classStr);
-            }
-        }
-
-        protected void addHeader(String name, Object value) {
-            if (!HttpServletRequestUtil.hasHttpServletRequest()) {
-                System.err.println("[Agent] java.lang.ClassNotFoundException: javax.servlet.http.HttpServletRequest");
-                return;
-            }
-            if (Objects.isNull(headers)) {
-                headers = new LinkedHashMap<>();
-            }
-            headers.put(name, value);
-        }
-
-        protected void setAttribute(String name, Object value) {
-            if (!HttpServletRequestUtil.hasHttpServletRequest()) {
-                System.err.println("[Agent] java.lang.ClassNotFoundException: javax.servlet.http.HttpServletRequest");
-                return;
-            }
-            if (Objects.isNull(attributes)) {
-                attributes = new LinkedHashMap<>();
-            }
-            attributes.put(name, value);
-        }
-
-        protected void printBegin() {
-            LogUtil.log("[Agent more] pre-processing begin");
-        }
-
-        protected void printEnd() {
-            LogUtil.log("[Agent more] pre-processing end");
-        }
-    }
-
     public static ExpressionExecutor getExecutor(ExpressionVo expVo, List<MethodParamTypeInfo> parameterTypeList, String projectBasePath) {
         if (Objects.isNull(expVo)) {
             return ExpressionExecutorFactory.EMPTY;
@@ -82,7 +26,7 @@ public class RuntimeTestExprExecutor {
         try {
             compiled = compileInMemory(expVo, parameterTypeList);
         } catch (Throwable t) {
-            t.printStackTrace();
+            LogUtil.alwaysErr(ThrowUtil.printStackTrace(t));
             compiled = ExpressionExecutorFactory.ERROR;
         }
         return compiled;
@@ -91,8 +35,7 @@ public class RuntimeTestExprExecutor {
     public static Object[] evaluate(ExpressionVo expVo,
                                     List<MethodParamTypeInfo> parameterTypeList,
                                     String projectBasePath,
-                                    Object[] args,
-                                    Object httpServletRequest) {
+                                    Object[] args) {
         if (Objects.isNull(expVo)) {
             return args;
         }
@@ -101,8 +44,8 @@ public class RuntimeTestExprExecutor {
         ExpressionExecutor executor = CACHE.get(key);
         if (Objects.nonNull(executor)) {
             if (ExpressionExecutorFactory.ERROR == executor) {
-                LogUtil.log("[Agent more] build pre-processing class is cached, error");
-            } else if (executor == ExpressionExecutorFactory.EMPTY) {
+                LogUtil.err("[Agent more] build pre-processing class is cached, error");
+            } else if (ExpressionExecutorFactory.EMPTY == executor) {
                 LogUtil.log("[Agent more] build pre-processing class is cached, empty");
             } else {
                 LogUtil.log("[Agent more] build pre-processing class is cached, code: " + executor.getClassStr());
@@ -112,12 +55,7 @@ public class RuntimeTestExprExecutor {
             CACHE.put(key, executor);
         }
         try {
-            Object[] resultArgs = executor.eval(args);
-            // 设置 HttpServletRequest到上下文 防止空指针
-            if (HttpServletRequestUtil.hasHttpServletRequest()) {
-                HttpServletRequestUtil.setRequestAttributes(httpServletRequest, executor.getAttributes(), executor.getHeaders());
-            }
-            return resultArgs;
+            return executor.eval(args);
         } catch (Throwable t) {
             CACHE.put(key, ExpressionExecutorFactory.ERROR);
             throw new RuntimeException(t);
@@ -138,7 +76,7 @@ public class RuntimeTestExprExecutor {
         return cacheKey.toString();
     }
 
-    public static RuntimeTestExprExecutor.ExpressionExecutor compileInMemory(ExpressionVo expVo, List<MethodParamTypeInfo> parameterTypes) throws Exception {
+    public static ExpressionExecutor compileInMemory(ExpressionVo expVo, List<MethodParamTypeInfo> parameterTypes) throws Exception {
 
         String expr = expVo.getMyExpression();
         if (expr == null || expr.isEmpty()) {
@@ -165,7 +103,7 @@ public class RuntimeTestExprExecutor {
             LogUtil.err("[Agent more] build pre-processing class fail: " + ThrowUtil.printStackTrace(e));
             return ExpressionExecutorFactory.ERROR;
         }
-        RuntimeTestExprExecutor.ExpressionExecutor expressionExecutor = (RuntimeTestExprExecutor.ExpressionExecutor) clazz.getDeclaredConstructor().newInstance();
+        ExpressionExecutor expressionExecutor = (ExpressionExecutor) clazz.getDeclaredConstructor().newInstance();
         expressionExecutor.setClassStr(source);
         return expressionExecutor;
     }
@@ -176,7 +114,7 @@ public class RuntimeTestExprExecutor {
         for (String imp : imports) {
             sb.append("import ").append(imp).append(";\n");
         }
-        sb.append("import com.zj.runtimetest.exp.RuntimeTestExprExecutor.ExpressionExecutor;\n\n");
+        sb.append("import com.zj.runtimetest.exp.ExpressionExecutor;\n\n");
         sb.append("public class ").append(className)
                 .append(" extends ExpressionExecutor {\n")
                 .append("    public Object[] eval(Object[] args) {\n")

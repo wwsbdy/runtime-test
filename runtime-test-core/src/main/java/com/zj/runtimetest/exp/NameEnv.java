@@ -2,6 +2,8 @@ package com.zj.runtimetest.exp;
 
 import com.zj.runtimetest.AgentContextHolder;
 import com.zj.runtimetest.utils.IOUtil;
+import com.zj.runtimetest.utils.LogUtil;
+import com.zj.runtimetest.utils.ThrowUtil;
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileReader;
 import org.eclipse.jdt.internal.compiler.env.INameEnvironment;
@@ -39,7 +41,7 @@ public class NameEnv implements INameEnvironment {
                         new ClassFileReader(bytes, className.toCharArray()), null);
             }
         } catch (Throwable e) {
-            e.printStackTrace();
+            LogUtil.alwaysErr(ThrowUtil.printStackTrace(e));
             return null;
         }
     }

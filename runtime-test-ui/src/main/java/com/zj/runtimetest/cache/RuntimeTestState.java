@@ -9,11 +9,9 @@ import com.zj.runtimetest.vo.ProcessVo;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 
 /**
  * @author : jie.zhou
@@ -28,6 +26,8 @@ public class RuntimeTestState implements PersistentStateComponent<RuntimeTestSta
     public Map<String, CacheVo> cache = new ConcurrentHashMap<>();
 
     private final Map<Long, ProcessVo> pidProcessMap = new LinkedHashMap<>();
+
+    private final List<Consumer<List<Long>>> listeners = new ArrayList<>();
 
     public static RuntimeTestState getInstance(Project project) {
         return project.getService(RuntimeTestState.class);
@@ -56,6 +56,7 @@ public class RuntimeTestState implements PersistentStateComponent<RuntimeTestSta
 
     public void putPidProcessMap(Long pid, ProcessVo process) {
         pidProcessMap.put(pid, process);
+        notifyListeners();
     }
 
     public ProcessVo getProcess(Long pid) {
@@ -64,6 +65,7 @@ public class RuntimeTestState implements PersistentStateComponent<RuntimeTestSta
 
     public void removePidProcessMap(Long pid) {
         pidProcessMap.remove(pid);
+        notifyListeners();
     }
 
     public boolean containsPid(Long pid) {
@@ -72,6 +74,17 @@ public class RuntimeTestState implements PersistentStateComponent<RuntimeTestSta
 
     public Set<Long> getPids() {
         return pidProcessMap.keySet();
+    }
+
+    public synchronized void addListener(Consumer<List<Long>> listener) {
+        listeners.add(listener);
+    }
+
+    private void notifyListeners() {
+        List<Long> copy = new ArrayList<>(getPids());
+        for (Consumer<List<Long>> listener : listeners) {
+            listener.accept(copy);
+        }
     }
 }
 

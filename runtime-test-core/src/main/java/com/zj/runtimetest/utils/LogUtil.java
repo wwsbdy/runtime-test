@@ -6,7 +6,7 @@ package com.zj.runtimetest.utils;
  */
 public class LogUtil {
     public static final String RED_START = "\u001B[31m";
-//    public static final String GREEN_START = "\u001B[32m";
+    //    public static final String GREEN_START = "\u001B[32m";
     public static final String END = "\u001B[0m";
     private static final ThreadLocal<Boolean> DETAIL_LOG = ThreadLocal.withInitial(() -> false);
 
@@ -30,21 +30,29 @@ public class LogUtil {
         DETAIL_LOG.remove();
     }
 
-    public static void log(String message) {
-        log(isDetailLogEnabled(), message);
+    public static void log(Object message) {
+        log(isDetailLogEnabled(), String.valueOf(message));
     }
 
-    public static void err(String message) {
-        err(isDetailLogEnabled(), message);
+    public static void err(Object message) {
+        err(isDetailLogEnabled(), String.valueOf(message));
     }
 
-    public static void log(boolean detailLog, String message) {
+    public static void alwaysLog(Object message) {
+        System.out.println(message);
+    }
+
+    public static void alwaysErr(Object message) {
+        System.out.println(RED_START + message + END);
+    }
+
+    private static void log(boolean detailLog, String message) {
         if (detailLog) {
             System.out.println(message);
         }
     }
 
-    public static void err(boolean detailLog, String message) {
+    private static void err(boolean detailLog, String message) {
         if (detailLog) {
             System.out.println(RED_START + message + END);
         }

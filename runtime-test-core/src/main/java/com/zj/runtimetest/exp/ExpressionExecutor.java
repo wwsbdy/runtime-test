@@ -1,0 +1,69 @@
+package com.zj.runtimetest.exp;
+
+import com.zj.runtimetest.AgentContextHolder;
+import com.zj.runtimetest.utils.HttpServletRequestUtil;
+import com.zj.runtimetest.utils.JsonUtil;
+import com.zj.runtimetest.utils.LogUtil;
+import com.zj.runtimetest.vo.IHttpServletRequest;
+import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
+
+import java.util.Objects;
+
+/**
+ * @author : jie.zhou
+ * @date : 2025/7/31
+ */
+@EqualsAndHashCode
+public abstract class ExpressionExecutor {
+    @Getter(AccessLevel.PACKAGE)
+    @Setter(AccessLevel.PACKAGE)
+    private String classStr;
+
+    public abstract Object[] eval(Object[] args);
+
+    protected void fakeMethod(Object... args) {
+        LogUtil.alwaysErr("[Agent] Don not execute me");
+    }
+
+    protected void printPreProcessingMethod() {
+        if (Objects.nonNull(classStr) && !classStr.isEmpty()) {
+            LogUtil.alwaysLog(classStr);
+        }
+    }
+
+    protected void addHeader(String name, Object value) {
+        HttpServletRequestUtil.addHeader(name, value);
+    }
+
+    protected void setAttribute(String name, Object value) {
+        HttpServletRequestUtil.setAttribute(name, value);
+    }
+
+    protected void printBegin() {
+        LogUtil.log("[Agent more] pre-processing begin");
+    }
+
+    protected void printEnd() {
+        LogUtil.log("[Agent more] pre-processing end");
+    }
+
+    @SuppressWarnings("unchecked")
+    protected <T> T getBean(Class<T> clz) {
+        try {
+            return (T) AgentContextHolder.getBean(clz.getName()).getBean();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    protected IHttpServletRequest getHttpServletRequest() {
+        return HttpServletRequestUtil.getHttpServletRequest();
+    }
+
+    protected String toJsonString(Object value) {
+        return JsonUtil.toJsonString(value);
+    }
+}

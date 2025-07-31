@@ -1,5 +1,6 @@
 package com.zj.runtimetest;
 
+import com.zj.runtimetest.exp.RuntimeTestExprExecutor;
 import com.zj.runtimetest.utils.CacheUtil;
 import com.zj.runtimetest.utils.ClassUtil;
 import com.zj.runtimetest.utils.JsonUtil;
@@ -24,13 +25,18 @@ public class AgentContextHolder {
     public static final ClassLoader DEFAULT_CLASS_LOADER = Thread.currentThread().getContextClassLoader();
 
     public static void setContext(Object ctx) {
-        System.out.println("[Agent] ApplicationContext injected." + ctx.getClass().getName());
+        LogUtil.alwaysLog("[Agent] ApplicationContext injected." + ctx.getClass().getName());
         CONTEXT_CLASS_LOADER_SET.add(ctx);
     }
 
     public static void invoke(RequestInfo requestInfo) throws ClassNotFoundException, InvocationTargetException, NoSuchMethodException, IllegalAccessException {
         String className = requestInfo.getClassName();
         String methodName = requestInfo.getMethodName();
+        if (Objects.isNull(className) || className.isEmpty()
+                || Objects.isNull(methodName) || methodName.isEmpty()) {
+            RuntimeTestExprExecutor.evaluate(requestInfo.getExpVo(), Collections.emptyList(), requestInfo.getProjectBasePath(), null);
+            return;
+        }
         String cacheKey = CacheUtil.genCacheKey(className, methodName, requestInfo.getParameterTypeList());
         // 打印cacheKey
         LogUtil.log("[Agent more] cacheKey: " + cacheKey);
@@ -43,7 +49,7 @@ public class AgentContextHolder {
                 BeanInfo beanInfo = getBean(className);
                 Object bean = beanInfo.getBean();
                 if (Objects.isNull(bean)) {
-                    System.err.println("[Agent] Bean not found: " + className);
+                    LogUtil.alwaysErr("[Agent] Bean not found: " + className);
                     return;
                 }
                 methodInvokeInfo = new MethodInvokeInfo(requestInfo, beanInfo);
@@ -62,12 +68,12 @@ public class AgentContextHolder {
         }
         LogUtil.log("[Agent more] " + className + "." + methodName + "() is invoked.");
         Object result = methodInvokeInfo.invoke(requestInfo.getExpVo(), requestInfo.getRequestJson());
-        System.out.println("[Agent] " + methodName + "() invoked successfully." + (methodInvokeInfo.isReturnValue() ? " result: " + JsonUtil.toJsonString(result) : ""));
+        LogUtil.alwaysLog("[Agent] " + methodName + "() invoked successfully." + (methodInvokeInfo.isReturnValue() ? " result: " + JsonUtil.toJsonString(result) : ""));
     }
 
     public static BeanInfo getBean(String className) {
         if (Objects.isNull(className) || className.isEmpty()) {
-            System.err.println("[Agent] className is null.");
+            LogUtil.alwaysErr("[Agent] className is null.");
             return BeanInfo.empty();
         }
         BeanInfo cacheBeanInfo = BEAN_CACHE.get(className);
@@ -84,7 +90,7 @@ public class AgentContextHolder {
             try {
                 initContextClassLoaderMap();
             } catch (Exception e) {
-                System.err.println("[Agent] init context classLoader map failed: " + e.getMessage());
+                LogUtil.alwaysErr("[Agent] init context classLoader map failed: " + e.getMessage());
             }
         }
         if (CLASS_LOADER_CONTEXT_MAP.isEmpty()) {
@@ -132,12 +138,12 @@ public class AgentContextHolder {
     private static void initContextClassLoaderMap() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         synchronized (AgentContextHolder.class) {
             if (isInit) {
-                System.out.println("[Agent] init context classLoader map is already.");
+                LogUtil.alwaysLog("[Agent] init context classLoader map is already.");
                 return;
             }
             isInit = true;
             if (CONTEXT_CLASS_LOADER_SET.isEmpty()) {
-                System.out.println("[Agent] init context classLoader map is empty.");
+                LogUtil.alwaysLog("[Agent] init context classLoader map is empty.");
                 CONTEXT_CLASS_LOADER_SET = null;
                 return;
             }
@@ -158,7 +164,7 @@ public class AgentContextHolder {
                         CLASS_LOADER_CONTEXT_MAP.computeIfAbsent(classLoader, k -> new ObjCache<>()).put(context, 1);
                     }
                 }
-                System.out.println("[Agent] " + context + " init classLoaders: " + classLoaders);
+                LogUtil.alwaysLog("[Agent] " + context + " init classLoaders: " + classLoaders);
             }
             CONTEXT_CLASS_LOADER_SET.clear();
             CONTEXT_CLASS_LOADER_SET = null;

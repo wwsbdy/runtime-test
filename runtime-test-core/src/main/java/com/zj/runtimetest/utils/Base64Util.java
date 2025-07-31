@@ -17,7 +17,7 @@ public class Base64Util {
             byte[] decodedBytes = Base64.getDecoder().decode(str);
             return new String(decodedBytes, StandardCharsets.UTF_8);
         } catch (Exception e) {
-            System.err.println("[Agent] Base64 decode fail: " + str);
+            LogUtil.alwaysErr("[Agent] Base64 decode fail: " + str);
             return null;
         }
     }

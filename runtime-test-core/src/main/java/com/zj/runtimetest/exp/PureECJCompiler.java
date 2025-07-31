@@ -1,5 +1,6 @@
 package com.zj.runtimetest.exp;
 
+import com.zj.runtimetest.utils.LogUtil;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.internal.compiler.ClassFile;
 import org.eclipse.jdt.internal.compiler.Compiler;
@@ -35,7 +36,7 @@ public class PureECJCompiler {
                     if (result.hasErrors()) {
                         for (IProblem problem : result.getProblems()) {
                             if (problem.isError()) {
-                                System.err.println(problem);
+                                LogUtil.alwaysErr(problem);
                             }
                         }
                         throw new RuntimeException("Compilation failed with errors");

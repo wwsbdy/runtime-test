@@ -16,7 +16,7 @@ public class ThrowUtil {
             throwable.printStackTrace(pw);
             return sw.toString();
         } catch (IOException e) {
-            System.err.println("failed: " + throwable.getMessage());
+            LogUtil.alwaysErr("failed: " + throwable.getMessage());
         }
         return "";
     }

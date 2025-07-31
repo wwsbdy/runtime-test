@@ -1,5 +1,6 @@
 package com.zj.runtimetest.utils;
 
+import com.zj.runtimetest.exp.ExpressionExecutor;
 import com.zj.runtimetest.exp.RuntimeTestExprExecutor;
 import com.zj.runtimetest.vo.MethodParamInfo;
 import com.zj.runtimetest.vo.MethodParamTypeInfo;
@@ -67,7 +68,7 @@ public class AgentUtil {
         run(requestInfo);
     }
 
-    public static RuntimeTestExprExecutor.ExpressionExecutor getExecutor(Method method, RequestInfo requestInfo) throws Exception {
+    public static ExpressionExecutor getExecutor(Method method, RequestInfo requestInfo) throws Exception {
         Type[] parameterTypes = method.getGenericParameterTypes();
         List<MethodParamInfo> parameterList = requestInfo.getParameterTypeList();
         List<MethodParamTypeInfo> parameterTypeList = new ArrayList<>();
