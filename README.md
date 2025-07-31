@@ -126,8 +126,12 @@ Notes:<br>
 - Save entered information even when canceled
 - Remove unnecessary cached data
 - Fixed the error log sequence issue
+- The <b>getBean()</b> method can now be invoked during preprocessing to obtain bean objects
+- Added a new window for executing scripts on the right side
 
 
 - 取消也保存填写的信息
 - 去掉不必要的缓存信息
 - 解决error日志顺序问题
+- 可在前置处理中调用 <b>getBean()</b> 获取bean对象
+- 右边侧边栏新增执行脚本窗口

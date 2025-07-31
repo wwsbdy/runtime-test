@@ -1,11 +1,5 @@
-package com.zj.runtimetest.ui;
+package com.zj.runtimetest.ui.method;
 
-import com.intellij.execution.Executor;
-import com.intellij.execution.ExecutorRegistry;
-import com.intellij.execution.ui.ConsoleView;
-import com.intellij.execution.ui.ExecutionConsole;
-import com.intellij.execution.ui.RunContentDescriptor;
-import com.intellij.execution.ui.RunContentManager;
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
@@ -22,6 +16,7 @@ import com.zj.runtimetest.cache.RuntimeTestState;
 import com.zj.runtimetest.json.JsonEditorField;
 import com.zj.runtimetest.json.JsonLanguage;
 import com.zj.runtimetest.language.PluginBundle;
+import com.zj.runtimetest.ui.ExpressionDialog;
 import com.zj.runtimetest.utils.ExecutorUtil;
 import com.zj.runtimetest.utils.JsonUtil;
 import com.zj.runtimetest.utils.RunUtil;
@@ -30,7 +25,6 @@ import com.zj.runtimetest.vo.ProcessVo;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -45,9 +39,9 @@ import java.util.concurrent.CompletableFuture;
  */
 @Setter
 @Getter
-public class RuntimeTestDialog extends DialogWrapper {
+public class ExecutionMethodDialog extends DialogWrapper {
 
-    private static final Logger log = Logger.getInstance(RuntimeTestDialog.class);
+    private static final Logger log = Logger.getInstance(ExecutionMethodDialog.class);
 
 
     private final Project project;
@@ -68,7 +62,7 @@ public class RuntimeTestDialog extends DialogWrapper {
     private JButton preMethodButton;
     private JBCheckBox logDetailCheckBox;
 
-    public RuntimeTestDialog(Project project, String cacheKey, CacheVo cache, String defaultJson, PsiMethod psiMethod) {
+    public ExecutionMethodDialog(Project project, String cacheKey, CacheVo cache, String defaultJson, PsiMethod psiMethod) {
         super(true);
         // 是否允许拖拽的方式扩大或缩小
         setResizable(true);
@@ -87,7 +81,7 @@ public class RuntimeTestDialog extends DialogWrapper {
         this.preMethodButton = new JButton(AllIcons.Nodes.Function);
         this.preMethodButton.setToolTipText(PluginBundle.get("dialog.preMethodFunction.title"));
         this.preMethodButton.addActionListener(event -> {
-            PreMethodExpressionDialog expressionDialog = new PreMethodExpressionDialog(project, cache, psiMethod);
+            ExpressionDialog expressionDialog = new ExpressionDialog(project, cache, psiMethod);
             Disposer.register(getDisposable(), expressionDialog.getDisposable());
             expressionDialog.show();
         });
@@ -212,7 +206,7 @@ public class RuntimeTestDialog extends DialogWrapper {
         }
 
         RuntimeTestState.getInstance(project).putCache(cacheKey, cache);
-        toFrontRunContent(pid);
+        ExecutorUtil.toFrontRunContent(project, pid);
         CompletableFuture.runAsync(() -> RunUtil.run(project, cache))
                 .exceptionally(throwable -> {
                     log.error("run error", throwable);
@@ -230,43 +224,6 @@ public class RuntimeTestDialog extends DialogWrapper {
         cache.setRequestJson(jsonContentText);
         RuntimeTestState.getInstance(project).putCache(cacheKey, cache);
         super.doCancelAction();
-    }
-
-    /**
-     * 跳转指定的Run/Debug窗口
-     *
-     * @param pid 进程id
-     */
-    private void toFrontRunContent(Long pid) {
-        if (Objects.isNull(pid)) {
-            log.info("toFrontRunContent pid is null");
-            return;
-        }
-        ProcessVo process = RuntimeTestState.getInstance(project).getProcess(pid);
-        if (Objects.isNull(process) || Objects.isNull(process.getExecutionId()) || StringUtils.isEmpty(process.getExecutorId())) {
-            log.info("toFrontRunContent process is null");
-            return;
-        }
-        Executor executor = ExecutorRegistry.getInstance().getExecutorById(process.getExecutorId());
-        if (Objects.isNull(executor)) {
-            log.info("toFrontRunContent executor is null");
-            return;
-        }
-        RunContentManager runContentManager = RunContentManager.getInstance(project);
-        RunContentDescriptor runContentDescriptor = runContentManager.getAllDescriptors().stream()
-                .filter(descriptor -> process.getExecutionId().equals(descriptor.getExecutionId()))
-                .findFirst()
-                .orElse(null);
-        if (Objects.isNull(runContentDescriptor)) {
-            log.info("toFrontRunContent runContentDescriptor is null");
-            return;
-        }
-        runContentManager.toFrontRunContent(executor, runContentDescriptor);
-        ExecutionConsole console = runContentDescriptor.getExecutionConsole();
-        if (console instanceof ConsoleView) {
-            ConsoleView consoleView = (ConsoleView) console;
-            consoleView.requestScrollingToEnd();
-        }
     }
 
     @Override

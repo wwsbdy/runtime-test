@@ -53,8 +53,8 @@
         <notificationGroup id="RuntimeTest" displayType="BALLOON"/>
     </extensions>
     <actions>
-        <action id="RuntimeTest.RuntimeTestAction"
-                class="com.zj.runtimetest.ui.RuntimeTestAction"
+        <action id="RuntimeTest.ExecutionMethodAction"
+                class="com.zj.runtimetest.ui.method.ExecutionMethodAction"
                 text="Runtime Test"
                 icon="/icons/logo.svg"
                 description="Run method">

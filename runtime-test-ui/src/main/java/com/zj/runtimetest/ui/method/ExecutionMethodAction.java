@@ -1,4 +1,4 @@
-package com.zj.runtimetest.ui;
+package com.zj.runtimetest.ui.method;
 
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.actionSystem.ActionUpdateThread;
@@ -35,9 +35,9 @@ import org.jetbrains.annotations.Nullable;
  * @author jie.zhou
  * @date : 2025/7/2
  */
-public class RuntimeTestAction extends AnAction implements Disposable {
+public class ExecutionMethodAction extends AnAction implements Disposable {
 
-    private static final Logger log = Logger.getInstance(RuntimeTestAction.class);
+    private static final Logger log = Logger.getInstance(ExecutionMethodAction.class);
 
     private final static Key<PsiMethod> USER_DATE_ELEMENT_KEY = new Key<>("user.psi.Element");
 
@@ -66,9 +66,9 @@ public class RuntimeTestAction extends AnAction implements Disposable {
             CacheAndKeyVo cacheAndKeyVo = PluginCacheUtil.getCacheOrDefault(psiMethod, project, defaultJson);
             String cacheKey = cacheAndKeyVo.getCacheKey();
             CacheVo cache = cacheAndKeyVo.getCache();
-            RuntimeTestDialog runtimeTestDialog = new RuntimeTestDialog(project, cacheKey, cache, defaultJson, psiMethod);
+            ExecutionMethodDialog executionMethodDialog = new ExecutionMethodDialog(project, cacheKey, cache, defaultJson, psiMethod);
 //            Disposer.register(this, runtimeTestDialog.getDisposable());
-            runtimeTestDialog.show();
+            executionMethodDialog.show();
         } catch (Exception exception) {
             log.error("invoke exception", exception);
         }
