@@ -65,11 +65,13 @@ public class RuntimeTestAttach {
         CompletableFuture.runAsync(() -> {
                     try {
                         LogUtil.setDetailLog(requestInfo.isDetailLog());
+                        HttpServletRequestUtil.getHttpServletRequest();
                         AgentContextHolder.invoke(requestInfo);
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     } finally {
                         LogUtil.clear();
+                        HttpServletRequestUtil.clear();
                     }
                 })
                 .exceptionally(throwable -> {

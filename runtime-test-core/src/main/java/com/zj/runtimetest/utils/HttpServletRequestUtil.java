@@ -41,7 +41,7 @@ public class HttpServletRequestUtil {
 
     public static void addHeader(String name, Object value) {
         if (!HttpServletRequestUtil.hasHttpServletRequest()) {
-            LogUtil.alwaysErr("[Agent] addHeader: java.lang.ClassNotFoundException: javax.servlet.http.HttpServletRequest");
+            LogUtil.err("[Agent more] addHeader: java.lang.ClassNotFoundException: javax.servlet.http.HttpServletRequest");
             return;
         }
         Optional.ofNullable(getHttpServletRequest()).ifPresent(request -> request.addHeader(name, value));
@@ -49,7 +49,7 @@ public class HttpServletRequestUtil {
 
     public static void setAttribute(String name, Object value) {
         if (!HttpServletRequestUtil.hasHttpServletRequest()) {
-            LogUtil.alwaysErr("[Agent] setAttribute: java.lang.ClassNotFoundException: javax.servlet.http.HttpServletRequest");
+            LogUtil.err("[Agent more] setAttribute: java.lang.ClassNotFoundException: javax.servlet.http.HttpServletRequest");
             return;
         }
         Optional.ofNullable(getHttpServletRequest()).ifPresent(request -> request.setAttribute(name, value));
@@ -57,7 +57,7 @@ public class HttpServletRequestUtil {
 
     public static synchronized IHttpServletRequest getHttpServletRequest() {
         if (!HttpServletRequestUtil.hasHttpServletRequest()) {
-            LogUtil.alwaysErr("[Agent] getHttpServletRequest: java.lang.ClassNotFoundException: javax.servlet.http.HttpServletRequest");
+            LogUtil.err("[Agent more] getHttpServletRequest: java.lang.ClassNotFoundException: javax.servlet.http.HttpServletRequest");
             return null;
         }
         IHttpServletRequest request = HTTP_SERVLET_REQUEST.get();
@@ -78,6 +78,14 @@ public class HttpServletRequestUtil {
             LogUtil.alwaysErr("[Agent] FakeHttpServletRequest build fail: " + ThrowUtil.printStackTrace(e));
         }
         return null;
+    }
+
+
+    /**
+     * 清除当前线程的ThreadLocal状态（防止内存泄漏）
+     */
+    public static void clear() {
+        HTTP_SERVLET_REQUEST.remove();
     }
 
     @SuppressWarnings("unchecked")

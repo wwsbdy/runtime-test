@@ -35,10 +35,18 @@ public abstract class ExpressionExecutor {
     }
 
     protected void addHeader(String name, Object value) {
+        if (!HttpServletRequestUtil.hasHttpServletRequest()) {
+            LogUtil.alwaysErr("[Agent] addHeader: java.lang.ClassNotFoundException: javax.servlet.http.HttpServletRequest");
+            return;
+        }
         HttpServletRequestUtil.addHeader(name, value);
     }
 
     protected void setAttribute(String name, Object value) {
+        if (!HttpServletRequestUtil.hasHttpServletRequest()) {
+            LogUtil.alwaysErr("[Agent] setAttribute: java.lang.ClassNotFoundException: javax.servlet.http.HttpServletRequest");
+            return;
+        }
         HttpServletRequestUtil.setAttribute(name, value);
     }
 
