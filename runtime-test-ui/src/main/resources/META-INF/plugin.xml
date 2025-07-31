@@ -54,6 +54,7 @@
 <!--        <notificationGroup id="RuntimeTest" displayType="BALLOON"/>-->
         <toolWindow id="RuntimeTest"
                     anchor="right"
+                    icon="/icons/logo.svg"
                     factoryClass="com.zj.runtimetest.ui.script.ScriptToolWindowFactory"
                     secondary="false"/>
     </extensions>
