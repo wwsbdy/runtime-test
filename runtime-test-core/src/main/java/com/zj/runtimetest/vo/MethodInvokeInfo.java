@@ -107,7 +107,7 @@ public class MethodInvokeInfo {
             }
             if (HttpServletRequestUtil.isHttpServletRequest(paramClazzArr[i])) {
                 IHttpServletRequest httpServletRequest = HttpServletRequestUtil.getHttpServletRequest();
-                args[i] = HttpServletRequestUtil.getHttpServletRequest();
+                args[i] = httpServletRequest;
                 if (Objects.nonNull(httpServletRequest) && Objects.nonNull(arg)) {
                     Map<String, Object> headers = JsonUtil.toMap(JsonUtil.toJsonString(arg));
                     headers.forEach(httpServletRequest::addHeader);
