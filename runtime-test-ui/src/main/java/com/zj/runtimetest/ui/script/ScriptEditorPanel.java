@@ -4,7 +4,6 @@ import com.intellij.icons.AllIcons;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.impl.ActionButton;
-import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.ComboBox;
 import com.intellij.ui.components.JBCheckBox;
@@ -26,7 +25,6 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 
 /**
  * @author : jie.zhou
@@ -35,7 +33,6 @@ import java.util.concurrent.CompletableFuture;
 public class ScriptEditorPanel {
     
     private static final String KEY = "bfa86f7f-d1e1-5b25-d32f-53cf6031f29f";
-    private static final Logger log = Logger.getInstance(ScriptEditorPanel.class);
     
     @Getter
     private final JPanel mainPanel;
@@ -106,11 +103,7 @@ public class ScriptEditorPanel {
                         && StringUtils.isNotBlank(expressionField.getExpression().getExpression())) {
                     cacheVo.setPid(pidComboBox.getItem());
                     cacheVo.setExpression(expressionField.getExpression());
-                    CompletableFuture.runAsync(() -> RunUtil.run(project, cacheVo))
-                            .exceptionally(throwable -> {
-                                log.error("run error", throwable);
-                                return null;
-                            });
+                    RunUtil.run(project, cacheVo);
                     runtimeTestState.putCache(KEY, cacheVo);
                 }
             }
