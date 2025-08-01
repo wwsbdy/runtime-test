@@ -54,11 +54,15 @@ public class RuntimeTestExprExecutor {
             executor = getExecutor(expVo, parameterTypeList, projectBasePath);
             CACHE.put(key, executor);
         }
+        ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
         try {
+            Thread.currentThread().setContextClassLoader(RuntimeTestClassLoader.defaultClassLoader());
             return executor.eval(args);
         } catch (Throwable t) {
             CACHE.put(key, ExpressionExecutorFactory.ERROR);
             throw new RuntimeException(t);
+        } finally {
+            Thread.currentThread().setContextClassLoader(contextClassLoader);
         }
     }
 
