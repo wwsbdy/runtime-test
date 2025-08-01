@@ -70,7 +70,7 @@ public class ScriptEditorPanel {
         });
         pidComboBox.setToolTipText(PluginBundle.get("dialog.pid.title"));
         topPanel.add(pidComboBox);
-        RuntimeTestState.getInstance(project).addListener(pids -> {
+        runtimeTestState.addListener(pids -> {
             pidComboBox.removeAllItems();
             pids.forEach(pidComboBox::addItem);
         });
@@ -119,6 +119,8 @@ public class ScriptEditorPanel {
                 "ScriptEditor",
                 new Dimension(20, 20)
         );
+        runButton.setEnabled(false);
+        pidComboBox.addActionListener(e -> runButton.setEnabled(Objects.nonNull(pidComboBox.getSelectedItem())));
         topPanel.add(runButton);
 
         mainPanel.add(topPanel, BorderLayout.NORTH);
