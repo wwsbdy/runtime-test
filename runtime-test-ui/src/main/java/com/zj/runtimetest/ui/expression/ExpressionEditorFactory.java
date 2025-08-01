@@ -96,7 +96,7 @@ public class ExpressionEditorFactory {
         // getBean
         builder.append("    public <T> T getBean(Class<T> clz) { return null; }\n");
         // getHttpServletRequest
-        builder.append("    public Object getHttpServletRequest() { return null; }\n");
+        builder.append("    public <T> T getHttpServletRequest() { return null; }\n");
         // toJsonString
         builder.append("    public String toJsonString(Object value) { return null; }\n");
         builder.append("}\n");
