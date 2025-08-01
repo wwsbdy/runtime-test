@@ -119,7 +119,7 @@ public class ScriptEditorPanel {
                 "ScriptEditor",
                 new Dimension(20, 20)
         );
-        runButton.setEnabled(false);
+        runButton.setEnabled(Objects.nonNull(pidComboBox.getSelectedItem()));
         pidComboBox.addActionListener(e -> runButton.setEnabled(Objects.nonNull(pidComboBox.getSelectedItem())));
         topPanel.add(runButton);
 
