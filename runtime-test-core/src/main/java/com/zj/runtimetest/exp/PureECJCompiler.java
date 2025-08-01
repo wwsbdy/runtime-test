@@ -1,5 +1,6 @@
 package com.zj.runtimetest.exp;
 
+import com.zj.runtimetest.AgentContextHolder;
 import com.zj.runtimetest.utils.LogUtil;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.internal.compiler.ClassFile;
@@ -9,6 +10,8 @@ import org.eclipse.jdt.internal.compiler.env.ICompilationUnit;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 import org.eclipse.jdt.internal.compiler.problem.DefaultProblemFactory;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -57,15 +60,19 @@ public class PureECJCompiler {
 
         byte[] classBytes = compiledClasses.values().iterator().next();
         // 加载类
-        // jdk17 不能通过反射调用defineClass
-//        ClassLoader appCl = AgentContextHolder.DEFAULT_CLASS_LOADER;
-//        Method defineClass = ClassLoader.class.getDeclaredMethod("defineClass", String.class, byte[].class, int.class, int.class);
-//        defineClass.setAccessible(true);
-//        Class<?> clazz = (Class<?>) defineClass.invoke(appCl, fullName, classBytes, 0, classBytes.length);
-        try (RuntimeTestClassLoader runtimeTestClassLoader = RuntimeTestClassLoader.defaultClassLoader()) {
-            return runtimeTestClassLoader.publicDefineClass(fullName, classBytes, 0, classBytes.length);
-        } catch (Exception e) {
+        ClassLoader appCl = AgentContextHolder.DEFAULT_CLASS_LOADER;
+        try {
+            Method defineClass = ClassLoader.class.getDeclaredMethod("defineClass", String.class, byte[].class, int.class, int.class);
+            defineClass.setAccessible(true);
+            return (Class<?>) defineClass.invoke(appCl, fullName, classBytes, 0, classBytes.length);
+        } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
             throw new RuntimeException(e);
         }
+        // 不用自定义的ClassLoader，某些方法找不到生成的Class
+//        try (RuntimeTestClassLoader runtimeTestClassLoader = RuntimeTestClassLoader.defaultClassLoader()) {
+//            return runtimeTestClassLoader.publicDefineClass(fullName, classBytes, 0, classBytes.length);
+//        } catch (Exception e) {
+//            throw new RuntimeException(e);
+//        }
     }
 }

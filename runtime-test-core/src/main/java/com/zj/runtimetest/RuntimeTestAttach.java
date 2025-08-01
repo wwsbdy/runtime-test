@@ -64,6 +64,7 @@ public class RuntimeTestAttach {
         }
         CompletableFuture.runAsync(() -> {
                     try {
+                        Thread.currentThread().setContextClassLoader(AgentContextHolder.DEFAULT_CLASS_LOADER);
                         LogUtil.setDetailLog(requestInfo.isDetailLog());
                         HttpServletRequestUtil.getHttpServletRequest();
                         AgentContextHolder.invoke(requestInfo);
