@@ -12,6 +12,7 @@ import com.intellij.xdebugger.impl.ui.XDebuggerExpressionEditor;
 import com.zj.runtimetest.cache.RuntimeTestState;
 import com.zj.runtimetest.language.PluginBundle;
 import com.zj.runtimetest.ui.expression.ExpressionEditorFactory;
+import com.zj.runtimetest.utils.ExecutorUtil;
 import com.zj.runtimetest.utils.PluginCacheUtil;
 import com.zj.runtimetest.utils.RunUtil;
 import com.zj.runtimetest.vo.CacheAndKeyVo;
@@ -106,6 +107,7 @@ public class ScriptEditorPanel {
                         && StringUtils.isNotBlank(expressionField.getExpression().getExpression())) {
                     cacheVo.setPid(pidComboBox.getItem());
                     cacheVo.setExpression(expressionField.getExpression());
+                    ExecutorUtil.toFrontRunContent(project, cacheVo.getPid());
                     CompletableFuture.runAsync(() -> RunUtil.run(project, cacheVo))
                             .exceptionally(throwable -> {
                                 log.error("run error", throwable);
