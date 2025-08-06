@@ -11,13 +11,19 @@ import com.intellij.openapi.util.Disposer;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowFactory;
 import com.intellij.openapi.wm.ex.ToolWindowEx;
-import com.intellij.ui.content.Content;
-import com.intellij.ui.content.ContentFactory;
+import com.intellij.ui.content.*;
+import com.zj.runtimetest.cache.RuntimeTestState;
 import com.zj.runtimetest.constant.Constant;
 import com.zj.runtimetest.language.PluginBundle;
 import com.zj.runtimetest.utils.NoticeUtil;
+import com.zj.runtimetest.utils.PluginCacheUtil;
+import com.zj.runtimetest.vo.CacheVo;
+import com.zj.runtimetest.vo.ItemVo;
+import org.apache.commons.collections.CollectionUtils;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 
@@ -27,8 +33,16 @@ import java.util.Optional;
 public class ScriptToolWindowFactory implements ToolWindowFactory {
     @Override
     public void createToolWindowContent(@NotNull Project project, @NotNull ToolWindow toolWindow) {
-        // TODO 先查询缓存
-        addContent(project, toolWindow);
+        // 先查询缓存
+        RuntimeTestState runtimeTestState = RuntimeTestState.getInstance(project);
+        List<ItemVo<CacheVo>> itemVoList = PluginCacheUtil.getAllExistContentCacheKey(runtimeTestState);
+        if (CollectionUtils.isNotEmpty(itemVoList)) {
+            for (ItemVo<CacheVo> itemVo : itemVoList) {
+                addContent(project, toolWindow, itemVo.getIndex(), new ScriptEditorPanel(project, itemVo.getValue()));
+            }
+        } else {
+            addContent(project, toolWindow);
+        }
         setupAddTabAction(project, toolWindow);
     }
 
@@ -37,28 +51,46 @@ public class ScriptToolWindowFactory implements ToolWindowFactory {
             NoticeUtil.notice(project, PluginBundle.get("tool-window.max"));
             return;
         }
-        addContent(project, toolWindow, new ScriptEditorPanel(project));
+        RuntimeTestState runtimeTestState = RuntimeTestState.getInstance(project);
+        ItemVo<String> keyItem = PluginCacheUtil.getOneOfNotExistContentCacheKey(runtimeTestState);
+        if (Objects.isNull(keyItem)) {
+            NoticeUtil.notice(project, PluginBundle.get("tool-window.creatContentError"));
+            return;
+        }
+        CacheVo cacheVo = new CacheVo();
+        runtimeTestState.putCache(keyItem.getValue(), cacheVo);
+        addContent(project, toolWindow, keyItem.getIndex(), new ScriptEditorPanel(project, cacheVo));
     }
 
-    public void addContent(Project project, ToolWindow toolWindow, ScriptEditorPanel scriptEditorPanel) {
-        if (toolWindow.getContentManager().getContentCount() >= Constant.TAB_MAX) {
+    public void addContent(Project project, ToolWindow toolWindow, Integer index, ScriptEditorPanel scriptEditorPanel) {
+        ContentManager contentManager = toolWindow.getContentManager();
+        if (contentManager.getContentCount() >= Constant.TAB_MAX) {
             NoticeUtil.notice(project, PluginBundle.get("tool-window.max"));
             return;
         }
         Content content = ContentFactory.getInstance()
-                .createContent(scriptEditorPanel.getMainPanel(), PluginBundle.get("tool-window.title") + toolWindow.getContentManager().getContentCount(), false);
+                .createContent(scriptEditorPanel.getMainPanel(), PluginBundle.get("tool-window.title") + index, false);
         content.setCloseable(true);
         Optional.ofNullable(content.getDisposer())
                 .ifPresent(disposable -> Disposer.register(toolWindow.getDisposable(), disposable));
-        toolWindow.getContentManager().addContent(content);
-        toolWindow.getContentManager().setSelectedContent(content);
+        contentManager.addContent(content);
+        contentManager.setSelectedContent(content);
         Disposable disposable = new Disposable() {
             @Override
             public void dispose() {
 
             }
         };
-        // TODO 关闭和closeAll监听
+        // 添加Content关闭监听
+        contentManager.addContentManagerListener(new ContentManagerListener() {
+            @Override
+            public void contentRemoved(@NotNull ContentManagerEvent event) {
+                if (event.getContent() == content) {
+                    // 关闭Content时移除缓存
+                    RuntimeTestState.getInstance(project).removeCache(Constant.TOOLWINDOW_CONTENT_CACHE_KEY_LIST.get(index));
+                }
+            }
+        });
         content.setDisposer(disposable);
         Disposer.register(toolWindow.getDisposable(), disposable);
         Disposer.register(disposable, scriptEditorPanel);

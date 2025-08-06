@@ -6,18 +6,19 @@ import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.impl.ActionButton;
 import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.editor.Editor;
+import com.intellij.openapi.editor.event.DocumentEvent;
+import com.intellij.openapi.editor.event.DocumentListener;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.ComboBox;
 import com.intellij.ui.components.JBCheckBox;
 import com.intellij.xdebugger.impl.ui.XDebuggerExpressionEditor;
 import com.zj.runtimetest.cache.RuntimeTestState;
-import com.zj.runtimetest.constant.Constant;
 import com.zj.runtimetest.language.PluginBundle;
 import com.zj.runtimetest.ui.expression.ExpressionEditorFactory;
 import com.zj.runtimetest.utils.ExecutorUtil;
-import com.zj.runtimetest.utils.PluginCacheUtil;
+import com.zj.runtimetest.utils.ExpressionUtil;
 import com.zj.runtimetest.utils.RunUtil;
-import com.zj.runtimetest.vo.CacheAndKeyVo;
 import com.zj.runtimetest.vo.CacheVo;
 import com.zj.runtimetest.vo.ProcessVo;
 import lombok.Getter;
@@ -36,7 +37,7 @@ import java.util.concurrent.CompletableFuture;
  * @date : 2025/7/31
  */
 public class ScriptEditorPanel implements Disposable {
-    
+
     private static final Logger log = Logger.getInstance(ScriptEditorPanel.class);
     private boolean disposed = false;
     @Getter
@@ -44,10 +45,8 @@ public class ScriptEditorPanel implements Disposable {
     private ComboBox<Long> pidComboBox;
     private JBCheckBox logDetailCheckBox;
 
-    public ScriptEditorPanel(Project project) {
+    public ScriptEditorPanel(Project project, CacheVo cacheVo) {
         mainPanel = new JPanel(new BorderLayout());
-        CacheAndKeyVo cacheAndKeyVo = PluginCacheUtil.getCacheOrDefault(Constant.KEY, project);
-        CacheVo cacheVo = cacheAndKeyVo.getCache();
         // 顶部按钮 + Popup 菜单
         JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         this.pidComboBox = new ComboBox<>();
@@ -82,11 +81,19 @@ public class ScriptEditorPanel implements Disposable {
 
         // 编辑器
         XDebuggerExpressionEditor expressionField =
-                ExpressionEditorFactory.createExpressionEditor(project, null, CacheVo.EmptyXExpression.INSTANCE);
+                ExpressionEditorFactory.createExpressionEditor(project, null, ExpressionUtil.EmptyXExpression.INSTANCE);
         if (Objects.isNull(expressionField)) {
             return;
         }
-
+        // 修改脚本保存到缓存
+        Optional.ofNullable(expressionField.getEditor())
+                .map(Editor::getDocument)
+                .ifPresent(document -> document.addDocumentListener(new DocumentListener() {
+                    @Override
+                    public void documentChanged(@NotNull DocumentEvent event) {
+                        cacheVo.setExpression(expressionField.getExpression());
+                    }
+                }));
         this.logDetailCheckBox = new JBCheckBox();
         logDetailCheckBox.setToolTipText(PluginBundle.get("dialog.logDetail.title"));
         logDetailCheckBox.setSelected(cacheVo.isDetailLog());
@@ -114,7 +121,6 @@ public class ScriptEditorPanel implements Disposable {
                                 log.error("run error", throwable);
                                 return null;
                             });
-                    runtimeTestState.putCache(Constant.KEY, cacheVo);
                 }
             }
         };

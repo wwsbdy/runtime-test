@@ -54,6 +54,10 @@ public class RuntimeTestState implements PersistentStateComponent<RuntimeTestSta
         return cache.get(key);
     }
 
+    public void removeCache(String key) {
+        cache.remove(key);
+    }
+
     public void putPidProcessMap(Long pid, ProcessVo process) {
         pidProcessMap.put(pid, process);
         notifyListeners();
