@@ -3,7 +3,7 @@ package com.zj.runtimetest.utils;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.intellij.psi.*;
 import com.intellij.psi.util.PsiUtil;
-import com.zj.runtimetest.json.parser.POJO2JSONParser;
+import com.zj.runtimetest.utils.json.POJO2JSONParser;
 import com.zj.runtimetest.vo.MethodParamInfo;
 import org.jetbrains.annotations.NotNull;
 

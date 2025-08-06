@@ -1,6 +1,7 @@
 package com.zj.runtimetest.ui.script;
 
 import com.intellij.icons.AllIcons;
+import com.intellij.openapi.Disposable;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.impl.ActionButton;
@@ -10,6 +11,7 @@ import com.intellij.openapi.ui.ComboBox;
 import com.intellij.ui.components.JBCheckBox;
 import com.intellij.xdebugger.impl.ui.XDebuggerExpressionEditor;
 import com.zj.runtimetest.cache.RuntimeTestState;
+import com.zj.runtimetest.constant.Constant;
 import com.zj.runtimetest.language.PluginBundle;
 import com.zj.runtimetest.ui.expression.ExpressionEditorFactory;
 import com.zj.runtimetest.utils.ExecutorUtil;
@@ -33,19 +35,18 @@ import java.util.concurrent.CompletableFuture;
  * @author : jie.zhou
  * @date : 2025/7/31
  */
-public class ScriptEditorPanel {
+public class ScriptEditorPanel implements Disposable {
     
-    private static final String KEY = "bfa86f7f-d1e1-5b25-d32f-53cf6031f29f";
     private static final Logger log = Logger.getInstance(ScriptEditorPanel.class);
-    
+    private boolean disposed = false;
     @Getter
-    private final JPanel mainPanel;
-    private final ComboBox<Long> pidComboBox;
+    private JPanel mainPanel;
+    private ComboBox<Long> pidComboBox;
     private JBCheckBox logDetailCheckBox;
 
     public ScriptEditorPanel(Project project) {
         mainPanel = new JPanel(new BorderLayout());
-        CacheAndKeyVo cacheAndKeyVo = PluginCacheUtil.getCacheOrDefault(KEY, project);
+        CacheAndKeyVo cacheAndKeyVo = PluginCacheUtil.getCacheOrDefault(Constant.KEY, project);
         CacheVo cacheVo = cacheAndKeyVo.getCache();
         // 顶部按钮 + Popup 菜单
         JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -113,7 +114,7 @@ public class ScriptEditorPanel {
                                 log.error("run error", throwable);
                                 return null;
                             });
-                    runtimeTestState.putCache(KEY, cacheVo);
+                    runtimeTestState.putCache(Constant.KEY, cacheVo);
                 }
             }
         };
@@ -132,4 +133,16 @@ public class ScriptEditorPanel {
         mainPanel.add(expressionField.getComponent(), BorderLayout.CENTER);
     }
 
+    @Override
+    public void dispose() {
+        if (!disposed) {
+            disposed = true;
+            ExecutorUtil.removeListener(pidComboBox);
+            ExecutorUtil.removeListener(logDetailCheckBox);
+            mainPanel.removeAll();
+            pidComboBox = null;
+            logDetailCheckBox = null;
+            mainPanel = null;
+        }
+    }
 }

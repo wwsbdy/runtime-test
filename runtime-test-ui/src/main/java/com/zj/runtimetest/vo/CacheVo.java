@@ -6,6 +6,7 @@ import com.intellij.util.xmlb.annotations.Transient;
 import com.intellij.xdebugger.XExpression;
 import com.intellij.xdebugger.evaluation.EvaluationMode;
 import com.intellij.xdebugger.impl.breakpoints.XExpressionImpl;
+import com.zj.runtimetest.constant.Constant;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -28,7 +29,6 @@ import java.util.function.Consumer;
 public class CacheVo extends RequestInfo implements Serializable {
 
     private static final long serialVersionUID = -574377082031667607L;
-    private static final int SIZE = 5;
 
     /**
      * 进程id
@@ -50,7 +50,7 @@ public class CacheVo extends RequestInfo implements Serializable {
             history.add(s);
             return;
         }
-        if (history.size() >= SIZE) {
+        if (history.size() >= Constant.HISTORY_SIZE) {
             history.remove(history.get(0));
         }
         history.add(s);
