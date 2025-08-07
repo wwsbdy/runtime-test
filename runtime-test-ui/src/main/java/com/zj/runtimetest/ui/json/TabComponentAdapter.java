@@ -1,4 +1,4 @@
-package com.zj.runtimetest.json;
+package com.zj.runtimetest.ui.json;
 
 import com.intellij.ide.DataManager;
 import com.intellij.openapi.Disposable;

@@ -1,4 +1,4 @@
-package com.zj.runtimetest.json;
+package com.zj.runtimetest.ui.json;
 
 import com.intellij.lang.Language;
 import com.intellij.openapi.fileTypes.PlainTextLanguage;

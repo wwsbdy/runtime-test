@@ -8,6 +8,7 @@ import com.intellij.util.ui.JBDimension;
 import com.intellij.xdebugger.XExpression;
 import com.intellij.xdebugger.impl.ui.XDebuggerEditorBase;
 import com.zj.runtimetest.language.PluginBundle;
+import com.zj.runtimetest.utils.ExpressionUtil;
 import com.zj.runtimetest.vo.CacheVo;
 import lombok.Getter;
 import lombok.Setter;
@@ -72,7 +73,7 @@ public class ExpressionDialog extends DialogWrapper {
                 && StringUtils.isNotBlank(expression.getExpression())) {
             cache.setExpression(expression);
         } else {
-            cache.setExpression(CacheVo.EmptyXExpression.INSTANCE);
+            cache.setExpression(ExpressionUtil.EmptyXExpression.INSTANCE);
         }
         super.doOKAction();
     }

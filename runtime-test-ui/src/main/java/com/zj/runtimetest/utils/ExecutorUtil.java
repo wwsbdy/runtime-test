@@ -10,7 +10,7 @@ import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.ComboBox;
 import com.zj.runtimetest.cache.RuntimeTestState;
-import com.zj.runtimetest.json.JsonEditorField;
+import com.zj.runtimetest.ui.json.JsonEditorField;
 import com.zj.runtimetest.vo.ProcessVo;
 import org.apache.commons.lang3.StringUtils;
 

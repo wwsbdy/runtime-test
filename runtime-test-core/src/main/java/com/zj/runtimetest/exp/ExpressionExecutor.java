@@ -74,4 +74,29 @@ public abstract class ExpressionExecutor {
     protected String toJsonString(Object value) {
         return JsonUtil.toJsonString(value);
     }
+
+    protected Object getBean(String name) {
+        try {
+            Object bean = AgentContextHolder.getBeanByName(name);
+            if (Objects.isNull(bean)) {
+                LogUtil.alwaysErr("[Agent] getBean: java.lang.ClassNotFoundException: " + name);
+            }
+            return bean;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    protected <T> T getBean(String name, Class<T> clz) {
+        try {
+            T bean = (T) AgentContextHolder.getBeanByName(name, clz.getName());
+            if (Objects.isNull(bean)) {
+                LogUtil.alwaysErr("[Agent] getBean: java.lang.ClassNotFoundException: " + name + ", class: " + clz);
+            }
+            return bean;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

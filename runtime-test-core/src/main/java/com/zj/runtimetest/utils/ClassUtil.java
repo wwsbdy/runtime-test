@@ -36,4 +36,8 @@ public class ClassUtil {
         }
         return Class.forName(className, true, classLoader);
     }
+
+    public static boolean isPrimitive(String className) {
+        return PRIMITIVE_TYPE_MAP.containsKey(className);
+    }
 }

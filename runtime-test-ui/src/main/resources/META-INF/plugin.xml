@@ -56,7 +56,8 @@
                     anchor="right"
                     icon="/icons/logo.svg"
                     factoryClass="com.zj.runtimetest.ui.script.ScriptToolWindowFactory"
-                    secondary="false"/>
+                    secondary="false"
+                    canCloseContents="true"/>
     </extensions>
     <actions>
         <action id="RuntimeTest.ExecutionMethodAction"
