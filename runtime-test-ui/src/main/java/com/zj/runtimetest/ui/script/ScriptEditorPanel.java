@@ -6,12 +6,13 @@ import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.impl.ActionButton;
 import com.intellij.openapi.diagnostic.Logger;
-import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.event.DocumentEvent;
 import com.intellij.openapi.editor.event.DocumentListener;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.ComboBox;
+import com.intellij.ui.EditorTextField;
 import com.intellij.ui.components.JBCheckBox;
+import com.intellij.xdebugger.XExpression;
 import com.intellij.xdebugger.impl.ui.XDebuggerExpressionEditor;
 import com.zj.runtimetest.cache.RuntimeTestState;
 import com.zj.runtimetest.language.PluginBundle;
@@ -31,6 +32,7 @@ import java.awt.event.ActionEvent;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
 
 /**
  * @author : jie.zhou
@@ -85,15 +87,8 @@ public class ScriptEditorPanel implements Disposable {
         if (Objects.isNull(expressionField)) {
             return;
         }
-        // 修改脚本保存到缓存
-        Optional.ofNullable(expressionField.getEditor())
-                .map(Editor::getDocument)
-                .ifPresent(document -> document.addDocumentListener(new DocumentListener() {
-                    @Override
-                    public void documentChanged(@NotNull DocumentEvent event) {
-                        cacheVo.setExpression(expressionField.getExpression());
-                    }
-                }));
+        // 修改脚本操作保存到缓存
+        attachExpressionChangeListener(expressionField, cacheVo::setExpression);
         this.logDetailCheckBox = new JBCheckBox();
         logDetailCheckBox.setToolTipText(PluginBundle.get("dialog.logDetail.title"));
         logDetailCheckBox.setSelected(cacheVo.isDetailLog());
@@ -150,5 +145,14 @@ public class ScriptEditorPanel implements Disposable {
             logDetailCheckBox = null;
             mainPanel = null;
         }
+    }
+
+    public static void attachExpressionChangeListener(XDebuggerExpressionEditor editor, Consumer<XExpression> onChange) {
+        ((EditorTextField) editor.getEditorComponent()).addDocumentListener(new DocumentListener() {
+            @Override
+            public void documentChanged(@NotNull DocumentEvent event) {
+                onChange.accept(editor.getExpression());
+            }
+        });
     }
 }
