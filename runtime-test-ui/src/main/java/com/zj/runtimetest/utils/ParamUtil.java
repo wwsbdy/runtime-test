@@ -29,7 +29,8 @@ public class ParamUtil {
         for (int i = 0; i < parameterList.getParametersCount(); i++) {
             PsiParameter parameter = Objects.requireNonNull(parameterList.getParameter(i));
             String canonicalText;
-            if (!parameter.getType().getCanonicalText().contains(".")) {
+            String clsName = parameter.getType().getCanonicalText();
+            if (!ClassUtil.isPrimitive(clsName) && !clsName.contains(".")) {
                 canonicalText = "java.lang.Object";
             } else {
                 // 兼容内部类，用$
