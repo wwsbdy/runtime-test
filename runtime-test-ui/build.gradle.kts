@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "com.zj"
-version = "1.7.222"
+version = "1.8.222"
 
 intellij {
     version.set(properties("intellij.version"))
@@ -26,6 +26,15 @@ tasks {
         untilBuild.set(properties("until.build"))
         changeNotes.set(
             """
+            <b>1.8.*</b><br>
+            <ul>
+                <li>Script window supports multiple tabs</li>
+                <li>Added some methods in pre-processing</li>
+            </ul><br>
+            <ul>
+                <li>脚本窗口支持多tab</li>
+                <li>在前置处理中添加了一些方法</li>
+            </ul>
             <b>1.7.*</b><br>
             <ul>
                 <li>Save entered information even when canceled</li>

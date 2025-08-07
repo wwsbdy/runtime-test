@@ -1,9 +1,10 @@
-package com.zj.runtimetest.json.parser;
+package com.zj.runtimetest.utils.json;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.Sets;
 import com.intellij.psi.*;
 import com.intellij.psi.util.PsiUtil;
+import com.zj.runtimetest.constant.Constant;
 import com.zj.runtimetest.utils.JsonUtil;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -52,11 +53,7 @@ public class POJO2JSONParser {
             "java.util.Date",
             "java.util.Map",
             "java.util.UUID");
-
-    /**
-     * 最大递归层级，防止死循环
-     */
-    private static final int MAX_RECURSION_LEVEL = 2;
+    
 
     private static Object parseClass(PsiClass psiClass, int recursionLevel) {
         ObjectNode objectNode = JsonUtil.objectMapper.createObjectNode();
@@ -104,7 +101,7 @@ public class POJO2JSONParser {
         } else if (type instanceof PsiArrayType) {
 
             PsiType typeToDeepType = ((PsiArrayType) type).getComponentType();
-            Object obj = parseFieldValue(typeToDeepType, MAX_RECURSION_LEVEL + (recursionLevel == MAX_RECURSION_LEVEL ? 1 : 0));
+            Object obj = parseFieldValue(typeToDeepType, Constant.MAX_RECURSION_LEVEL + (recursionLevel == Constant.MAX_RECURSION_LEVEL ? 1 : 0));
             return obj != null ? Collections.singletonList(obj) : Collections.emptyList();
 
         } else {
@@ -131,10 +128,10 @@ public class POJO2JSONParser {
                     if (typeToDeepType == null) {
                         return Collections.emptyList();
                     }
-                    if (recursionLevel > MAX_RECURSION_LEVEL) {
+                    if (recursionLevel > Constant.MAX_RECURSION_LEVEL) {
                         return Collections.emptyList();
                     }
-                    Object obj = parseFieldValue(typeToDeepType, MAX_RECURSION_LEVEL + (recursionLevel == MAX_RECURSION_LEVEL ? 1 : 0));
+                    Object obj = parseFieldValue(typeToDeepType, Constant.MAX_RECURSION_LEVEL + (recursionLevel == Constant.MAX_RECURSION_LEVEL ? 1 : 0));
                     return obj != null ? Collections.singletonList(obj) : Collections.emptyList();
                 } else {
                     if (isCharSequence(fieldTypeNames)) {
@@ -143,7 +140,7 @@ public class POJO2JSONParser {
                     if (isJavaObject(psiClass.getQualifiedName())) {
                         return null;
                     }
-                    if (recursionLevel > MAX_RECURSION_LEVEL) {
+                    if (recursionLevel > Constant.MAX_RECURSION_LEVEL) {
                         return null;
                     }
                     PsiClass subPsiClass = PsiUtil.resolveClassInClassTypeOnly(type);

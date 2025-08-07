@@ -4,13 +4,17 @@ import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiMethod;
 import com.zj.runtimetest.cache.RuntimeTestState;
+import com.zj.runtimetest.constant.Constant;
 import com.zj.runtimetest.vo.CacheAndKeyVo;
 import com.zj.runtimetest.vo.CacheVo;
+import com.zj.runtimetest.vo.ItemVo;
 import com.zj.runtimetest.vo.MethodParamInfo;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -47,13 +51,27 @@ public class PluginCacheUtil {
         return new CacheAndKeyVo(cacheKey, cache);
     }
 
-
-    public static @NotNull CacheAndKeyVo getCacheOrDefault(@NotNull String key, Project project) {
-        CacheVo cache = RuntimeTestState.getInstance(project).getCache(key);
-        if (Objects.isNull(cache)) {
-            cache = new CacheVo();
+    public static @Nullable ItemVo<String> getOneOfNotExistContentCacheKey(RuntimeTestState runtimeTestState) {
+        for (int i = 0; i < Constant.TOOLWINDOW_CONTENT_CACHE_KEY_LIST.size(); i++) {
+            String key = Constant.TOOLWINDOW_CONTENT_CACHE_KEY_LIST.get(i);
+            CacheVo cache = runtimeTestState.getCache(key);
+            if (Objects.isNull(cache)) {
+                return new ItemVo<>(i, key);
+            }
         }
-        cache.setProjectBasePath(project.getBasePath());
-        return new CacheAndKeyVo(key, cache);
+        return null;
+    }
+
+    public static @NotNull List<ItemVo<CacheVo>> getAllExistContentCacheKey(RuntimeTestState runtimeTestState) {
+        List<ItemVo<CacheVo>> cacheList = new ArrayList<>();
+        for (int i = 0; i < Constant.TOOLWINDOW_CONTENT_CACHE_KEY_LIST.size(); i++) {
+            String key = Constant.TOOLWINDOW_CONTENT_CACHE_KEY_LIST.get(i);
+            CacheVo cache = runtimeTestState.getCache(key);
+            if (Objects.nonNull(cache)) {
+                cacheList.add(new ItemVo<>(i, cache));
+            }
+        }
+
+        return cacheList;
     }
 }

@@ -31,7 +31,7 @@ public class MethodInvokeInfo {
         if (Objects.nonNull(requestInfo.getParameterTypeList()) && !requestInfo.getParameterTypeList().isEmpty()) {
             paramClazzArr = requestInfo.getParameterTypeList().stream().map(MethodParamInfo::getParamType).map(clsStr -> {
                         try {
-                            if (clsStr.contains(".")) {
+                            if (ClassUtil.isPrimitive(clsStr) || clsStr.contains(".")) {
                                 return ClassUtil.getClass(clsStr, beanInfo.getClassLoader());
                             }
                             // 兼容范型

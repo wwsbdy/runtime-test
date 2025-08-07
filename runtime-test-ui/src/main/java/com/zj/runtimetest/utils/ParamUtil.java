@@ -3,7 +3,7 @@ package com.zj.runtimetest.utils;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.intellij.psi.*;
 import com.intellij.psi.util.PsiUtil;
-import com.zj.runtimetest.json.parser.POJO2JSONParser;
+import com.zj.runtimetest.utils.json.POJO2JSONParser;
 import com.zj.runtimetest.vo.MethodParamInfo;
 import org.jetbrains.annotations.NotNull;
 
@@ -29,7 +29,8 @@ public class ParamUtil {
         for (int i = 0; i < parameterList.getParametersCount(); i++) {
             PsiParameter parameter = Objects.requireNonNull(parameterList.getParameter(i));
             String canonicalText;
-            if (!parameter.getType().getCanonicalText().contains(".")) {
+            String clsName = parameter.getType().getCanonicalText();
+            if (!ClassUtil.isPrimitive(clsName) && !clsName.contains(".")) {
                 canonicalText = "java.lang.Object";
             } else {
                 // 兼容内部类，用$

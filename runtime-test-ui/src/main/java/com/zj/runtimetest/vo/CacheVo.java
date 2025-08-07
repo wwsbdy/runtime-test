@@ -1,15 +1,13 @@
 package com.zj.runtimetest.vo;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.intellij.lang.java.JavaLanguage;
 import com.intellij.util.xmlb.annotations.Transient;
 import com.intellij.xdebugger.XExpression;
-import com.intellij.xdebugger.evaluation.EvaluationMode;
-import com.intellij.xdebugger.impl.breakpoints.XExpressionImpl;
+import com.zj.runtimetest.constant.Constant;
+import com.zj.runtimetest.utils.ExpressionUtil;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
-import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.Serializable;
@@ -28,7 +26,6 @@ import java.util.function.Consumer;
 public class CacheVo extends RequestInfo implements Serializable {
 
     private static final long serialVersionUID = -574377082031667607L;
-    private static final int SIZE = 5;
 
     /**
      * 进程id
@@ -50,7 +47,7 @@ public class CacheVo extends RequestInfo implements Serializable {
             history.add(s);
             return;
         }
-        if (history.size() >= SIZE) {
+        if (history.size() >= Constant.HISTORY_SIZE) {
             history.remove(history.get(0));
         }
         history.add(s);
@@ -68,41 +65,15 @@ public class CacheVo extends RequestInfo implements Serializable {
     }
 
     public void setExpression(@NotNull XExpression expression) {
-        super.setExpVo(fromExpression(expression));
+        super.setExpVo(ExpressionUtil.fromExpression(expression));
     }
 
     @JsonIgnore
     public @NotNull XExpression getExpression() {
         if (Objects.isNull(getExpVo())) {
-            return EmptyXExpression.INSTANCE;
+            return ExpressionUtil.EmptyXExpression.INSTANCE;
         }
-        return toExpression(getExpVo());
-    }
-
-    private XExpression toExpression(ExpressionVo expVo) {
-        if (Objects.isNull(expVo)) {
-            return EmptyXExpression.INSTANCE;
-        }
-        return new XExpressionImpl(expVo.getMyExpression(), JavaLanguage.INSTANCE, expVo.getMyCustomInfo(), EvaluationMode.CODE_FRAGMENT);
-    }
-
-    private ExpressionVo fromExpression(XExpression expression) {
-        if (StringUtils.isBlank(expression.getExpression())) {
-            return null;
-        }
-        ExpressionVo vo = new ExpressionVo();
-        vo.setMyExpression(expression.getExpression().trim());
-        vo.setMyCustomInfo(expression.getCustomInfo());
-        return vo;
-    }
-
-    public static class EmptyXExpression {
-        public static final XExpression INSTANCE;
-
-        static {
-            INSTANCE = new XExpressionImpl("", JavaLanguage.INSTANCE, null, EvaluationMode.CODE_FRAGMENT);
-//            INSTANCE = XExpressionImpl.fromText("", EvaluationMode.CODE_FRAGMENT);
-        }
+        return ExpressionUtil.toExpression(getExpVo());
     }
 
 

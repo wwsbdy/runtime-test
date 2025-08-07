@@ -38,7 +38,7 @@ public class AgentUtil {
         Method attach = aClass.getMethod("attach", String.class);
         attach.setAccessible(true);
         Object vm = attach.invoke(null, pid);
-        aClass.getMethod("loadAgent", String.class, String.class).invoke(vm, agentJarPath, agentArgs);
+        aClass.getMethod("loadAgent", String.class, String.class).invoke(vm, agentJarPath, Base64Util.encode(agentArgs));
         aClass.getMethod("detach").invoke(vm);
     }
 
