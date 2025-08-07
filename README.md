@@ -141,6 +141,8 @@ Notes:<br>
 ### 1.8.*
 
 - Script window supports multiple tabs
+- Added some methods in pre-processing
 
 
 - 脚本窗口支持多tab
+- 在前置处理中添加了一些方法

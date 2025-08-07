@@ -144,7 +144,6 @@ public class AgentContextHolder {
             isInit = true;
             if (CONTEXT_CLASS_LOADER_SET.isEmpty()) {
                 LogUtil.alwaysLog("[Agent] init context classLoader map is empty.");
-                CONTEXT_CLASS_LOADER_SET = null;
                 return;
             }
             for (Object context : CONTEXT_CLASS_LOADER_SET) {
@@ -166,8 +165,67 @@ public class AgentContextHolder {
                 }
                 LogUtil.alwaysLog("[Agent] " + context + " init classLoaders: " + classLoaders);
             }
-            CONTEXT_CLASS_LOADER_SET.clear();
-            CONTEXT_CLASS_LOADER_SET = null;
         }
     }
+
+    public static Object getBeanByName(String name) {
+        if (CONTEXT_CLASS_LOADER_SET.isEmpty()) {
+            LogUtil.log("[Agent] context classLoaders is empty.");
+        }
+        for (Object context : CONTEXT_CLASS_LOADER_SET) {
+            Object bean;
+            try {
+                bean = context.getClass().getMethod("getBean", String.class).invoke(context, name);
+            } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
+                throw new RuntimeException(e);
+            }
+            if (Objects.nonNull(bean)) {
+                return bean;
+            }
+        }
+        return null;
+    }
+
+    public static Object getBeanByName(String name, String className) {
+        if (!isInit) {
+            try {
+                initContextClassLoaderMap();
+            } catch (Exception e) {
+                LogUtil.alwaysErr("[Agent] getBeanByName: init context classLoader map failed: " + e.getMessage());
+            }
+        }
+        if (CLASS_LOADER_CONTEXT_MAP.isEmpty()) {
+            LogUtil.log("[Agent more] getBeanByName: context classLoader map is empty. it will be created through a constructor");
+            return null;
+        }
+        // accessOrder=true，表示最近访问的元素会排在最后，将能正常获取bean的类加载器和spring上下文放最后
+        for (ClassLoader classLoader : CLASS_LOADER_CONTEXT_MAP.getKeys()) {
+            ObjCache<Object, Integer> contextCache = CLASS_LOADER_CONTEXT_MAP.get(classLoader);
+            Class<?> clazz;
+            try {
+                clazz = ClassUtil.getClass(className, classLoader);
+            } catch (Exception e) {
+                LogUtil.err("[Agent more] getBeanByName: find class fail: " + className);
+                continue;
+            }
+            if (Objects.isNull(contextCache) || contextCache.isEmpty()) {
+                continue;
+            }
+            for (Object context : contextCache.getKeys()) {
+                Object bean;
+                try {
+                    bean = context.getClass().getMethod("getBean", String.class, Class.class).invoke(context, name, clazz);
+                } catch (Exception e) {
+                    LogUtil.err("[Agent more] getBeanByName: getBean fail: " + className + " from spring context: " + context + "; classLoader: " + classLoader);
+                    continue;
+                }
+                if (Objects.nonNull(bean)) {
+                    LogUtil.log("[Agent more] getBeanByName: getBean from spring context: " + className + " from spring context: " + context + "; classLoader: " + classLoader);
+                    return bean;
+                }
+            }
+        }
+        return null;
+    }
+
 }

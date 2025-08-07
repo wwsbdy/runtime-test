@@ -99,6 +99,10 @@ public class ExpressionEditorFactory {
         builder.append("    public <T> T getHttpServletRequest() { return null; }\n");
         // toJsonString
         builder.append("    public String toJsonString(Object value) { return null; }\n");
+        // getBean
+        builder.append("    public Object getBean(String name) { return null; }");
+        // getBean
+        builder.append("    public <T> T getBean(String name, Class<T> clz) { return null; }");
         builder.append("}\n");
 
         return builder.toString();
