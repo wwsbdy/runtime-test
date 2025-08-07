@@ -137,3 +137,10 @@ Notes:<br>
 - 可在前置处理中调用 <b>getBean()</b> 获取bean对象
 - 右边侧边栏新增执行脚本窗口
 - 在前置处理中添加了一些方法
+
+### 1.8.*
+
+- Script window supports multiple tabs
+
+
+- 脚本窗口支持多tab
