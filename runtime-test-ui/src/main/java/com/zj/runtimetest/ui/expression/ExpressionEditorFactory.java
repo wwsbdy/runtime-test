@@ -13,6 +13,7 @@ import com.intellij.xdebugger.XExpression;
 import com.intellij.xdebugger.XSourcePosition;
 import com.intellij.xdebugger.impl.XSourcePositionImpl;
 import com.intellij.xdebugger.impl.ui.XDebuggerExpressionEditor;
+import com.zj.runtimetest.utils.ClassUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -74,7 +75,7 @@ public class ExpressionEditorFactory {
                 PsiType type = param.getType();
                 // 获取完整类型（包含包名）
                 String typeText = type.getCanonicalText();
-                if (!typeText.contains(".")) {
+                if (!ClassUtil.isPrimitive(typeText) && !typeText.contains(".")) {
                     typeText = "java.lang.Object";
                 }
                 builder.append(typeText).append(" ").append(param.getName());
@@ -100,9 +101,9 @@ public class ExpressionEditorFactory {
         // toJsonString
         builder.append("    public String toJsonString(Object value) { return null; }\n");
         // getBean
-        builder.append("    public Object getBean(String name) { return null; }");
+        builder.append("    public Object getBean(String name) { return null; }\n");
         // getBean
-        builder.append("    public <T> T getBean(String name, Class<T> clz) { return null; }");
+        builder.append("    public <T> T getBean(String name, Class<T> clz) { return null; }\n");
         builder.append("}\n");
 
         return builder.toString();
