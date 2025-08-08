@@ -16,7 +16,7 @@ import java.util.stream.Stream;
  * @date : 2025/7/22
  */
 public class RuntimeTestExprExecutor {
-    public static final Map<String, ExpressionExecutor> CACHE = new ConcurrentHashMap<>();
+    private static final Map<String, ExpressionExecutor> CACHE = new ConcurrentHashMap<>();
 
     public static ExpressionExecutor getExecutor(ExpressionVo expVo, List<MethodParamTypeInfo> parameterTypeList, String projectBasePath) {
         if (Objects.isNull(expVo)) {
@@ -41,38 +41,43 @@ public class RuntimeTestExprExecutor {
         }
         String key = getKey(expVo, parameterTypeList);
         LogUtil.log("[Agent more] pre-processing class cache key: " + key);
-        ExpressionExecutor executor = CACHE.get(key);
-        if (Objects.nonNull(executor)) {
-            if (ExpressionExecutorFactory.ERROR == executor) {
-                LogUtil.err("[Agent more] build pre-processing class is cached, error");
-            } else if (ExpressionExecutorFactory.EMPTY == executor) {
-                LogUtil.log("[Agent more] build pre-processing class is cached, empty");
-            } else {
-                LogUtil.log("[Agent more] build pre-processing class is cached, code: " + executor.getClassStr());
-            }
-        } else {
+        ExpressionExecutor executor = get(key);
+        if (Objects.isNull(executor)) {
             executor = getExecutor(expVo, parameterTypeList, projectBasePath);
-            CACHE.put(key, executor);
+            put(key, executor);
         }
         ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
         try {
             Thread.currentThread().setContextClassLoader(RuntimeTestClassLoader.defaultClassLoader());
             return executor.eval(args);
         } catch (Throwable t) {
-            CACHE.put(key, ExpressionExecutorFactory.ERROR);
+            put(key, ExpressionExecutorFactory.ERROR);
             throw new RuntimeException(t);
         } finally {
             Thread.currentThread().setContextClassLoader(contextClassLoader);
         }
     }
 
+    private static void put(String key, ExpressionExecutor executor) {
+        CACHE.put(key, executor);
+    }
+
+    private static ExpressionExecutor get(String key) {
+        if (LogUtil.isDetailLogEnabled()) {
+            return null;
+        }
+        return CACHE.get(key);
+    }
+
     private static String getKey(ExpressionVo expVo, List<MethodParamTypeInfo> methodParamTypeInfoList) {
         StringBuilder cacheKey = new StringBuilder();
-        for (MethodParamTypeInfo methodParamTypeInfo : methodParamTypeInfoList) {
-            cacheKey.append(methodParamTypeInfo.getParamName())
-                    .append("|")
-                    .append(methodParamTypeInfo.getType().getTypeName())
-                    .append("|");
+        if (Objects.nonNull(methodParamTypeInfoList) && !methodParamTypeInfoList.isEmpty()) {
+            for (MethodParamTypeInfo methodParamTypeInfo : methodParamTypeInfoList) {
+                cacheKey.append(methodParamTypeInfo.getParamName())
+                        .append("|")
+                        .append(methodParamTypeInfo.getType().getTypeName())
+                        .append("|");
+            }
         }
         cacheKey.append(expVo.getMyExpression());
         cacheKey.append("|");
@@ -124,19 +129,21 @@ public class RuntimeTestExprExecutor {
                 .append("    public Object[] eval(Object[] args) {\n")
                 .append("        printBegin();\n");
 
-        for (int i = 0; i < parameterTypes.size(); i++) {
-            MethodParamTypeInfo methodParamTypeInfo = parameterTypes.get(i);
-            // 把内部类的 $ 替换成 .
-            String typeName = methodParamTypeInfo.getType().getTypeName().replaceAll("(?<!\\$)\\$(?!\\$)", ".");
-            String paramName = methodParamTypeInfo.getParamName();
-            sb.append("        ").append(typeName).append(" ").append(paramName)
-                    .append(" = (").append(typeName).append(") args[").append(i).append("];\n");
+        if (Objects.nonNull(parameterTypes) && !parameterTypes.isEmpty()) {
+            for (int i = 0; i < parameterTypes.size(); i++) {
+                MethodParamTypeInfo methodParamTypeInfo = parameterTypes.get(i);
+                // 把内部类的 $ 替换成 .
+                String typeName = methodParamTypeInfo.getType().getTypeName().replaceAll("(?<!\\$)\\$(?!\\$)", ".");
+                String paramName = methodParamTypeInfo.getParamName();
+                sb.append("        ").append(typeName).append(" ").append(paramName)
+                        .append(" = (").append(typeName).append(") args[").append(i).append("];\n");
+            }
         }
         sb.append("        try {\n").append(expr)
                 .append(";\n        } catch (Throwable t) { throw new RuntimeException(t); }\n")
                 .append("        printEnd();\n");
 
-        if (parameterTypes.isEmpty()) {
+        if (Objects.isNull(parameterTypes) || parameterTypes.isEmpty()) {
             sb.append("        return null;\n");
         } else {
             sb.append("        return new Object[]{");
