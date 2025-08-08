@@ -16,7 +16,7 @@ import java.util.stream.Stream;
  * @date : 2025/7/22
  */
 public class RuntimeTestExprExecutor {
-    public static final Map<String, ExpressionExecutor> CACHE = new ConcurrentHashMap<>();
+    private static final Map<String, ExpressionExecutor> CACHE = new ConcurrentHashMap<>();
 
     public static ExpressionExecutor getExecutor(ExpressionVo expVo, List<MethodParamTypeInfo> parameterTypeList, String projectBasePath) {
         if (Objects.isNull(expVo)) {
@@ -41,29 +41,32 @@ public class RuntimeTestExprExecutor {
         }
         String key = getKey(expVo, parameterTypeList);
         LogUtil.log("[Agent more] pre-processing class cache key: " + key);
-        ExpressionExecutor executor = CACHE.get(key);
-        if (Objects.nonNull(executor)) {
-            if (ExpressionExecutorFactory.ERROR == executor) {
-                LogUtil.err("[Agent more] build pre-processing class is cached, error");
-            } else if (ExpressionExecutorFactory.EMPTY == executor) {
-                LogUtil.log("[Agent more] build pre-processing class is cached, empty");
-            } else {
-                LogUtil.log("[Agent more] build pre-processing class is cached, code: " + executor.getClassStr());
-            }
-        } else {
+        ExpressionExecutor executor = get(key);
+        if (Objects.isNull(executor)) {
             executor = getExecutor(expVo, parameterTypeList, projectBasePath);
-            CACHE.put(key, executor);
+            put(key, executor);
         }
         ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
         try {
             Thread.currentThread().setContextClassLoader(RuntimeTestClassLoader.defaultClassLoader());
             return executor.eval(args);
         } catch (Throwable t) {
-            CACHE.put(key, ExpressionExecutorFactory.ERROR);
+            put(key, ExpressionExecutorFactory.ERROR);
             throw new RuntimeException(t);
         } finally {
             Thread.currentThread().setContextClassLoader(contextClassLoader);
         }
+    }
+
+    private static void put(String key, ExpressionExecutor executor) {
+        CACHE.put(key, executor);
+    }
+
+    private static ExpressionExecutor get(String key) {
+        if (LogUtil.isDetailLogEnabled()) {
+            return null;
+        }
+        return CACHE.get(key);
     }
 
     private static String getKey(ExpressionVo expVo, List<MethodParamTypeInfo> methodParamTypeInfoList) {
