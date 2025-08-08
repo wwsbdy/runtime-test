@@ -34,7 +34,10 @@ public class AgentContextHolder {
         String methodName = requestInfo.getMethodName();
         if (Objects.isNull(className) || className.isEmpty()
                 || Objects.isNull(methodName) || methodName.isEmpty()) {
-            RuntimeTestExprExecutor.evaluate(requestInfo.getExpVo(), Collections.emptyList(), requestInfo.getProjectBasePath(), null);
+            LogUtil.log("[Agent more] script begin.");
+            // 通过脚本调用agent的方式，直接运行前置方法
+            RuntimeTestExprExecutor.evaluate(requestInfo.getExpVo(), null, requestInfo.getProjectBasePath(), null);
+            LogUtil.alwaysLog("[Agent] script execution completed.");
             return;
         }
         String cacheKey = CacheUtil.genCacheKey(className, methodName, requestInfo.getParameterTypeList());
