@@ -37,7 +37,7 @@ public class AgentContextHolder {
             LogUtil.log("[Agent more] script begin.");
             // 通过脚本调用agent的方式，直接运行前置方法
             RuntimeTestExprExecutor.evaluate(requestInfo.getExpVo(), null, requestInfo.getProjectBasePath(), null);
-            LogUtil.alwaysLog("[Agent] script invoked successfully.");
+            LogUtil.alwaysLog("[Agent] script execution completed.");
             return;
         }
         String cacheKey = CacheUtil.genCacheKey(className, methodName, requestInfo.getParameterTypeList());
