@@ -27,7 +27,7 @@ public class RuntimeTestState implements PersistentStateComponent<RuntimeTestSta
 
     private final Map<Long, ProcessVo> pidProcessMap = new LinkedHashMap<>();
 
-    private final List<Consumer<List<Long>>> listeners = new ArrayList<>();
+    private final Map<String, Consumer<List<Long>>> listeners = new HashMap<>();
 
     public static RuntimeTestState getInstance(Project project) {
         return project.getService(RuntimeTestState.class);
@@ -80,13 +80,17 @@ public class RuntimeTestState implements PersistentStateComponent<RuntimeTestSta
         return pidProcessMap.keySet();
     }
 
-    public synchronized void addListener(Consumer<List<Long>> listener) {
-        listeners.add(listener);
+    public synchronized void addListener(String key, Consumer<List<Long>> listener) {
+        listeners.put(key, listener);
+    }
+
+    public synchronized void removeListener(String key) {
+        listeners.remove(key);
     }
 
     private void notifyListeners() {
         List<Long> copy = new ArrayList<>(getPids());
-        for (Consumer<List<Long>> listener : listeners) {
+        for (Consumer<List<Long>> listener : listeners.values()) {
             listener.accept(copy);
         }
     }
