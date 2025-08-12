@@ -17,6 +17,17 @@ import java.util.stream.Collectors;
  * @date : 2025/6/30
  */
 public class ParamUtil {
+    private static final Set<String> JAVA_KEYWORDS = new HashSet<>(Arrays.asList(
+            "abstract", "assert", "boolean", "break", "byte", "case", "catch",
+            "char", "class", "const", "continue", "default", "do", "double",
+            "else", "enum", "extends", "false", "final", "finally", "float",
+            "for", "goto", "if", "implements", "import", "instanceof", "int",
+            "interface", "long", "native", "new", "null", "package", "private",
+            "protected", "public", "return", "short", "static", "strictfp",
+            "super", "switch", "synchronized", "this", "throw", "throws",
+            "transient", "true", "try", "void", "volatile", "while", "var",
+            "record"
+    ));
 
     /**
      * 获取参数类型列表，paramType为可直接Class.forName(paramType)的 兼容内部类$；不包含范型
@@ -212,11 +223,42 @@ public class ParamUtil {
         if (topLevelFqn != null && !topLevelFqn.startsWith("java.lang.")) {
             importNames = Collections.singleton(topLevelFqn);
         }
-        return new ParamVo(getTypeName(psiClass), JsonUtil.convertName(psiClass.getName()), importNames);
+        String beanName = psiClass.getName();
+        if (Objects.isNull(beanName)) {
+            beanName = "bean_" + Integer.toHexString(Math.abs(UUID.randomUUID().toString().hashCode()));
+        }
+        return new ParamVo(getTypeName(psiClass), getParamName(beanName), importNames);
     }
 
     public static ParamVo getParamVo(PsiType psiType) {
-        return new ParamVo(getTypeName(psiType), JsonUtil.convertName(StringUtils.substringBefore(psiType.getPresentableText(), "<")), collectImportsFromType(psiType));
+        return new ParamVo(getTypeName(psiType), getParamName(StringUtils.substringBefore(psiType.getPresentableText(), "<")), collectImportsFromType(psiType));
+    }
+
+    /**
+     * 获取安全的参数名称，处理Java关键字和JSON命名转换
+     *
+     * @param name 原始参数名
+     * @return 处理后的安全参数名
+     */
+    public static String getParamName(@NotNull String name) {
+        // 1. 首先进行JSON命名转换
+        name = JsonUtil.convertName(name);
+        // 2. 处理Java关键字冲突
+        if (isJavaKeyword(name)) {
+            // 关键字处理策略：添加下划线前缀
+            return name + "_" + Integer.toHexString(Math.abs(UUID.randomUUID().toString().hashCode()));
+        }
+        return name;
+    }
+
+    /**
+     * 检查字符串是否为Java关键字
+     *
+     * @param word 待检查的字符串
+     * @return 如果是Java关键字返回true，否则返回false
+     */
+    private static boolean isJavaKeyword(String word) {
+        return JAVA_KEYWORDS.contains(word);
     }
 
     /**
@@ -246,7 +288,7 @@ public class ParamUtil {
             }
         }
         // 基本类型等
-        return clsName;
+        return type.getPresentableText();
     }
 
     /**
