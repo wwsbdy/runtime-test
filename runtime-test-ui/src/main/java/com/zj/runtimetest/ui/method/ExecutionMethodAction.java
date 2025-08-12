@@ -49,17 +49,7 @@ public class ExecutionMethodAction extends AnAction implements Disposable {
             throw new IllegalArgumentException("idea arg error (project or editor is null)");
         }
         try {
-            PsiFile file = e.getData(CommonDataKeys.PSI_FILE);
-            PsiMethod psiMethod = null;
-            if (e.getDataContext() instanceof UserDataHolder) {
-                psiMethod = ((UserDataHolder) e.getDataContext()).getUserData(USER_DATE_ELEMENT_KEY);
-            }
-            if (psiMethod == null) {
-                psiMethod = PsiTreeUtil.getParentOfType(getElement(editor, file), PsiMethod.class);
-                if (psiMethod == null) {
-                    throw new IllegalArgumentException("idea arg error (method is null)");
-                }
-            }
+            PsiMethod psiMethod = getPsiMethod(e, editor);
 
             String defaultJson = ParamUtil.getDefaultJson(psiMethod.getParameterList());
 
@@ -72,6 +62,21 @@ public class ExecutionMethodAction extends AnAction implements Disposable {
         } catch (Exception exception) {
             log.error("invoke exception", exception);
         }
+    }
+
+    protected @NotNull PsiMethod getPsiMethod(@NotNull AnActionEvent e, Editor editor) {
+        PsiFile file = e.getData(CommonDataKeys.PSI_FILE);
+        PsiMethod psiMethod = null;
+        if (e.getDataContext() instanceof UserDataHolder) {
+            psiMethod = ((UserDataHolder) e.getDataContext()).getUserData(USER_DATE_ELEMENT_KEY);
+        }
+        if (psiMethod == null) {
+            psiMethod = PsiTreeUtil.getParentOfType(getElement(editor, file), PsiMethod.class);
+            if (psiMethod == null) {
+                throw new IllegalArgumentException("idea arg error (method is null)");
+            }
+        }
+        return psiMethod;
     }
 
     @Override

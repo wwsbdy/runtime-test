@@ -18,6 +18,7 @@ import com.zj.runtimetest.language.PluginBundle;
 import com.zj.runtimetest.utils.NoticeUtil;
 import com.zj.runtimetest.utils.PluginCacheUtil;
 import com.zj.runtimetest.vo.CacheVo;
+import com.zj.runtimetest.vo.ExpressionVo;
 import com.zj.runtimetest.vo.ItemVo;
 import org.apache.commons.collections.CollectionUtils;
 import org.jetbrains.annotations.NotNull;
@@ -46,7 +47,11 @@ public class ScriptToolWindowFactory implements ToolWindowFactory {
         setupAddTabAction(project, toolWindow);
     }
 
-    public void addContent(Project project, ToolWindow toolWindow) {
+    public static void addContent(Project project, ToolWindow toolWindow) {
+        addContent(project, toolWindow, null);
+    }
+
+    public static void addContent(Project project, ToolWindow toolWindow, ExpressionVo expressionVo) {
         if (toolWindow.getContentManager().getContentCount() >= Constant.TAB_MAX) {
             NoticeUtil.notice(project, PluginBundle.get("tool-window.max"));
             return;
@@ -58,11 +63,12 @@ public class ScriptToolWindowFactory implements ToolWindowFactory {
             return;
         }
         CacheVo cacheVo = new CacheVo();
+        cacheVo.setExpVo(expressionVo);
         runtimeTestState.putCache(keyItem.getValue(), cacheVo);
         addContent(project, toolWindow, keyItem.getIndex(), new ScriptEditorPanel(project, cacheVo));
     }
 
-    public void addContent(Project project, ToolWindow toolWindow, Integer index, ScriptEditorPanel scriptEditorPanel) {
+    public static void addContent(Project project, ToolWindow toolWindow, Integer index, ScriptEditorPanel scriptEditorPanel) {
         ContentManager contentManager = toolWindow.getContentManager();
         if (contentManager.getContentCount() >= Constant.TAB_MAX) {
             NoticeUtil.notice(project, PluginBundle.get("tool-window.max"));

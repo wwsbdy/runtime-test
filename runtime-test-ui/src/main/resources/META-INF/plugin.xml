@@ -66,6 +66,13 @@
                 description="Run method">
             <add-to-group group-id="EditorPopupMenu" anchor="first"/>
         </action>
+        <action id="RuntimeTest.ScriptAction"
+                class="com.zj.runtimetest.ui.script.ScriptAction"
+                text="Runtime Test Script"
+                icon="/icons/logo.svg"
+                description="Run method Script">
+            <add-to-group group-id="EditorPopupMenu" anchor="first"/>
+        </action>
     </actions>
     <projectListeners>
         <listener class="com.zj.runtimetest.listener.RuntimeTestExecutionListener"

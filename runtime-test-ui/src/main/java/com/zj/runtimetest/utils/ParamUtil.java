@@ -5,6 +5,8 @@ import com.intellij.psi.*;
 import com.intellij.psi.util.PsiUtil;
 import com.zj.runtimetest.utils.json.POJO2JSONParser;
 import com.zj.runtimetest.vo.MethodParamInfo;
+import com.zj.runtimetest.vo.ParamVo;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -106,9 +108,42 @@ public class ParamUtil {
         ObjectNode objectNode = JsonUtil.objectMapper.createObjectNode();
         for (int i = 0; i < parameterList.getParametersCount(); i++) {
             PsiParameter parameter = Objects.requireNonNull(parameterList.getParameter(i));
-            objectNode.putPOJO(JsonUtil.convertName(parameter.getName()), POJO2JSONParser.parseFieldValue(parameter.getType()));
+            objectNode.putPOJO(parameter.getName(), POJO2JSONParser.parseFieldValue(parameter.getType()));
         }
         return JsonUtil.toJsonString(objectNode);
+    }
+
+    public static ParamVo getParamVo(String jvmQualifiedClassName) {
+        String className = "Object";
+        String beanName = "obj";
+        String importName = "";
+        if (ClassUtil.isPrimitive(jvmQualifiedClassName)) {
+            return new ParamVo(jvmQualifiedClassName, beanName, importName);
+        }
+        if (StringUtils.isBlank(jvmQualifiedClassName) || !jvmQualifiedClassName.contains(".")) {
+            return new ParamVo(className, beanName, importName);
+        }
+        // 分割内部类部分
+        String[] innerParts = jvmQualifiedClassName.split("\\$");
+
+        // 处理包名和外部类
+        String outerClass = innerParts[0];
+        String[] packageParts = outerClass.split("\\.");
+        String simpleOuterClassName = packageParts[packageParts.length - 1];
+
+        // 构建import语句（只导入外部类）
+        importName = outerClass;
+
+        // 构建完整类名（带外部类前缀）
+        StringBuilder classNameBuilder = new StringBuilder(simpleOuterClassName);
+        for (int i = 1; i < innerParts.length; i++) {
+            classNameBuilder.append(".").append(innerParts[i]);
+        }
+        className = classNameBuilder.toString();
+
+        // 生成beanName（取最后一级类名，首字母小写）
+        beanName = JsonUtil.convertName(simpleOuterClassName);
+        return new ParamVo(className, beanName, importName);
     }
 
 }
