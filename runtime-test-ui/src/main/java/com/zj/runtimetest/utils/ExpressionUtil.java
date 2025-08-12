@@ -1,19 +1,21 @@
 package com.zj.runtimetest.utils;
 
 import com.intellij.lang.java.JavaLanguage;
+import com.intellij.psi.PsiMethod;
+import com.intellij.psi.PsiParameter;
 import com.intellij.psi.PsiParameterList;
+import com.intellij.psi.PsiType;
 import com.intellij.xdebugger.XExpression;
 import com.intellij.xdebugger.evaluation.EvaluationMode;
 import com.intellij.xdebugger.impl.breakpoints.XExpressionImpl;
 import com.zj.runtimetest.vo.ExpressionVo;
-import com.zj.runtimetest.vo.MethodParamInfo;
 import com.zj.runtimetest.vo.ParamVo;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * @author : jie.zhou
@@ -21,28 +23,25 @@ import java.util.Objects;
  */
 public class ExpressionUtil {
 
-    public static @NotNull ExpressionVo getDefaultExpression(PsiParameterList parameterList) {
-        if (Objects.isNull(parameterList) || parameterList.getParametersCount() == 0) {
-            return new ExpressionVo();
-        }
-        // TODO 没有兼容范型、[]、...
-        List<MethodParamInfo> paramGenericsTypeNameList = ParamUtil.getParamGenericsTypeNameList(parameterList);
-        if (CollectionUtils.isEmpty(paramGenericsTypeNameList)) {
-            return new ExpressionVo();
-        }
+    public static @NotNull ExpressionVo getDefaultExpression(PsiMethod psiMethod) {
+        PsiParameterList parameterList = psiMethod.getParameterList();
         StringBuilder expression = new StringBuilder();
         StringBuilder imports = new StringBuilder();
-        for (MethodParamInfo methodParamInfo : paramGenericsTypeNameList) {
-            String paramType = methodParamInfo.getParamType();
-            String paramName = methodParamInfo.getParamName();
-            ParamVo paramVo = ParamUtil.getParamVo(paramType);
+        if (parameterList.getParametersCount() == 0) {
+            return new ExpressionVo(expression.toString(), imports.toString());
+        }
+        for (int i = 0; i < parameterList.getParametersCount(); i++) {
+            PsiParameter parameter = Objects.requireNonNull(parameterList.getParameter(i));
+            PsiType type = parameter.getType();
+            ParamVo paramVo = ParamUtil.getParamVo(type);
             String className = paramVo.getClassName();
-            String importName = paramVo.getImportName();
-            if (StringUtils.isNotBlank(className)) {
-                expression.append(className).append(" ").append(paramName).append(" = ").append(FiledUtil.getFieldNullValue(paramType)).append(";\n");
+            Set<String> importNames = paramVo.getImportNames();
+            if (CollectionUtils.isNotEmpty(importNames)) {
+                importNames.forEach(importName -> imports.append(importName).append(","));
             }
-            if (StringUtils.isNotBlank(importName)) {
-                imports.append(importName).append(",");
+            String clsName = parameter.getType().getCanonicalText();
+            if (StringUtils.isNotBlank(className)) {
+                expression.append(className).append(" ").append(parameter.getName()).append(" = ").append(FiledUtil.getFieldNullValue(clsName)).append(";\n");
             }
         }
         return new ExpressionVo(expression.toString(), imports.toString());

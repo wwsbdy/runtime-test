@@ -71,7 +71,7 @@
                 text="Runtime Test Script"
                 icon="/icons/logo.svg"
                 description="Run method Script">
-            <add-to-group group-id="EditorPopupMenu" anchor="first"/>
+            <add-to-group group-id="EditorPopupMenu" anchor="after" relative-to-action="RuntimeTest.ExecutionMethodAction"/>
         </action>
     </actions>
     <projectListeners>

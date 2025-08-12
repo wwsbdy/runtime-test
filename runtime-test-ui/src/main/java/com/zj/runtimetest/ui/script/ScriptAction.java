@@ -16,10 +16,14 @@ import com.zj.runtimetest.utils.NoticeUtil;
 import com.zj.runtimetest.utils.ParamUtil;
 import com.zj.runtimetest.vo.ExpressionVo;
 import com.zj.runtimetest.vo.ParamVo;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
+import java.util.UUID;
 
 
 /**
@@ -44,9 +48,10 @@ public class ScriptAction extends ExecutionMethodAction {
         }
         try {
             PsiMethod psiMethod = getPsiMethod(e, editor);
-            ExpressionVo expressionVo = ExpressionUtil.getDefaultExpression(psiMethod.getParameterList());
+            ExpressionVo expressionVo = ExpressionUtil.getDefaultExpression(psiMethod);
             addInvokeMethod(expressionVo, psiMethod);
             ScriptToolWindowFactory.addContent(project, runtimeTest, expressionVo);
+            runtimeTest.show();
         } catch (Exception exception) {
             log.error("invoke exception", exception);
         }
@@ -75,18 +80,21 @@ public class ScriptAction extends ExecutionMethodAction {
         if (StringUtils.isNotBlank(expressionVo.getMyCustomInfo())) {
             imports.append(expressionVo.getMyCustomInfo());
         }
-        ParamVo paramVo = ParamUtil.getParamVo(ParamUtil.getJvmQualifiedClassName(((PsiClass) psiMethod.getParent())));
+        ParamVo paramVo = ParamUtil.getParamVo((PsiClass) psiMethod.getParent());
         String className = paramVo.getClassName();
         String beanName = paramVo.getBeanName();
-        String importName = paramVo.getImportName();
-        // 兼容bean名称和属性名冲突
-        if (paramNames.contains(beanName)) {
-            beanName = beanName + "_" + Integer.toHexString(Math.abs(UUID.randomUUID().toString().hashCode()));
-            paramNames.add(beanName);
+        Set<String> importNames = paramVo.getImportNames();
+        if (CollectionUtils.isNotEmpty(importNames)) {
+            importNames.forEach(importName -> imports.append(importName).append(","));
         }
         if (MethodUtil.isStaticMethod(psiMethod)) {
             beanName = className;
         } else {
+            // 兼容bean名称和属性名冲突
+            if (paramNames.contains(beanName)) {
+                beanName = beanName + "_" + Integer.toHexString(Math.abs(UUID.randomUUID().toString().hashCode()));
+                paramNames.add(beanName);
+            }
             expression.append("// ").append(PluginBundle.get("description.getBean")).append("\n");
             expression.append(className).append(" ").append(beanName).append(" = getBean(").append(className).append(".class);\n");
         }
@@ -94,19 +102,19 @@ public class ScriptAction extends ExecutionMethodAction {
         PsiType returnType = psiMethod.getReturnType();
         String resultBeanName = null;
         if (Objects.nonNull(returnType) && !"void".equals(returnType.getCanonicalText())) {
-            ParamVo resultParam = ParamUtil.getParamVo(ParamUtil.getJvmQualifiedClassName(returnType));
+            ParamVo resultParam = ParamUtil.getParamVo(returnType);
             String resultClassName = resultParam.getClassName();
-            String resultImportName = resultParam.getImportName();
+            Set<String> resultImportNames = resultParam.getImportNames();
             resultBeanName = resultParam.getBeanName();
             // 兼容返回属性名冲突
             if (paramNames.contains(resultBeanName)) {
                 resultBeanName = resultBeanName + "_" + Integer.toHexString(Math.abs(UUID.randomUUID().toString().hashCode()));
                 paramNames.add(resultBeanName);
             }
-            expression.append(resultClassName).append(" ").append(resultBeanName).append(" = ");
-            if (StringUtils.isNotBlank(resultImportName)) {
-                imports.append(resultImportName).append(",");
+            if (CollectionUtils.isNotEmpty(resultImportNames)) {
+                resultImportNames.forEach(importName -> imports.append(importName).append(","));
             }
+            expression.append(resultClassName).append(" ").append(resultBeanName).append(" = ");
         }
         expression.append(beanName).append(".").append(psiMethod.getName()).append("(");
         for (int i = 0; i < parameterList.getParametersCount(); i++) {
@@ -119,9 +127,6 @@ public class ScriptAction extends ExecutionMethodAction {
         expression.append(");");
         if (Objects.nonNull(resultBeanName)) {
             expression.append("\nSystem.out.println(toJsonString(").append(resultBeanName).append("));");
-        }
-        if (StringUtils.isNotBlank(importName)) {
-            imports.append(importName).append(",");
         }
         expressionVo.setMyExpression(expression.toString());
         expressionVo.setMyCustomInfo(imports.toString());

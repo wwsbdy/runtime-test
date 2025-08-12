@@ -1,3 +1,6 @@
+import java.nio.file.Files
+import java.nio.file.Paths
+
 fun properties(key: String) = providers.gradleProperty(key)
 
 plugins {
@@ -24,98 +27,7 @@ tasks {
     patchPluginXml {
         sinceBuild.set(properties("since.build"))
         untilBuild.set(properties("until.build"))
-        changeNotes.set(
-            """
-            <b>1.8.*</b><br>
-            <ul>
-                <li>Script window supports multiple tabs</li>
-                <li>Added some methods in pre-processing</li>
-            </ul><br>
-            <ul>
-                <li>脚本窗口支持多tab</li>
-                <li>在前置处理中添加了一些方法</li>
-            </ul>
-            <b>1.7.*</b><br>
-            <ul>
-                <li>Save entered information even when canceled</li>
-                <li>Remove unnecessary cached data</li>
-                <li>Fixed the error log sequence issue</li>
-                <li>The <b>getBean()</b> method can now be invoked pre-processing to obtain bean objects</li>
-                <li>Added a new window for executing scripts on the right side</li>
-                <li>Added some methods in pre-processing</li>
-            </ul><br>
-            <ul>
-                <li>取消也保存填写的信息</li>
-                <li>去掉不必要的缓存信息</li>
-                <li>解决error日志顺序问题</li>
-                <li>可在前置处理中调用 <b>getBean()</b> 获取bean对象</li>
-                <li>右边侧边栏新增执行脚本窗口</li>
-                <li>在前置处理中添加了一些方法</li>
-            </ul>
-            <b>1.6.*</b><br>
-            <ul>
-                <li>Fixed cache issues in pre-processing classes</li>
-                <li>Added option to print detail logs</li>
-            </ul><br>
-            <ul>
-                <li>调整前置处理类缓存问题</li>
-                <li>新增打印详细日志选项</li>
-            </ul>
-            <b>1.5.*</b><br>
-            <ul>
-                <li>Adjusted some logic and error issues</li>
-                <li>Compatible inner class</li>
-            </ul><br>
-            <ul>
-                <li>调整了一些逻辑和报错问题</li>
-                <li>兼容内部类</li>
-            </ul>
-            <b>1.4.*</b><br>
-            <ul>
-                <li>Removed dependency on <b>HttpServletRequest</b> in <b>non-Spring</b> projects</li>
-                <li>Fixed errors after converting static methods to instance methods</li>
-                <li>Support <b>LocalDate</b>, <b>LocalDateTime</b></li>
-            </ul><br>
-            <ul>
-                <li>移除 <b>非Spring</b> 项目对 <b>HttpServletRequest</b> 的依赖</li>
-                <li>调整静态方法改为非静态方法后报错问题</li>
-                <li>支持 <b>LocalDate</b>、<b>LocalDateTime</b></li>
-            </ul>
-            <b>1.3.*</b><br>
-            <ul>
-                <li>Remove dependency on breakpoints for pre-processing</li>
-                <li>Add support for printing pre-processing methods (call <b>printPreProcessingMethod()</b> during pre-processing)</li>
-                <li>Now supports pre-processing in <b>non-Debug mode</b></li>
-                <li>Support for HttpServletRequest (in pre-processing, allows calling <b>addHeader()</b> and <b>setAttribute()</b>; supports passing headers in JSON format through parameters)</li>
-            </ul><br>
-            <ul>
-                <li>移除前置处理对断点的依赖</li>
-                <li>支持打印前置处理方法（在前置处理中调用 <b>printPreProcessingMethod()</b> ）</li>
-                <li>现在支持 <b>非Debug模式</b> 前置处理</li>
-                <li>支持 <b>HttpServletRequest</b> （在前置处理中调用 <b>addHeader()</b> 和 <b>setAttribute()</b> ；参数里支持用json格式填入header）</li>
-            </ul>
-            <b>1.2.*</b><br>
-            <ul>
-                <li>Save entered information even when canceled</li>
-                <li>Fix cases where breakpoints were not properly removed</li>
-                <li>Skip breakpoint interception for proxy classes</li>
-            </ul><br>
-            <ul>
-                <li>取消也保存填写的信息</li>
-                <li>调整一些情况下断点未删除情况</li>
-                <li>跳过代理类的断点拦截</li>
-            </ul>
-            <b>1.1.*</b><br>
-            <ul>
-                <li>Maintain compatibility with other versions</li>
-                <li>Fix project freeze issue (when resuming execution after breakpoint pause in RuntimeTest)</li>
-            </ul><br>
-            <ul>
-                <li>兼容其他版本</li>
-                <li>防止项目卡死</li>
-            </ul>
-            """
-        )
+        changeNotes.set(parseChangeNotesFromReadme())
     }
 
 }
@@ -148,4 +60,70 @@ tasks.withType<Test>().configureEach {
 
 tasks.compileJava {
     dependsOn(":runtime-test-core:jar")
+}
+
+fun parseChangeNotesFromReadme(): String {
+    val readmePath = Paths.get("README.md")
+    val lines = Files.readAllLines(readmePath)
+
+    data class VersionNotes(val version: String, val blocks: List<List<String>>)
+
+    val versions = mutableListOf<VersionNotes>()
+
+    var currentVersion: String? = null
+    var currentBlock = mutableListOf<String>()
+    var allBlocks = mutableListOf<List<String>>()
+
+    fun flushBlock() {
+        if (currentBlock.isNotEmpty()) {
+            allBlocks.add(currentBlock)
+            currentBlock = mutableListOf()
+        }
+    }
+
+    fun flushVersion() {
+        if (currentVersion != null && allBlocks.isNotEmpty()) {
+            versions.add(VersionNotes(currentVersion!!, allBlocks.toList()))
+        }
+        allBlocks = mutableListOf()
+    }
+
+    for (line in lines) {
+        val trimmed = line.trim()
+        when {
+            trimmed.startsWith("### ") -> {
+                flushBlock()
+                flushVersion()
+                val version = trimmed.removePrefix("### ").trim()
+                currentVersion = if (version != "0.0.1") version else null
+            }
+
+            trimmed.isEmpty() -> {
+                flushBlock()
+            }
+
+            trimmed.startsWith("- ") && currentVersion != null -> {
+                currentBlock.add(trimmed.removePrefix("- ").trim())
+            }
+        }
+    }
+    flushBlock()
+    flushVersion()
+
+    // 倒序（新版本在最前面）
+    versions.reverse()
+
+    val result = StringBuilder()
+    for (v in versions) {
+        result.append("<h3>${v.version}</h3>\n")
+        for (block in v.blocks) {
+            result.append("<ul>\n")
+            block.forEach { item ->
+                result.append("    <li>${item}</li>\n")
+            }
+            result.append("</ul><br>\n")
+        }
+    }
+
+    return result.toString()
 }
