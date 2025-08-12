@@ -1,5 +1,4 @@
 import java.nio.file.Files
-import java.nio.file.Paths
 
 fun properties(key: String) = providers.gradleProperty(key)
 
