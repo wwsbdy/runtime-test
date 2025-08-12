@@ -63,7 +63,7 @@ tasks.compileJava {
 }
 
 fun parseChangeNotesFromReadme(): String {
-    val readmePath = Paths.get("README.md")
+    val readmePath = rootProject.file("README.md").toPath()
     val lines = Files.readAllLines(readmePath)
 
     data class VersionNotes(val version: String, val blocks: List<List<String>>)
