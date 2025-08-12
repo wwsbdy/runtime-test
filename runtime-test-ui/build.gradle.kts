@@ -1,5 +1,4 @@
 import java.nio.file.Files
-import java.nio.file.Paths
 
 fun properties(key: String) = providers.gradleProperty(key)
 
@@ -7,8 +6,10 @@ plugins {
     id("org.jetbrains.intellij") version "1.14.1"
 }
 
+val versionNumber = "1.9"
+
 group = "com.zj"
-version = "1.9.222"
+version = "$versionNumber.222"
 
 intellij {
     version.set(properties("intellij.version"))
