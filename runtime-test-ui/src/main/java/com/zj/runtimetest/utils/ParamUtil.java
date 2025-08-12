@@ -272,6 +272,7 @@ public class ParamUtil {
         if (type instanceof PsiArrayType) {
             return getTypeName(((PsiArrayType) type).getComponentType()) + "[]";
         }
+        // TODO ? extends A.C 内部类不兼容，会变成? extends C PsiWildcardType
         if (type instanceof PsiClassType) {
             PsiClass psiClass = ((PsiClassType) type).resolve();
             if (psiClass != null) {
