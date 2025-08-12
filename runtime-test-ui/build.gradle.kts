@@ -6,8 +6,10 @@ plugins {
     id("org.jetbrains.intellij") version "1.14.1"
 }
 
+val versionNumber = "1.9"
+
 group = "com.zj"
-version = "1.9-SNAPSHOT"
+version = "$versionNumber-SNAPSHOT"
 
 intellij {
     version.set(properties("intellij.version"))
