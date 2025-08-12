@@ -46,8 +46,10 @@ public class ScriptEditorPanel implements Disposable {
     private JPanel mainPanel;
     private ComboBox<Long> pidComboBox;
     private JBCheckBox logDetailCheckBox;
+    private Project project;
 
     public ScriptEditorPanel(Project project, CacheVo cacheVo) {
+        this.project = project;
         mainPanel = new JPanel(new BorderLayout());
         // 顶部按钮 + Popup 菜单
         JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -76,9 +78,11 @@ public class ScriptEditorPanel implements Disposable {
         });
         pidComboBox.setToolTipText(PluginBundle.get("dialog.pid.title"));
         topPanel.add(pidComboBox);
-        runtimeTestState.addListener(pids -> {
-            pidComboBox.removeAllItems();
-            pids.forEach(pidComboBox::addItem);
+        runtimeTestState.addListener(Integer.toHexString(hashCode()), pids -> {
+            if (Objects.nonNull(pidComboBox)) {
+                pidComboBox.removeAllItems();
+                pids.forEach(pidComboBox::addItem);
+            }
         });
 
         // 编辑器
@@ -140,10 +144,14 @@ public class ScriptEditorPanel implements Disposable {
             disposed = true;
             ExecutorUtil.removeListener(pidComboBox);
             ExecutorUtil.removeListener(logDetailCheckBox);
+            if (Objects.nonNull(project)) {
+                RuntimeTestState.getInstance(project).removeCache(Integer.toHexString(hashCode()));
+            }
             mainPanel.removeAll();
             pidComboBox = null;
             logDetailCheckBox = null;
             mainPanel = null;
+            project = null;
         }
     }
 

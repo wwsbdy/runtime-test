@@ -146,3 +146,11 @@ Notes:<br>
 
 - 脚本窗口支持多tab
 - 在前置处理中添加了一些方法
+
+
+### 1.9.*
+
+- Right-click method can quickly generate call scripts
+
+
+- 右键方法可快速生成调用脚本
