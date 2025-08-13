@@ -145,7 +145,7 @@ public class ScriptEditorPanel implements Disposable {
             ExecutorUtil.removeListener(pidComboBox);
             ExecutorUtil.removeListener(logDetailCheckBox);
             if (Objects.nonNull(project)) {
-                RuntimeTestState.getInstance(project).removeCache(Integer.toHexString(hashCode()));
+                RuntimeTestState.getInstance(project).removeListener(Integer.toHexString(hashCode()));
             }
             mainPanel.removeAll();
             pidComboBox = null;
