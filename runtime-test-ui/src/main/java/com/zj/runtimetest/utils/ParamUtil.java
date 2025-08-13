@@ -142,13 +142,13 @@ public class ParamUtil {
             if (psiClass != null) {
                 // <--- 返回外层顶级类的 FQN
                 String topLevelFqn = getTopLevelQualifiedName(psiClass);
-                if (topLevelFqn != null && !topLevelFqn.startsWith("java.lang.")) {
+                if (isNotJavaLang(topLevelFqn)) {
                     out.add(topLevelFqn);
                 }
             } else {
                 // 未解析的类型（例如源码未解析或依赖缺失）使用 canonicalText 作为回退，但同样过滤 java.lang
                 String txt = type.getCanonicalText();
-                if (!txt.startsWith("java.lang.")) {
+                if (isNotJavaLang(txt)) {
                     out.add(txt);
                 }
             }
@@ -184,7 +184,7 @@ public class ParamUtil {
 
         // 兜底：把 canonicalText 放进集合（但仍过滤 java.lang）
         String canon = type.getCanonicalText();
-        if (!canon.startsWith("java.lang.")) {
+        if (isNotJavaLang(canon)) {
             out.add(canon);
         }
         return out;
@@ -205,7 +205,7 @@ public class ParamUtil {
     public static ParamVo getParamVo(PsiClass psiClass) {
         Set<String> importNames = null;
         String topLevelFqn = getTopLevelQualifiedName(psiClass);
-        if (topLevelFqn != null && !topLevelFqn.startsWith("java.lang.")) {
+        if (isNotJavaLang(topLevelFqn)) {
             importNames = Collections.singleton(topLevelFqn);
         }
         String beanName = psiClass.getName();
@@ -310,5 +310,9 @@ public class ParamUtil {
             current = current.getContainingClass();
         }
         return String.join(".", names);
+    }
+
+    private static boolean isNotJavaLang(String className) {
+        return className != null && (!className.startsWith("java.lang.") || !className.matches("^java\\.lang(\\.[A-Za-z0-9]+)?$"));
     }
 }

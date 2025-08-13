@@ -48,6 +48,10 @@ public class ScriptAction extends ExecutionMethodAction {
         }
         try {
             PsiMethod psiMethod = getPsiMethod(e, editor);
+            if (MethodUtil.isConstructor(psiMethod)) {
+                NoticeUtil.error(project, PluginBundle.get("notice.info.method-constructor"));
+                return;
+            }
             if (!MethodUtil.isPublicMethod(psiMethod)) {
                 NoticeUtil.notice(project, PluginBundle.get("notice.info.method-private"));
                 return;
