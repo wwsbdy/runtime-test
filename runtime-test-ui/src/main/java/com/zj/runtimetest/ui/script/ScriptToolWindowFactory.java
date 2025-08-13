@@ -59,7 +59,7 @@ public class ScriptToolWindowFactory implements ToolWindowFactory {
         RuntimeTestState runtimeTestState = RuntimeTestState.getInstance(project);
         ItemVo<String> keyItem = PluginCacheUtil.getOneOfNotExistContentCacheKey(runtimeTestState);
         if (Objects.isNull(keyItem)) {
-            NoticeUtil.notice(project, PluginBundle.get("tool-window.creatContentError"));
+            NoticeUtil.notice(project, PluginBundle.get("tool-window.create-content-error"));
             return;
         }
         CacheVo cacheVo = new CacheVo();

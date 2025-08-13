@@ -103,10 +103,10 @@ public class ScriptAction extends ExecutionMethodAction {
                 beanName = beanName + "_" + Integer.toHexString(Math.abs(UUID.randomUUID().toString().hashCode()));
             }
             paramNames.add(beanName);
-            expression.append("// ").append(PluginBundle.get("description.getBean")).append("\n");
+            expression.append("// ").append(PluginBundle.get("description.get-bean")).append("\n");
             expression.append(className).append(" ").append(beanName).append(" = getBean(").append(className).append(".class);\n");
         }
-        expression.append("// ").append(PluginBundle.get("description.invokeMethod")).append("\n");
+        expression.append("// ").append(PluginBundle.get("description.invoke-method")).append("\n");
         PsiType returnType = psiMethod.getReturnType();
         String resultBeanName = null;
         if (Objects.nonNull(returnType) && !"void".equals(returnType.getCanonicalText())) {
