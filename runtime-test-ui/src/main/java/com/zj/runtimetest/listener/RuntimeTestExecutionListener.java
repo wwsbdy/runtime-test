@@ -4,14 +4,10 @@ import com.intellij.execution.ExecutionListener;
 import com.intellij.execution.process.BaseProcessHandler;
 import com.intellij.execution.process.ProcessHandler;
 import com.intellij.execution.runners.ExecutionEnvironment;
-import com.intellij.execution.ui.RunContentDescriptor;
-import com.intellij.execution.ui.RunContentManager;
 import com.intellij.openapi.project.Project;
 import com.zj.runtimetest.cache.RuntimeTestState;
 import com.zj.runtimetest.vo.ProcessVo;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.Optional;
 
 /**
  * 进程监听
@@ -28,9 +24,7 @@ public class RuntimeTestExecutionListener implements ExecutionListener {
         try {
             if (handler instanceof BaseProcessHandler) {
                 long pid = ((BaseProcessHandler<?>) handler).getProcess().pid();
-                Long executionId = Optional.ofNullable(RunContentManager.getInstance(project).getSelectedContent())
-                        .map(RunContentDescriptor::getExecutionId)
-                        .orElse(null);
+                Long executionId = env.getExecutionId();
                 RuntimeTestState.getInstance(project).putPidProcessMap(pid, new ProcessVo(pid, env.toString(), executionId, executorId));
             }
         } catch (Exception ignored) {

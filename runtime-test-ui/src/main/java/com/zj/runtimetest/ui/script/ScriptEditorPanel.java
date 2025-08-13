@@ -94,7 +94,7 @@ public class ScriptEditorPanel implements Disposable {
         // 修改脚本操作保存到缓存
         attachExpressionChangeListener(expressionField, cacheVo::setExpression);
         this.logDetailCheckBox = new JBCheckBox();
-        logDetailCheckBox.setToolTipText(PluginBundle.get("dialog.logDetail.title"));
+        logDetailCheckBox.setToolTipText(PluginBundle.get("dialog.log-detail.title"));
         logDetailCheckBox.setSelected(cacheVo.isDetailLog());
         logDetailCheckBox.addActionListener(new AbstractAction() {
             @Override
