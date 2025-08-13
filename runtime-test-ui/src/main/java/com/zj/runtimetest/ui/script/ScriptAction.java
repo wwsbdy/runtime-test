@@ -48,6 +48,10 @@ public class ScriptAction extends ExecutionMethodAction {
         }
         try {
             PsiMethod psiMethod = getPsiMethod(e, editor);
+            if (!MethodUtil.isPublicMethod(psiMethod)) {
+                NoticeUtil.notice(project, PluginBundle.get("notice.info.method-private"));
+                return;
+            }
             ExpressionVo expressionVo = ExpressionUtil.getDefaultExpression(psiMethod);
             addInvokeMethod(expressionVo, psiMethod);
             ScriptToolWindowFactory.addContent(project, runtimeTest, expressionVo);

@@ -216,7 +216,13 @@ public class ParamUtil {
     }
 
     public static ParamVo getParamVo(PsiType psiType) {
-        return new ParamVo(getTypeName(psiType), getParamName(StringUtils.substringBefore(psiType.getPresentableText(), "<")), collectImportsFromType(psiType));
+        String paramName;
+        if (psiType instanceof PsiArrayType) {
+            paramName = getParamName(psiType.getDeepComponentType().getPresentableText());
+        } else {
+            paramName = getParamName(StringUtils.substringBefore(psiType.getPresentableText(), "<"));
+        }
+        return new ParamVo(getTypeName(psiType), paramName, collectImportsFromType(psiType));
     }
 
     /**
