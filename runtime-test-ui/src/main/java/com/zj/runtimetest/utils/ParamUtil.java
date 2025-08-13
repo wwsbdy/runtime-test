@@ -122,21 +122,6 @@ public class ParamUtil {
         return JsonUtil.toJsonString(objectNode);
     }
 
-    /**
-     * 返回要添加到 import 区块的 FQN 集合（已去重、排序）。
-     */
-    public static Set<String> collectImportsForMethod(PsiMethod method) {
-        Set<String> result = new TreeSet<>();
-        if (method == null) {
-            return result;
-        }
-        result.addAll(collectImportsFromType(method.getReturnType()));
-        for (PsiParameter param : method.getParameterList().getParameters()) {
-            result.addAll(collectImportsFromType(param.getType()));
-        }
-        return result;
-    }
-
     private static Set<String> collectImportsFromType(PsiType type) {
         if (type == null) {
             return Collections.emptySet();
@@ -272,7 +257,6 @@ public class ParamUtil {
         if (type instanceof PsiArrayType) {
             return getTypeName(((PsiArrayType) type).getComponentType()) + "[]";
         }
-        // TODO ? extends A.C 内部类不兼容，会变成? extends C PsiWildcardType
         if (type instanceof PsiClassType) {
             PsiClass psiClass = ((PsiClassType) type).resolve();
             if (psiClass != null) {
@@ -286,6 +270,19 @@ public class ParamUtil {
                     return className + "<" + params + ">";
                 }
                 return className;
+            }
+        }
+        // 通配符
+        if (type instanceof PsiWildcardType) {
+            PsiType bound = ((PsiWildcardType) type).getBound();
+            if (Objects.isNull(bound)) {
+                return "?";
+            }
+            if (((PsiWildcardType) type).isExtends()) {
+                return "? extends " + getTypeName(bound);
+            }
+            if (((PsiWildcardType) type).isSuper()) {
+                return "? super " + getTypeName(bound);
             }
         }
         // 基本类型等
