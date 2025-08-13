@@ -54,7 +54,7 @@ public class ExecutionMethodAction extends AnAction implements Disposable {
         try {
             PsiMethod psiMethod = getPsiMethod(e, editor);
             if (MethodUtil.isConstructor(psiMethod)) {
-                NoticeUtil.error(project, PluginBundle.get("notice.info.method-constructor"));
+                NoticeUtil.notice(project, PluginBundle.get("notice.info.method-constructor"));
                 return;
             }
             String defaultJson = ParamUtil.getDefaultJson(psiMethod.getParameterList());
