@@ -14,6 +14,9 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiMethod;
 import com.intellij.psi.util.PsiTreeUtil;
+import com.zj.runtimetest.language.PluginBundle;
+import com.zj.runtimetest.utils.MethodUtil;
+import com.zj.runtimetest.utils.NoticeUtil;
 import com.zj.runtimetest.utils.ParamUtil;
 import com.zj.runtimetest.utils.PluginCacheUtil;
 import com.zj.runtimetest.vo.CacheAndKeyVo;
@@ -49,7 +52,10 @@ public class ExecutionMethodAction extends AnAction implements Disposable {
         }
         try {
             PsiMethod psiMethod = getPsiMethod(e, editor);
-
+            if (MethodUtil.isConstructor(psiMethod)) {
+                NoticeUtil.notice(project, PluginBundle.get("notice.info.method-constructor"));
+                return;
+            }
             String defaultJson = ParamUtil.getDefaultJson(psiMethod.getParameterList());
 
             CacheAndKeyVo cacheAndKeyVo = PluginCacheUtil.getCacheOrDefault(psiMethod, project, defaultJson);

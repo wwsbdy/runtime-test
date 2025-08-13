@@ -72,7 +72,7 @@
                 text="Runtime Test Script"
                 icon="/icons/logo.svg"
                 description="Run method Script">
-            <add-to-group group-id="EditorPopupMenu" anchor="after" relative-to-action="RuntimeTest.ExecutionMethodAction"/>
+            <add-to-group group-id="EditorPopupMenu" anchor="after" relative-to-action="Copy.Paste.Special"/>
         </action>
     </actions>
     <projectListeners>

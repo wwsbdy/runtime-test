@@ -1,22 +1,17 @@
 import java.nio.file.Files
 
-fun properties(key: String) = project.findProperty(key).toString()
+fun properties(key: String) = project.findProperty(key)?.toString() ?: throw IllegalStateException("Property `$key` is undefined")
 
 plugins {
     id("org.jetbrains.intellij") version "1.0"
 }
 
-val versionNumber = "1.9"
-
 group = "com.zj"
-version = "$versionNumber.201"
+version = "${properties("plugin.version")}.201"
 
 intellij {
     version.set(properties("intellij.version"))
     type.set(properties("intellij.type"))
-    // idea version 243
-//    plugins.set(listOf("com.intellij.java", "com.intellij.modules.json"))
-
     plugins.set(listOf("com.intellij.java"))
 }
 

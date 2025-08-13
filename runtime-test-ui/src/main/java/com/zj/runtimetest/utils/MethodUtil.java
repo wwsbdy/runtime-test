@@ -24,4 +24,11 @@ public class MethodUtil {
         PsiModifierList modifierList = method.getModifierList();
         return modifierList.hasModifierProperty(PsiModifier.PUBLIC);
     }
+
+    public static boolean isConstructor(PsiMethod method) {
+        if (method == null) {
+            return false;
+        }
+        return method.isConstructor();
+    }
 }
