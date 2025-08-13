@@ -256,12 +256,25 @@ public class ParamUtil {
      * 保留泛型、内部类、数组、varargs等的类型文本
      */
     public static String getTypeName(PsiType type) {
+        if (type instanceof PsiArrayType) {
+            return getTypeName(((PsiArrayType) type).getComponentType()) + "[]";
+        }
+        // 通配符
+        if (type instanceof PsiWildcardType) {
+            PsiType bound = ((PsiWildcardType) type).getBound();
+            if (Objects.isNull(bound)) {
+                return "?";
+            }
+            if (((PsiWildcardType) type).isExtends()) {
+                return "? extends " + getTypeName(bound);
+            }
+            if (((PsiWildcardType) type).isSuper()) {
+                return "? super " + getTypeName(bound);
+            }
+        }
         String clsName = type.getCanonicalText();
         if (!ClassUtil.isPrimitive(clsName) && !clsName.contains(".")) {
             return "Object";
-        }
-        if (type instanceof PsiArrayType) {
-            return getTypeName(((PsiArrayType) type).getComponentType()) + "[]";
         }
         if (type instanceof PsiClassType) {
             PsiClass psiClass = ((PsiClassType) type).resolve();
@@ -276,19 +289,6 @@ public class ParamUtil {
                     return className + "<" + params + ">";
                 }
                 return className;
-            }
-        }
-        // 通配符
-        if (type instanceof PsiWildcardType) {
-            PsiType bound = ((PsiWildcardType) type).getBound();
-            if (Objects.isNull(bound)) {
-                return "?";
-            }
-            if (((PsiWildcardType) type).isExtends()) {
-                return "? extends " + getTypeName(bound);
-            }
-            if (((PsiWildcardType) type).isSuper()) {
-                return "? super " + getTypeName(bound);
             }
         }
         // 基本类型等
