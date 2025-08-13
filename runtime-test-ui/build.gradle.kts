@@ -58,6 +58,10 @@ tasks.compileJava {
     dependsOn(":runtime-test-core:jar")
 }
 
+tasks.publishPlugin {
+    token.set(properties("publish.token"))
+}
+
 fun parseChangeNotesFromReadme(): String {
     val readmePath = rootProject.file("README.md").toPath()
     val lines = Files.readAllLines(readmePath)
