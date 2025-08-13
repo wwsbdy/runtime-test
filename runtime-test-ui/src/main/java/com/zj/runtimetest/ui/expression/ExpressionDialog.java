@@ -44,7 +44,7 @@ public class ExpressionDialog extends DialogWrapper {
         // 是否允许拖拽的方式扩大或缩小
         setResizable(true);
         // 设置会话框标题
-        setTitle(Objects.nonNull(psiMethod) ? PluginBundle.get("dialog.preMethodFunction.title") : PluginBundle.get("dialog.executionExpression.title"));
+        setTitle(Objects.nonNull(psiMethod) ? PluginBundle.get("dialog.pre-method-function.title") : PluginBundle.get("dialog.execution-expression.title"));
         // 获取到当前项目的名称
         this.project = project;
         this.cache = cache;

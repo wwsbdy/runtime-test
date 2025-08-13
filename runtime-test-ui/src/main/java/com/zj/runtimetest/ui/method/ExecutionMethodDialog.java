@@ -13,18 +13,20 @@ import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.util.ui.JBUI;
 import com.zj.runtimetest.cache.RuntimeTestState;
-import com.zj.runtimetest.ui.json.JsonEditorField;
-import com.zj.runtimetest.ui.json.JsonLanguage;
 import com.zj.runtimetest.language.PluginBundle;
 import com.zj.runtimetest.ui.expression.ExpressionDialog;
+import com.zj.runtimetest.ui.json.JsonEditorField;
+import com.zj.runtimetest.ui.json.JsonLanguage;
 import com.zj.runtimetest.utils.ExecutorUtil;
 import com.zj.runtimetest.utils.JsonUtil;
+import com.zj.runtimetest.utils.NoticeUtil;
 import com.zj.runtimetest.utils.RunUtil;
 import com.zj.runtimetest.vo.CacheVo;
 import com.zj.runtimetest.vo.ProcessVo;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -79,7 +81,7 @@ public class ExecutionMethodDialog extends DialogWrapper {
         this.defaultJson = defaultJson;
 
         this.preMethodButton = new JButton(AllIcons.Nodes.Function);
-        this.preMethodButton.setToolTipText(PluginBundle.get("dialog.preMethodFunction.title"));
+        this.preMethodButton.setToolTipText(PluginBundle.get("dialog.pre-method-function.title"));
         this.preMethodButton.addActionListener(event -> {
             ExpressionDialog expressionDialog = new ExpressionDialog(project, cache, psiMethod);
             Disposer.register(getDisposable(), expressionDialog.getDisposable());
@@ -146,7 +148,7 @@ public class ExecutionMethodDialog extends DialogWrapper {
         }
 
         this.logDetailCheckBox = new JBCheckBox();
-        logDetailCheckBox.setToolTipText(PluginBundle.get("dialog.logDetail.title"));
+        logDetailCheckBox.setToolTipText(PluginBundle.get("dialog.log-detail.title"));
         logDetailCheckBox.setSelected(cache.isDetailLog());
         logDetailCheckBox.addActionListener(new AbstractAction() {
             @Override
@@ -207,6 +209,10 @@ public class ExecutionMethodDialog extends DialogWrapper {
 
         RuntimeTestState.getInstance(project).putCache(cacheKey, cache);
         ExecutorUtil.toFrontRunContent(project, pid);
+        // 提示有前置处理
+        if (Objects.nonNull(cache.getExpVo()) && StringUtils.isNotBlank(cache.getExpVo().getMyExpression())) {
+            NoticeUtil.notice(project, PluginBundle.get("notice.info.has-pre-processing"));
+        }
         CompletableFuture.runAsync(() -> RunUtil.run(project, cache))
                 .exceptionally(throwable -> {
                     log.error("run error", throwable);
