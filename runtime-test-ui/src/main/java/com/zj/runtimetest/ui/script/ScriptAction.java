@@ -48,6 +48,14 @@ public class ScriptAction extends ExecutionMethodAction {
         }
         try {
             PsiMethod psiMethod = getPsiMethod(e, editor);
+            if (MethodUtil.isConstructor(psiMethod)) {
+                NoticeUtil.notice(project, PluginBundle.get("notice.info.method-constructor"));
+                return;
+            }
+            if (!MethodUtil.isPublicMethod(psiMethod)) {
+                NoticeUtil.notice(project, PluginBundle.get("notice.info.method-private"));
+                return;
+            }
             ExpressionVo expressionVo = ExpressionUtil.getDefaultExpression(psiMethod);
             addInvokeMethod(expressionVo, psiMethod);
             ScriptToolWindowFactory.addContent(project, runtimeTest, expressionVo);
@@ -93,8 +101,8 @@ public class ScriptAction extends ExecutionMethodAction {
             // 兼容bean名称和属性名冲突
             if (paramNames.contains(beanName)) {
                 beanName = beanName + "_" + Integer.toHexString(Math.abs(UUID.randomUUID().toString().hashCode()));
-                paramNames.add(beanName);
             }
+            paramNames.add(beanName);
             expression.append("// ").append(PluginBundle.get("description.getBean")).append("\n");
             expression.append(className).append(" ").append(beanName).append(" = getBean(").append(className).append(".class);\n");
         }
@@ -109,8 +117,8 @@ public class ScriptAction extends ExecutionMethodAction {
             // 兼容返回属性名冲突
             if (paramNames.contains(resultBeanName)) {
                 resultBeanName = resultBeanName + "_" + Integer.toHexString(Math.abs(UUID.randomUUID().toString().hashCode()));
-                paramNames.add(resultBeanName);
             }
+            paramNames.add(resultBeanName);
             if (CollectionUtils.isNotEmpty(resultImportNames)) {
                 resultImportNames.forEach(importName -> imports.append(importName).append(","));
             }

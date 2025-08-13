@@ -17,6 +17,17 @@ import java.util.stream.Collectors;
  * @date : 2025/6/30
  */
 public class ParamUtil {
+    private static final Set<String> JAVA_KEYWORDS = new HashSet<>(Arrays.asList(
+            "abstract", "assert", "boolean", "break", "byte", "case", "catch",
+            "char", "class", "const", "continue", "default", "do", "double",
+            "else", "enum", "extends", "false", "final", "finally", "float",
+            "for", "goto", "if", "implements", "import", "instanceof", "int",
+            "interface", "long", "native", "new", "null", "package", "private",
+            "protected", "public", "return", "short", "static", "strictfp",
+            "super", "switch", "synchronized", "this", "throw", "throws",
+            "transient", "true", "try", "void", "volatile", "while", "var",
+            "record"
+    ));
 
     /**
      * 获取参数类型列表，paramType为可直接Class.forName(paramType)的 兼容内部类$；不包含范型
@@ -111,21 +122,6 @@ public class ParamUtil {
         return JsonUtil.toJsonString(objectNode);
     }
 
-    /**
-     * 返回要添加到 import 区块的 FQN 集合（已去重、排序）。
-     */
-    public static Set<String> collectImportsForMethod(PsiMethod method) {
-        Set<String> result = new TreeSet<>();
-        if (method == null) {
-            return result;
-        }
-        result.addAll(collectImportsFromType(method.getReturnType()));
-        for (PsiParameter param : method.getParameterList().getParameters()) {
-            result.addAll(collectImportsFromType(param.getType()));
-        }
-        return result;
-    }
-
     private static Set<String> collectImportsFromType(PsiType type) {
         if (type == null) {
             return Collections.emptySet();
@@ -146,13 +142,13 @@ public class ParamUtil {
             if (psiClass != null) {
                 // <--- 返回外层顶级类的 FQN
                 String topLevelFqn = getTopLevelQualifiedName(psiClass);
-                if (topLevelFqn != null && !topLevelFqn.startsWith("java.lang.")) {
+                if (isNotJavaLang(topLevelFqn)) {
                     out.add(topLevelFqn);
                 }
             } else {
                 // 未解析的类型（例如源码未解析或依赖缺失）使用 canonicalText 作为回退，但同样过滤 java.lang
                 String txt = type.getCanonicalText();
-                if (!txt.startsWith("java.lang.")) {
+                if (isNotJavaLang(txt)) {
                     out.add(txt);
                 }
             }
@@ -188,7 +184,7 @@ public class ParamUtil {
 
         // 兜底：把 canonicalText 放进集合（但仍过滤 java.lang）
         String canon = type.getCanonicalText();
-        if (!canon.startsWith("java.lang.")) {
+        if (isNotJavaLang(canon)) {
             out.add(canon);
         }
         return out;
@@ -209,26 +205,76 @@ public class ParamUtil {
     public static ParamVo getParamVo(PsiClass psiClass) {
         Set<String> importNames = null;
         String topLevelFqn = getTopLevelQualifiedName(psiClass);
-        if (topLevelFqn != null && !topLevelFqn.startsWith("java.lang.")) {
+        if (isNotJavaLang(topLevelFqn)) {
             importNames = Collections.singleton(topLevelFqn);
         }
-        return new ParamVo(getTypeName(psiClass), JsonUtil.convertName(psiClass.getName()), importNames);
+        String beanName = psiClass.getName();
+        if (Objects.isNull(beanName)) {
+            beanName = "bean_" + Integer.toHexString(Math.abs(UUID.randomUUID().toString().hashCode()));
+        }
+        return new ParamVo(getTypeName(psiClass), getParamName(beanName), importNames);
     }
 
     public static ParamVo getParamVo(PsiType psiType) {
-        return new ParamVo(getTypeName(psiType), JsonUtil.convertName(StringUtils.substringBefore(psiType.getPresentableText(), "<")), collectImportsFromType(psiType));
+        String paramName;
+        if (psiType instanceof PsiArrayType) {
+            paramName = getParamName(psiType.getDeepComponentType().getPresentableText());
+        } else {
+            paramName = getParamName(StringUtils.substringBefore(psiType.getPresentableText(), "<"));
+        }
+        return new ParamVo(getTypeName(psiType), paramName, collectImportsFromType(psiType));
+    }
+
+    /**
+     * 获取安全的参数名称，处理Java关键字和JSON命名转换
+     *
+     * @param name 原始参数名
+     * @return 处理后的安全参数名
+     */
+    public static String getParamName(@NotNull String name) {
+        // 1. 首先进行JSON命名转换
+        name = JsonUtil.convertName(name);
+        // 2. 处理Java关键字冲突
+        if (isJavaKeyword(name)) {
+            // 关键字处理策略：添加下划线前缀
+            return name + "_" + Integer.toHexString(Math.abs(UUID.randomUUID().toString().hashCode()));
+        }
+        return name;
+    }
+
+    /**
+     * 检查字符串是否为Java关键字
+     *
+     * @param word 待检查的字符串
+     * @return 如果是Java关键字返回true，否则返回false
+     */
+    private static boolean isJavaKeyword(String word) {
+        return JAVA_KEYWORDS.contains(word);
     }
 
     /**
      * 保留泛型、内部类、数组、varargs等的类型文本
      */
     public static String getTypeName(PsiType type) {
+        if (type instanceof PsiArrayType) {
+            return getTypeName(((PsiArrayType) type).getComponentType()) + "[]";
+        }
+        // 通配符
+        if (type instanceof PsiWildcardType) {
+            PsiType bound = ((PsiWildcardType) type).getBound();
+            if (Objects.isNull(bound)) {
+                return "?";
+            }
+            if (((PsiWildcardType) type).isExtends()) {
+                return "? extends " + getTypeName(bound);
+            }
+            if (((PsiWildcardType) type).isSuper()) {
+                return "? super " + getTypeName(bound);
+            }
+        }
         String clsName = type.getCanonicalText();
         if (!ClassUtil.isPrimitive(clsName) && !clsName.contains(".")) {
             return "Object";
-        }
-        if (type instanceof PsiArrayType) {
-            return getTypeName(((PsiArrayType) type).getComponentType()) + "[]";
         }
         if (type instanceof PsiClassType) {
             PsiClass psiClass = ((PsiClassType) type).resolve();
@@ -246,7 +292,7 @@ public class ParamUtil {
             }
         }
         // 基本类型等
-        return clsName;
+        return type.getPresentableText();
     }
 
     /**
@@ -264,5 +310,9 @@ public class ParamUtil {
             current = current.getContainingClass();
         }
         return String.join(".", names);
+    }
+
+    private static boolean isNotJavaLang(String className) {
+        return className != null && (!className.startsWith("java.lang.") || !className.matches("^java\\.lang(\\.[A-Za-z0-9]+)?$"));
     }
 }
