@@ -54,6 +54,7 @@ public class ScriptEditorPanel implements Disposable {
         // 顶部按钮 + Popup 菜单
         JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         this.pidComboBox = new ComboBox<>();
+        // 宽度固定
         Dimension fixedSize = new Dimension(150, 28);
         pidComboBox.setPreferredSize(fixedSize);
         pidComboBox.setMaximumSize(fixedSize);
@@ -106,6 +107,16 @@ public class ScriptEditorPanel implements Disposable {
 
         expressionField.setExpression(cacheVo.getExpression());
         // 图标按钮（启动/运行）
+        ActionButton runButton = getRunButton(project, cacheVo, expressionField);
+        runButton.setEnabled(Objects.nonNull(pidComboBox.getSelectedItem()));
+        pidComboBox.addActionListener(e -> runButton.setEnabled(Objects.nonNull(pidComboBox.getSelectedItem())));
+        topPanel.add(runButton);
+
+        mainPanel.add(topPanel, BorderLayout.NORTH);
+        mainPanel.add(expressionField.getComponent(), BorderLayout.CENTER);
+    }
+
+    private @NotNull ActionButton getRunButton(Project project, CacheVo cacheVo, XDebuggerExpressionEditor expressionField) {
         AnAction runAction = new AnAction(AllIcons.Actions.Execute) {
             @Override
             public void actionPerformed(@NotNull AnActionEvent e) {
@@ -124,18 +135,12 @@ public class ScriptEditorPanel implements Disposable {
             }
         };
 
-        ActionButton runButton = new ActionButton(
+        return new ActionButton(
                 runAction,
                 runAction.getTemplatePresentation(),
                 "ScriptEditor",
                 new Dimension(20, 20)
         );
-        runButton.setEnabled(Objects.nonNull(pidComboBox.getSelectedItem()));
-        pidComboBox.addActionListener(e -> runButton.setEnabled(Objects.nonNull(pidComboBox.getSelectedItem())));
-        topPanel.add(runButton);
-
-        mainPanel.add(topPanel, BorderLayout.NORTH);
-        mainPanel.add(expressionField.getComponent(), BorderLayout.CENTER);
     }
 
     @Override
