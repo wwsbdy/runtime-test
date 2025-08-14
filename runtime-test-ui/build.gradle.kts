@@ -1,6 +1,7 @@
 import java.nio.file.Files
 
-fun properties(key: String) = project.findProperty(key)?.toString() ?: throw IllegalStateException("Property `$key` is undefined")
+fun properties(key: String) =
+    project.findProperty(key)?.toString() ?: throw IllegalStateException("Property `$key` is undefined")
 
 plugins {
     id("org.jetbrains.intellij") version "1.14.1"
@@ -73,6 +74,7 @@ fun parseChangeNotesFromReadme(): String {
     var currentVersion: String? = null
     var currentBlock = mutableListOf<String>()
     var allBlocks = mutableListOf<List<String>>()
+    var isVersionBlock = false
 
     fun flushBlock() {
         if (currentBlock.isNotEmpty()) {
@@ -90,12 +92,21 @@ fun parseChangeNotesFromReadme(): String {
 
     for (line in lines) {
         val trimmed = line.trim()
+        if (trimmed.startsWith("[//]: # (version-start)")) {
+            isVersionBlock = true
+        }
+        if (!isVersionBlock) {
+            continue
+        }
+        // 检测版本块结束标记
+        if (trimmed.startsWith("[//]: # (version-end)")) {
+            break
+        }
         when {
             trimmed.startsWith("### ") -> {
                 flushBlock()
                 flushVersion()
-                val version = trimmed.removePrefix("### ").trim()
-                currentVersion = if (version != "0.0.1") version else null
+                currentVersion = trimmed.removePrefix("### ").trim()
             }
 
             trimmed.isEmpty() -> {

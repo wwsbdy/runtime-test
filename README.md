@@ -59,6 +59,8 @@ Notes:<br>
 - 点击ok后跳转指定Run/Debug进程窗口
 - 支持前置表达式
 
+[//]: # (version-start)
+
 ### 1.1.*
 
 - Maintain compatibility with other versions
@@ -154,3 +156,5 @@ Notes:<br>
 
 
 - 右键方法可快速生成调用脚本
+
+[//]: # (version-end)
