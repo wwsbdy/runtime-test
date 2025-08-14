@@ -65,6 +65,7 @@ public class RuntimeTestAttach {
         CompletableFuture.runAsync(() -> {
                     try {
                         LogUtil.setDetailLog(requestInfo.isDetailLog());
+                        // 此处初始化HttpServletRequest，防止被调用方法里有使用HttpServletRequest导致报错
                         HttpServletRequestUtil.getHttpServletRequest();
                         AgentContextHolder.invoke(requestInfo);
                     } catch (Exception e) {

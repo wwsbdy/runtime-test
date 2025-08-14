@@ -53,7 +53,7 @@ public class POJO2JSONParser {
             "java.util.Date",
             "java.util.Map",
             "java.util.UUID");
-    
+
 
     private static Object parseClass(PsiClass psiClass, int recursionLevel) {
         ObjectNode objectNode = JsonUtil.objectMapper.createObjectNode();
