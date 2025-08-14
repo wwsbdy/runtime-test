@@ -18,7 +18,7 @@ public class AgentContextHolder {
 
 
     private static boolean isInit = false;
-    private static Set<Object> CONTEXT_CLASS_LOADER_SET = new HashSet<>();
+    private static final Set<Object> CONTEXT_CLASS_LOADER_SET = new HashSet<>();
     private static final ObjCache<ClassLoader, ObjCache<Object, Integer>> CLASS_LOADER_CONTEXT_MAP = new ObjCache<>();
     private static final ObjCache<String, BeanInfo> BEAN_CACHE = new ObjCache<>(10);
     private static final ObjCache<String, MethodInvokeInfo> METHOD_CACHE = new ObjCache<>(10);

@@ -37,22 +37,23 @@ public class FiledUtil {
             return null;
         }
         if (ClassUtil.isPrimitive(jvmQualifiedClassName)) {
-            if ("byte".equals(jvmQualifiedClassName)) {
-                return 0;
-            } else if ("short".equals(jvmQualifiedClassName)) {
-                return (byte) 0;
-            } else if ("int".equals(jvmQualifiedClassName)) {
-                return (short) 0;
-            } else if ("long".equals(jvmQualifiedClassName)) {
-                return 0L;
-            } else if ("float".equals(jvmQualifiedClassName)) {
-                return 0F;
-            } else if ("double".equals(jvmQualifiedClassName)) {
-                return 0D;
-            } else if ("char".equals(jvmQualifiedClassName)) {
-                return '\u0000';
-            } else if ("boolean".equals(jvmQualifiedClassName)) {
-                return false;
+            switch (jvmQualifiedClassName) {
+                case "byte":
+                    return 0;
+                case "short":
+                    return (byte) 0;
+                case "int":
+                    return (short) 0;
+                case "long":
+                    return 0L;
+                case "float":
+                    return 0F;
+                case "double":
+                    return 0D;
+                case "char":
+                    return '\u0000';
+                case "boolean":
+                    return false;
             }
         }
         return null;
