@@ -1,9 +1,7 @@
 package com.zj.runtimetest.ui.script;
 
 import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.diagnostic.Logger;
-import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
@@ -37,8 +35,7 @@ public class ScriptAction extends ExecutionMethodAction {
     @Override
     public void actionPerformed(@NotNull final AnActionEvent e) {
         final Project project = e.getProject();
-        final Editor editor = e.getData(CommonDataKeys.EDITOR);
-        if (null == project || editor == null) {
+        if (null == project) {
             throw new IllegalArgumentException("idea arg error (project or editor is null)");
         }
         ToolWindow runtimeTest = ToolWindowManager.getInstance(project).getToolWindow("RuntimeTest");
@@ -47,15 +44,7 @@ public class ScriptAction extends ExecutionMethodAction {
             return;
         }
         try {
-            PsiMethod psiMethod = getPsiMethod(e, editor);
-            if (MethodUtil.isConstructor(psiMethod)) {
-                NoticeUtil.notice(project, PluginBundle.get("notice.info.method-constructor"));
-                return;
-            }
-            if (!MethodUtil.isPublicMethod(psiMethod)) {
-                NoticeUtil.notice(project, PluginBundle.get("notice.info.method-private"));
-                return;
-            }
+            PsiMethod psiMethod = getPsiMethod(e);
             ExpressionVo expressionVo = ExpressionUtil.getDefaultExpression(psiMethod);
             addInvokeMethod(expressionVo, psiMethod);
             ScriptToolWindowFactory.addContent(project, runtimeTest, expressionVo);
@@ -141,7 +130,12 @@ public class ScriptAction extends ExecutionMethodAction {
     }
 
     @Override
-    public void dispose() {
-
+    protected boolean disabledMethod(@NotNull PsiMethod psiMethod) {
+        // 脚本只支持public的方法
+        if (!MethodUtil.isPublicMethod(psiMethod)) {
+            return true;
+        }
+        return super.disabledMethod(psiMethod);
     }
+
 }
