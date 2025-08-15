@@ -100,7 +100,7 @@ public class MethodInvokeInfo {
             Object arg = map.get(methodParamTypeInfo.getParamName());
             Type argType;
             if (Objects.isNull(methodParamTypeInfo.getType())) {
-                argType = parameterTypes[i];
+                argType = ClassUtil.eraseGenericType(parameterTypes[i]);
                 methodParamTypeInfo.setType(argType);
             } else {
                 argType = methodParamTypeInfo.getType();
