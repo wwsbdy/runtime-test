@@ -154,16 +154,18 @@ Notes:<br>
 
 ### 1.9.*
 
-- Right-click method can quickly generate call scripts
+- Right-click method can quickly generate call scripts (<b>Runtime Test Script</b> action)
 
 
-- 右键方法可快速生成调用脚本
+- 右键方法可快速生成调用脚本（<b>Runtime Test Script</b> 功能）
 
 ### 2.0.*
 
-- Disable constructors, anonymous classes, local classes, non-public methods (only `Runtime Test Script` action)
+- Disable constructors, anonymous classes, local classes, non-public methods (only <b>Runtime Test Script</b> action)
+- Performed type erasure for unknown generic types in pre-processing
 
 
-- 禁用构造器、匿名类、本地类、非公共方法（仅`Runtime Test Script`功能）
+- 禁用构造器、匿名类、本地类、非公共方法（仅 <b>Runtime Test Script</b> 功能）
+- 在前置处理中对未知范型进行范型擦除
 
 [//]: # (version-end)
