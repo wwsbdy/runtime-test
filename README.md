@@ -159,4 +159,11 @@ Notes:<br>
 
 - 右键方法可快速生成调用脚本
 
+### 2.0.*
+
+- Disable constructors, anonymous classes, local classes, non-public methods (only `Runtime Test Script` action)
+
+
+- 禁用构造器、匿名类、本地类、非公共方法（仅`Runtime Test Script`功能）
+
 [//]: # (version-end)

@@ -10,9 +10,7 @@ import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Key;
 import com.intellij.openapi.util.UserDataHolder;
-import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiFile;
-import com.intellij.psi.PsiMethod;
+import com.intellij.psi.*;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.zj.runtimetest.language.PluginBundle;
 import com.zj.runtimetest.utils.MethodUtil;
@@ -23,6 +21,8 @@ import com.zj.runtimetest.vo.CacheAndKeyVo;
 import com.zj.runtimetest.vo.CacheVo;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Objects;
 
 
 /**
@@ -46,12 +46,8 @@ public class ExecutionMethodAction extends AnAction implements Disposable {
     @Override
     public void actionPerformed(@NotNull final AnActionEvent e) {
         final Project project = e.getProject();
-        final Editor editor = e.getData(CommonDataKeys.EDITOR);
-        if (null == project || editor == null) {
-            throw new IllegalArgumentException("idea arg error (project or editor is null)");
-        }
         try {
-            PsiMethod psiMethod = getPsiMethod(e, editor);
+            PsiMethod psiMethod = getPsiMethod(e);
             if (MethodUtil.isConstructor(psiMethod)) {
                 NoticeUtil.notice(project, PluginBundle.get("notice.info.method-constructor"));
                 return;
@@ -69,7 +65,11 @@ public class ExecutionMethodAction extends AnAction implements Disposable {
         }
     }
 
-    protected @NotNull PsiMethod getPsiMethod(@NotNull AnActionEvent e, Editor editor) {
+    protected @NotNull PsiMethod getPsiMethod(@NotNull AnActionEvent e) {
+        final Editor editor = e.getData(CommonDataKeys.EDITOR);
+        if (Objects.isNull(editor)) {
+            throw new IllegalArgumentException("idea arg error (project or editor is null)");
+        }
         PsiFile file = e.getData(CommonDataKeys.PSI_FILE);
         PsiMethod psiMethod = null;
         if (e.getDataContext() instanceof UserDataHolder) {
@@ -91,10 +91,34 @@ public class ExecutionMethodAction extends AnAction implements Disposable {
         PsiFile file = e.getData(CommonDataKeys.PSI_FILE);
         PsiMethod method = PsiTreeUtil.getParentOfType(getElement(editor, file), PsiMethod.class);
         boolean enabled = project != null && editor != null && method != null;
-        if (enabled && e.getDataContext() instanceof UserDataHolder) {
+        if (!enabled || disabledMethod(method)) {
+            e.getPresentation().setEnabledAndVisible(false);
+            return;
+        }
+        if (e.getDataContext() instanceof UserDataHolder) {
             ((UserDataHolder) e.getDataContext()).putUserData(USER_DATE_ELEMENT_KEY, method);
         }
-        e.getPresentation().setEnabledAndVisible(enabled);
+        e.getPresentation().setEnabledAndVisible(true);
+    }
+
+    /**
+     * 禁用方法
+     *
+     * @param psiMethod 方法
+     * @return true: 禁用
+     */
+    protected boolean disabledMethod(@NotNull PsiMethod psiMethod) {
+        // 过滤构造器
+        if (MethodUtil.isConstructor(psiMethod)) {
+            return true;
+        }
+        PsiElement parent = psiMethod.getParent();
+        // 过滤匿名类
+        if (parent instanceof PsiAnonymousClass) {
+            return true;
+        }
+        // 过滤本地类（定义在方法内部的类）
+        return parent instanceof PsiDeclarationStatement;
     }
 
     @Nullable
