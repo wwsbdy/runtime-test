@@ -1,12 +1,9 @@
 package com.zj.runtimetest.utils;
 
-import sun.reflect.generics.reflectiveObjects.GenericArrayTypeImpl;
-import sun.reflect.generics.reflectiveObjects.ParameterizedTypeImpl;
+import com.zj.runtimetest.vo.GenericArrayTypeImpl;
+import com.zj.runtimetest.vo.ParameterizedTypeImpl;
 
-import java.lang.reflect.Array;
-import java.lang.reflect.GenericArrayType;
-import java.lang.reflect.Type;
-import java.lang.reflect.TypeVariable;
+import java.lang.reflect.*;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -58,9 +55,9 @@ public class ClassUtil {
         if (type instanceof TypeVariable) {
             // 未绑定泛型变量（如 <T>）替换为 Object
             return Object.class;
-        } else if (type instanceof ParameterizedTypeImpl) {
+        } else if (type instanceof ParameterizedType) {
             // 处理参数化类型（如 List<T>）
-            ParameterizedTypeImpl pt = (ParameterizedTypeImpl) type;
+            ParameterizedType pt = (ParameterizedType) type;
             Type[] actualTypeArgs = pt.getActualTypeArguments();
             Type[] newTypeArgs = new Type[actualTypeArgs.length];
             // 递归擦除每个类型参数
@@ -68,7 +65,7 @@ public class ClassUtil {
                 newTypeArgs[i] = eraseGenericType(actualTypeArgs[i]);
             }
             // 重建 ParameterizedType
-            return ParameterizedTypeImpl.make(pt.getRawType(), newTypeArgs, pt.getOwnerType());
+            return ParameterizedTypeImpl.make((Class<?>) pt.getRawType(), newTypeArgs, pt.getOwnerType());
         } else if (type instanceof GenericArrayType) {
             // 处理泛型数组（如 T[]）
             Type componentType = ((GenericArrayType) type).getGenericComponentType();
