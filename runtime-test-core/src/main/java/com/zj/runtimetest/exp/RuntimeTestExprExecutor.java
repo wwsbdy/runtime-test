@@ -18,7 +18,7 @@ import java.util.stream.Stream;
 public class RuntimeTestExprExecutor {
     private static final Map<String, ExpressionExecutor> CACHE = new ConcurrentHashMap<>();
 
-    public static ExpressionExecutor getExecutor(ExpressionVo expVo, List<MethodParamTypeInfo> parameterTypeList, String projectBasePath) {
+    public static ExpressionExecutor getExecutor(ExpressionVo expVo, List<MethodParamTypeInfo> parameterTypeList) {
         if (Objects.isNull(expVo)) {
             return ExpressionExecutorFactory.EMPTY;
         }
@@ -34,7 +34,6 @@ public class RuntimeTestExprExecutor {
 
     public static Object[] evaluate(ExpressionVo expVo,
                                     List<MethodParamTypeInfo> parameterTypeList,
-                                    String projectBasePath,
                                     Object[] args) {
         if (Objects.isNull(expVo)) {
             return args;
@@ -43,7 +42,7 @@ public class RuntimeTestExprExecutor {
         LogUtil.log("[Agent more] pre-processing class cache key: " + key);
         ExpressionExecutor executor = get(key);
         if (Objects.isNull(executor)) {
-            executor = getExecutor(expVo, parameterTypeList, projectBasePath);
+            executor = getExecutor(expVo, parameterTypeList);
             put(key, executor);
         }
         ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
