@@ -6,6 +6,7 @@ import java.util.Objects;
 
 
 /**
+ * 泛型数组类型
  * @author : jie.zhou
  * @date : 2025/8/15
  */

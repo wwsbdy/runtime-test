@@ -17,6 +17,7 @@ import java.util.Objects;
 import java.util.function.Consumer;
 
 /**
+ * 缓存
  * @author : jie.zhou
  * @date : 2025/6/30
  */

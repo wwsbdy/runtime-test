@@ -25,6 +25,7 @@ import java.util.UUID;
 
 
 /**
+ * 脚本
  * @author : jie.zhou
  * @date : 2025/8/12
  */

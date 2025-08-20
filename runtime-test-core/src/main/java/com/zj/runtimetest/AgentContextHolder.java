@@ -1,6 +1,6 @@
 package com.zj.runtimetest;
 
-import com.zj.runtimetest.exp.RuntimeTestExprExecutor;
+import com.zj.runtimetest.utils.ExprExecuteUtil;
 import com.zj.runtimetest.utils.CacheUtil;
 import com.zj.runtimetest.utils.ClassUtil;
 import com.zj.runtimetest.utils.JsonUtil;
@@ -12,6 +12,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
+ * Spring上下文处理器
  * @author 19242
  */
 public class AgentContextHolder {
@@ -29,14 +30,14 @@ public class AgentContextHolder {
         CONTEXT_CLASS_LOADER_SET.add(ctx);
     }
 
-    public static void invoke(RequestInfo requestInfo) throws ClassNotFoundException, InvocationTargetException, NoSuchMethodException, IllegalAccessException {
+    public static void invoke(RequestInfo requestInfo) throws ClassNotFoundException, InvocationTargetException, NoSuchMethodException, IllegalAccessException, NoSuchFieldException {
         String className = requestInfo.getClassName();
         String methodName = requestInfo.getMethodName();
         if (Objects.isNull(className) || className.isEmpty()
                 || Objects.isNull(methodName) || methodName.isEmpty()) {
             LogUtil.log("[Agent more] script begin.");
             // 通过脚本调用agent的方式，直接运行前置方法
-            RuntimeTestExprExecutor.evaluate(requestInfo.getExpVo(), null, requestInfo.getProjectBasePath(), null);
+            ExprExecuteUtil.evaluate(requestInfo.getExpVo(), null, null);
             LogUtil.alwaysLog("[Agent] script execution completed.");
             return;
         }
@@ -46,8 +47,7 @@ public class AgentContextHolder {
         MethodInvokeInfo methodInvokeInfo = METHOD_CACHE.get(cacheKey);
         if (Objects.isNull(methodInvokeInfo)) {
             if (requestInfo.isStaticMethod()) {
-                LogUtil.log("[Agent more] " + className + "." + methodName + "() is static.");
-                methodInvokeInfo = new MethodInvokeInfo(requestInfo, new BeanInfo(className, null, DEFAULT_CLASS_LOADER));
+                methodInvokeInfo = new MethodInvokeInfo(requestInfo, new BeanInfo(ClassUtil.getClass(className, DEFAULT_CLASS_LOADER), null, DEFAULT_CLASS_LOADER));
             } else {
                 BeanInfo beanInfo = getBean(className);
                 Object bean = beanInfo.getBean();
@@ -56,25 +56,19 @@ public class AgentContextHolder {
                     return;
                 }
                 methodInvokeInfo = new MethodInvokeInfo(requestInfo, beanInfo);
-                LogUtil.log("[Agent more] Bean from: " + bean);
             }
             METHOD_CACHE.put(cacheKey, methodInvokeInfo);
         } else {
             LogUtil.log("[Agent more] " + className + "." + methodName + "() is cached.");
-            if (requestInfo.isStaticMethod()) {
-                LogUtil.log("[Agent more] " + className + "." + methodName + "() is a static method.");
-            } else if (methodInvokeInfo.getBeanInfo() instanceof NoSpringBeanInfo) {
-                LogUtil.log("[Agent more] " + className + "." + methodName + "() is not a method of spring bean.");
-            } else if (Objects.nonNull(methodInvokeInfo.getBeanInfo().getBean())) {
-                LogUtil.log("[Agent more] " + className + "." + methodName + "() is a method of spring bean.");
-            }
         }
         LogUtil.log("[Agent more] " + className + "." + methodName + "() is invoked.");
-        Object result = methodInvokeInfo.invoke(requestInfo.getExpVo(), requestInfo.getRequestJson());
-        LogUtil.alwaysLog("[Agent] " + methodName + "() invoked successfully." + (methodInvokeInfo.isReturnValue() ? " result: " + JsonUtil.toJsonString(result) : ""));
+        Result result = methodInvokeInfo.invoke(requestInfo.getExpVo(), requestInfo.getRequestJson());
+        if (result.isSuccess()) {
+            LogUtil.alwaysLog("[Agent] " + methodName + "() invoked successfully." + (methodInvokeInfo.isReturnValue() ? " result: " + JsonUtil.toJsonString(result.getResult()) : ""));
+        }
     }
 
-    public static BeanInfo getBean(String className) {
+    public static BeanInfo getBean(String className) throws ClassNotFoundException {
         if (Objects.isNull(className) || className.isEmpty()) {
             LogUtil.alwaysErr("[Agent] className is null.");
             return BeanInfo.empty();
@@ -125,7 +119,7 @@ public class AgentContextHolder {
                 }
                 if (Objects.nonNull(bean)) {
                     LogUtil.log("[Agent more] getBean from spring context: " + className + " from spring context: " + context + "; classLoader: " + classLoader);
-                    BeanInfo beanInfo = new BeanInfo(className, bean, classLoader);
+                    BeanInfo beanInfo = new BeanInfo(clazz, bean, classLoader);
                     BEAN_CACHE.put(className, beanInfo);
                     return beanInfo;
                 }
@@ -173,7 +167,7 @@ public class AgentContextHolder {
 
     public static Object getBeanByName(String name) {
         if (CONTEXT_CLASS_LOADER_SET.isEmpty()) {
-            LogUtil.log("[Agent] context classLoaders is empty.");
+            LogUtil.log("[Agent more] context classLoaders is empty.");
         }
         for (Object context : CONTEXT_CLASS_LOADER_SET) {
             Object bean;

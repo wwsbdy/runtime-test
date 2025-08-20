@@ -6,6 +6,7 @@ import lombok.EqualsAndHashCode;
 import java.lang.reflect.Type;
 
 /**
+ * 方法参数类型信息
  * @author : jie.zhou
  * @date : 2025/7/22
  */
@@ -14,13 +15,16 @@ import java.lang.reflect.Type;
 public class MethodParamTypeInfo extends MethodParamInfo {
 
     private Type type;
+    private Class<?> cls;
 
-    public MethodParamTypeInfo(String paramName, String paramType, Type type) {
+    public MethodParamTypeInfo(String paramName, String paramType, Class<?> cls) {
         super(paramName, paramType);
-        this.type = type;
+        this.cls = cls;
     }
 
-    public MethodParamTypeInfo(Type type) {
+    public MethodParamTypeInfo(String paramName, String paramType, Class<?> cls, Type type) {
+        super(paramName, paramType);
+        this.cls = cls;
         this.type = type;
     }
 }

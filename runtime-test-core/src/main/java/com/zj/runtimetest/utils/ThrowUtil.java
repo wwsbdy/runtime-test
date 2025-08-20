@@ -5,6 +5,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 
 /**
+ * 异常工具类
  * @author : jie.zhou
  * @date : 2025/7/10
  */

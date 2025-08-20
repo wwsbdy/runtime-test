@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 
 /**
+ * 进程信息
  * @author : jie.zhou
  * @date : 2025/7/8
  */

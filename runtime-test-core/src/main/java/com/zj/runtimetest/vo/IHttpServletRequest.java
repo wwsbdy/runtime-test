@@ -1,6 +1,7 @@
 package com.zj.runtimetest.vo;
 
 /**
+ * http请求接口
  * @author 19242
  */
 public interface IHttpServletRequest {

@@ -11,6 +11,7 @@ import java.time.ZoneId;
 import java.util.Date;
 
 /**
+ * 序列化器
  * @author : jie.zhou
  * @date : 2025/7/25
  */

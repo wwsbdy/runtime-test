@@ -21,6 +21,7 @@ import javax.swing.*;
 import java.util.Objects;
 
 /**
+ * 表达式编辑器工厂
  * @author : jie.zhou
  * @date : 2025/7/31
  */

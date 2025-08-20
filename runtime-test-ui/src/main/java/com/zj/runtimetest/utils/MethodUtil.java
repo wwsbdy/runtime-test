@@ -5,6 +5,7 @@ import com.intellij.psi.PsiModifier;
 import com.intellij.psi.PsiModifierList;
 
 /**
+ * 方法工具类
  * @author : jie.zhou
  * @date : 2025/7/2
  */

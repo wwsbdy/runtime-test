@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
+ * 缓存工具类
  * @author jie.zhou
  */
 public class CacheUtil {

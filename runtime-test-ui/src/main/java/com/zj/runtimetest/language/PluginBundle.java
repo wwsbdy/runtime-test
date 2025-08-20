@@ -7,6 +7,7 @@ import java.util.Optional;
 import java.util.ResourceBundle;
 
 /**
+ * 语言绑定
  * @author : jie.zhou
  * @date : 2025/4/18
  */

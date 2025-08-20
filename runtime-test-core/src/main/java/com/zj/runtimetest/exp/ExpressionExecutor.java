@@ -5,22 +5,24 @@ import com.zj.runtimetest.utils.HttpServletRequestUtil;
 import com.zj.runtimetest.utils.JsonUtil;
 import com.zj.runtimetest.utils.LogUtil;
 import com.zj.runtimetest.vo.IHttpServletRequest;
-import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
-import lombok.Getter;
 import lombok.Setter;
 
 import java.util.Objects;
 
 /**
+ * 执行器抽象类
  * @author : jie.zhou
  * @date : 2025/7/31
  */
+@Setter
 @EqualsAndHashCode
 public abstract class ExpressionExecutor {
-    @Getter(AccessLevel.PACKAGE)
-    @Setter(AccessLevel.PACKAGE)
-    private String classStr;
+
+    /**
+     * 源代码
+     */
+    private String sourceCode;
 
     public abstract Object[] eval(Object[] args);
 
@@ -29,8 +31,8 @@ public abstract class ExpressionExecutor {
     }
 
     protected void printPreProcessingMethod() {
-        if (Objects.nonNull(classStr) && !classStr.isEmpty()) {
-            LogUtil.alwaysLog(classStr);
+        if (Objects.nonNull(sourceCode) && !sourceCode.isEmpty()) {
+            LogUtil.alwaysLog(sourceCode);
         }
     }
 
