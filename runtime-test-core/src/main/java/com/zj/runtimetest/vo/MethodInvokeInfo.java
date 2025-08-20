@@ -17,15 +17,16 @@ import java.util.*;
 @Getter
 public class MethodInvokeInfo {
 
-    private final Method method;
-    private final List<MethodParamTypeInfo> parameterList;
-    private final boolean returnValue;
-    private final BeanInfo beanInfo;
-    private final Object bean;
-    private final boolean privateMethodProxyClass;
+    private Method method;
+    private List<MethodParamTypeInfo> parameterList;
+    private boolean returnValue;
+    private Object bean;
+    private boolean privateMethodProxyClass;
+    private final boolean springBean;
+    private String errorMsg;
 
-    public MethodInvokeInfo(RequestInfo requestInfo, BeanInfo beanInfo) throws NoSuchMethodException, ClassNotFoundException {
-        this.beanInfo = beanInfo;
+    public MethodInvokeInfo(RequestInfo requestInfo, BeanInfo beanInfo) {
+        springBean = !(beanInfo instanceof NoSpringBeanInfo) && Objects.nonNull(beanInfo.getBean());
         List<MethodParamInfo> parameterTypeList = requestInfo.getParameterTypeList();
         Class<?>[] paramClazzArr = null;
         // 封装入参类型
@@ -36,17 +37,25 @@ public class MethodInvokeInfo {
                 MethodParamInfo methodParamInfo = parameterTypeList.get(i);
                 String clsStr = methodParamInfo.getParamType();
                 if (ClassUtil.isPrimitive(clsStr) || clsStr.contains(".")) {
-                    paramClazzArr[i] = ClassUtil.getClass(clsStr, beanInfo.getClassLoader());
+                    try {
+                        paramClazzArr[i] = ClassUtil.getClass(clsStr, beanInfo.getClassLoader());
+                    } catch (ClassNotFoundException e) {
+                        errorMsg = "ClassNotFoundException: " + clsStr;
+                        return;
+                    }
                 } else {
                     // 兼容范型
                     paramClazzArr[i] = Object.class;
                 }
                 this.parameterList.add(new MethodParamTypeInfo(methodParamInfo.getParamName(), methodParamInfo.getParamType(), paramClazzArr[i]));
             }
-        } else {
-            this.parameterList = Collections.emptyList();
         }
-        method = beanInfo.getCls().getDeclaredMethod(requestInfo.getMethodName(), paramClazzArr);
+        try {
+            method = beanInfo.getCls().getDeclaredMethod(requestInfo.getMethodName(), paramClazzArr);
+        } catch (NoSuchMethodException e) {
+            errorMsg = "NoSuchMethodException: " + requestInfo.getMethodName();
+            return;
+        }
         method.setAccessible(true);
         returnValue = method.getReturnType() != void.class;
         // 兼容代理
@@ -69,11 +78,29 @@ public class MethodInvokeInfo {
         }
     }
 
-    public Object invoke(ExpressionVo expVo, String requestJson) throws InvocationTargetException, IllegalAccessException {
+    public Result invoke(ExpressionVo expVo, String requestJson) throws InvocationTargetException, IllegalAccessException {
+        if (Objects.nonNull(errorMsg)) {
+            LogUtil.alwaysLog("[Agent] " + errorMsg);
+            return Result.FAIL;
+        }
+        if (Objects.nonNull(bean)) {
+            LogUtil.log("[Agent more] Bean from: " + bean);
+        }
+        if (Objects.isNull(method)) {
+            LogUtil.alwaysLog("[Agent] method is not found.");
+            return Result.FAIL;
+        }
         if (privateMethodProxyClass) {
             LogUtil.log("[Agent more] method is private, try to get proxied instance");
         }
-        return method.invoke(bean, getArgs(expVo, requestJson));
+        if (Objects.isNull(bean)) {
+            LogUtil.log("[Agent more] " + method + " is a static method.");
+        } else if (springBean) {
+            LogUtil.log("[Agent more] " + method + " is a method of spring bean.");
+        } else {
+            LogUtil.log("[Agent more] " + method + " is not a method of spring bean.");
+        }
+        return new Result(method.invoke(bean, getArgs(expVo, requestJson)));
     }
 
     private Object[] getArgs(ExpressionVo expVo, String requestJson) {

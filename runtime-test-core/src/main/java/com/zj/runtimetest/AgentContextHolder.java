@@ -46,7 +46,6 @@ public class AgentContextHolder {
         MethodInvokeInfo methodInvokeInfo = METHOD_CACHE.get(cacheKey);
         if (Objects.isNull(methodInvokeInfo)) {
             if (requestInfo.isStaticMethod()) {
-                LogUtil.log("[Agent more] " + className + "." + methodName + "() is static.");
                 methodInvokeInfo = new MethodInvokeInfo(requestInfo, new BeanInfo(ClassUtil.getClass(className, DEFAULT_CLASS_LOADER), null, DEFAULT_CLASS_LOADER));
             } else {
                 BeanInfo beanInfo = getBean(className);
@@ -56,22 +55,16 @@ public class AgentContextHolder {
                     return;
                 }
                 methodInvokeInfo = new MethodInvokeInfo(requestInfo, beanInfo);
-                LogUtil.log("[Agent more] Bean from: " + bean);
             }
             METHOD_CACHE.put(cacheKey, methodInvokeInfo);
         } else {
             LogUtil.log("[Agent more] " + className + "." + methodName + "() is cached.");
-            if (requestInfo.isStaticMethod()) {
-                LogUtil.log("[Agent more] " + className + "." + methodName + "() is a static method.");
-            } else if (methodInvokeInfo.getBeanInfo() instanceof NoSpringBeanInfo) {
-                LogUtil.log("[Agent more] " + className + "." + methodName + "() is not a method of spring bean.");
-            } else if (Objects.nonNull(methodInvokeInfo.getBeanInfo().getBean())) {
-                LogUtil.log("[Agent more] " + className + "." + methodName + "() is a method of spring bean.");
-            }
         }
         LogUtil.log("[Agent more] " + className + "." + methodName + "() is invoked.");
-        Object result = methodInvokeInfo.invoke(requestInfo.getExpVo(), requestInfo.getRequestJson());
-        LogUtil.alwaysLog("[Agent] " + methodName + "() invoked successfully." + (methodInvokeInfo.isReturnValue() ? " result: " + JsonUtil.toJsonString(result) : ""));
+        Result result = methodInvokeInfo.invoke(requestInfo.getExpVo(), requestInfo.getRequestJson());
+        if (result.isSuccess()) {
+            LogUtil.alwaysLog("[Agent] " + methodName + "() invoked successfully." + (methodInvokeInfo.isReturnValue() ? " result: " + JsonUtil.toJsonString(result.getResult()) : ""));
+        }
     }
 
     public static BeanInfo getBean(String className) throws ClassNotFoundException {
