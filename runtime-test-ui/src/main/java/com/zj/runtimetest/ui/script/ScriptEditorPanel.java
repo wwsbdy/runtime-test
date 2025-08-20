@@ -35,21 +35,21 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
 /**
+ * 脚本编辑面板
  * @author : jie.zhou
  * @date : 2025/7/31
  */
 public class ScriptEditorPanel implements Disposable {
 
     private static final Logger log = Logger.getInstance(ScriptEditorPanel.class);
-    private boolean disposed = false;
+    private RuntimeTestState runtimeTestState;
+    private boolean disposed;
     @Getter
     private JPanel mainPanel;
     private ComboBox<Long> pidComboBox;
     private JBCheckBox logDetailCheckBox;
-    private Project project;
 
     public ScriptEditorPanel(Project project, CacheVo cacheVo) {
-        this.project = project;
         mainPanel = new JPanel(new BorderLayout());
         // 顶部按钮 + Popup 菜单
         JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -60,7 +60,7 @@ public class ScriptEditorPanel implements Disposable {
         pidComboBox.setMaximumSize(fixedSize);
         pidComboBox.setMinimumSize(fixedSize);
         pidComboBox.setPrototypeDisplayValue(10000000000L);
-        RuntimeTestState runtimeTestState = RuntimeTestState.getInstance(project);
+        runtimeTestState = RuntimeTestState.getInstance(project);
         runtimeTestState.getPids().forEach(pidComboBox::addItem);
         pidComboBox.setRenderer(new DefaultListCellRenderer() {
             @Override
@@ -153,14 +153,14 @@ public class ScriptEditorPanel implements Disposable {
             disposed = true;
             ExecutorUtil.removeListener(pidComboBox);
             ExecutorUtil.removeListener(logDetailCheckBox);
-            if (Objects.nonNull(project)) {
-                RuntimeTestState.getInstance(project).removeListener(Integer.toHexString(hashCode()));
+            if (Objects.nonNull(runtimeTestState)) {
+                runtimeTestState.removeListener(Integer.toHexString(hashCode()));
             }
             mainPanel.removeAll();
             pidComboBox = null;
             logDetailCheckBox = null;
             mainPanel = null;
-            project = null;
+            runtimeTestState = null;
         }
     }
 

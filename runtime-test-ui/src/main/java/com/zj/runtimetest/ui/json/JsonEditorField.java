@@ -20,7 +20,7 @@ import org.jetbrains.annotations.Nullable;
 public class JsonEditorField extends LanguageTextField implements Disposable {
 
 
-    private boolean disposed = false;
+    private boolean disposed;
 
     public JsonEditorField(Language language, @Nullable Project project, @NotNull String value, boolean enabled) {
         super(language, project, value);

@@ -8,6 +8,7 @@ import java.lang.reflect.Modifier;
 import java.util.Objects;
 
 /**
+ * 创建非 spring bean
  * @author : jie.zhou
  * @date : 2025/7/1
  */
@@ -15,8 +16,8 @@ public class NoSpringBeanInfo extends BeanInfo {
 
     private boolean isInit = false;
 
-    public NoSpringBeanInfo(String className, ClassLoader classLoader) {
-        super(className, null, classLoader);
+    public NoSpringBeanInfo(String className, ClassLoader classLoader) throws ClassNotFoundException {
+        super(ClassUtil.getClass(className, classLoader), null, classLoader);
     }
 
     @Override
@@ -28,7 +29,7 @@ public class NoSpringBeanInfo extends BeanInfo {
                 }
                 isInit = true;
                 try {
-                    Object instanceSmart = createInstanceSmart(ClassUtil.getClass(super.getClassName(), super.getClassLoader()));
+                    Object instanceSmart = createInstanceSmart(getCls());
                     super.setBean(instanceSmart);
                     return instanceSmart;
                 } catch (Exception e) {

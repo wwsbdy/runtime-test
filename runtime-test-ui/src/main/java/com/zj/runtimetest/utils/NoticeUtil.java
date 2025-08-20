@@ -6,6 +6,7 @@ import com.intellij.notification.NotificationType;
 import com.intellij.openapi.project.Project;
 
 /**
+ * 提示工具类
  * @author : jie.zhou
  * @date : 2025/7/2
  */

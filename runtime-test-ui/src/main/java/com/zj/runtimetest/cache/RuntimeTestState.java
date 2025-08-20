@@ -14,6 +14,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
 /**
+ * RuntimeTest缓存信息存储
  * @author : jie.zhou
  * @date : 2025/6/12
  */

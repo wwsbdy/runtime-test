@@ -1,7 +1,9 @@
-package com.zj.runtimetest.exp;
+package com.zj.runtimetest.utils;
 
-import com.zj.runtimetest.utils.LogUtil;
-import com.zj.runtimetest.utils.ThrowUtil;
+import com.zj.runtimetest.exp.ExpressionExecutor;
+import com.zj.runtimetest.exp.ExpressionExecutorFactory;
+import com.zj.runtimetest.exp.PureECJCompiler;
+import com.zj.runtimetest.exp.RuntimeTestClassLoader;
 import com.zj.runtimetest.vo.ExpressionVo;
 import com.zj.runtimetest.vo.MethodParamTypeInfo;
 
@@ -15,10 +17,10 @@ import java.util.stream.Stream;
  * @author : jie.zhou
  * @date : 2025/7/22
  */
-public class RuntimeTestExprExecutor {
+public class ExprExecuteUtil {
     private static final Map<String, ExpressionExecutor> CACHE = new ConcurrentHashMap<>();
 
-    public static ExpressionExecutor getExecutor(ExpressionVo expVo, List<MethodParamTypeInfo> parameterTypeList, String projectBasePath) {
+    public static ExpressionExecutor getExecutor(ExpressionVo expVo, List<MethodParamTypeInfo> parameterTypeList) {
         if (Objects.isNull(expVo)) {
             return ExpressionExecutorFactory.EMPTY;
         }
@@ -34,7 +36,6 @@ public class RuntimeTestExprExecutor {
 
     public static Object[] evaluate(ExpressionVo expVo,
                                     List<MethodParamTypeInfo> parameterTypeList,
-                                    String projectBasePath,
                                     Object[] args) {
         if (Objects.isNull(expVo)) {
             return args;
@@ -43,7 +44,7 @@ public class RuntimeTestExprExecutor {
         LogUtil.log("[Agent more] pre-processing class cache key: " + key);
         ExpressionExecutor executor = get(key);
         if (Objects.isNull(executor)) {
-            executor = getExecutor(expVo, parameterTypeList, projectBasePath);
+            executor = getExecutor(expVo, parameterTypeList);
             put(key, executor);
         }
         ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
@@ -113,7 +114,7 @@ public class RuntimeTestExprExecutor {
             return ExpressionExecutorFactory.ERROR;
         }
         ExpressionExecutor expressionExecutor = (ExpressionExecutor) clazz.getDeclaredConstructor().newInstance();
-        expressionExecutor.setClassStr(source);
+        expressionExecutor.setSourceCode(source);
         return expressionExecutor;
     }
 

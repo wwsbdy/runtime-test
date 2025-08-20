@@ -168,4 +168,10 @@ Notes:<br>
 - 禁用构造器、匿名类、本地类、非公共方法（仅 <b>Runtime Test Script</b> 功能）
 - 在前置处理中对未知范型进行范型擦除
 
+### 2.1.*
+
+- Non-public methods are skipped when proxied
+
+- 非公共方法则跳过代理
+
 [//]: # (version-end)

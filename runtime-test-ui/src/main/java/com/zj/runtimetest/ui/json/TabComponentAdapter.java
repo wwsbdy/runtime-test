@@ -32,7 +32,7 @@ public class TabComponentAdapter extends ComponentAdapter implements Disposable 
     private final EditorTextField editor;
     private boolean initDone = false;
 
-    private boolean disposed = false;
+    private boolean disposed;
     private JButton submit;
 
     public TabComponentAdapter(EditorTextField editor) {

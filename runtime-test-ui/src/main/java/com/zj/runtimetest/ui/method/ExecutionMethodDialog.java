@@ -46,14 +46,15 @@ public class ExecutionMethodDialog extends DialogWrapper {
     private static final Logger log = Logger.getInstance(ExecutionMethodDialog.class);
 
 
-    private final Project project;
+    private Project project;
 
     /**
      * swing样式类，定义在4.3.2
      */
-    private final JsonEditorField jsonContent;
+    private JsonEditorField jsonContent;
+    private RuntimeTestState runtimeTestState;
 
-    private boolean disposed = false;
+    private boolean disposed;
     private String cacheKey;
     private CacheVo cache;
     private String defaultJson;
@@ -66,6 +67,7 @@ public class ExecutionMethodDialog extends DialogWrapper {
 
     public ExecutionMethodDialog(Project project, String cacheKey, CacheVo cache, String defaultJson, PsiMethod psiMethod) {
         super(true);
+        runtimeTestState = RuntimeTestState.getInstance(project);
         // 是否允许拖拽的方式扩大或缩小
         setResizable(true);
         String content = cache.getRequestJson();
@@ -92,7 +94,7 @@ public class ExecutionMethodDialog extends DialogWrapper {
         this.jsonContent.setPreferredSize(new Dimension(500, 700));
         Disposer.register(getDisposable(), this.jsonContent);
         // 没有进程禁用ok按钮
-        setOKActionEnabled(CollectionUtils.isNotEmpty(RuntimeTestState.getInstance(project).getPids()));
+        setOKActionEnabled(CollectionUtils.isNotEmpty(runtimeTestState.getPids()));
         // 触发一下init方法，否则swing样式将无法展示在会话框
         init();
     }
@@ -102,7 +104,6 @@ public class ExecutionMethodDialog extends DialogWrapper {
         JPanel jPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         jPanel.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, jPanel.getBackground().darker()));
         this.pidComboBox = new ComboBox<>();
-        RuntimeTestState runtimeTestState = RuntimeTestState.getInstance(project);
         runtimeTestState.getPids().forEach(pidComboBox::addItem);
         pidComboBox.setRenderer(new DefaultListCellRenderer() {
             @Override
@@ -189,7 +190,7 @@ public class ExecutionMethodDialog extends DialogWrapper {
             Messages.showErrorDialog(PluginBundle.get("notice.error.no-process-selected"), PluginBundle.get("notice.error"));
             return;
         }
-        if (!RuntimeTestState.getInstance(project).containsPid(pid)) {
+        if (!runtimeTestState.containsPid(pid)) {
             Messages.showErrorDialog(PluginBundle.get("notice.error.no-such-process") + " " + pid, PluginBundle.get("notice.error"));
             return;
         }
@@ -210,7 +211,7 @@ public class ExecutionMethodDialog extends DialogWrapper {
             cache.addHistory(jsonContentText);
         }
 
-        RuntimeTestState.getInstance(project).putCache(cacheKey, cache);
+        runtimeTestState.putCache(cacheKey, cache);
         ExecutorUtil.toFrontRunContent(project, pid);
         // 提示有前置处理
         if (Objects.nonNull(cache.getExpVo()) && StringUtils.isNotBlank(cache.getExpVo().getMyExpression())) {
@@ -234,7 +235,7 @@ public class ExecutionMethodDialog extends DialogWrapper {
         String jsonContentText = jsonContent.getText();
         cache.setPid(pid);
         cache.setRequestJson(jsonContentText);
-        RuntimeTestState.getInstance(project).putCache(cacheKey, cache);
+        runtimeTestState.putCache(cacheKey, cache);
         super.doCancelAction();
     }
 
@@ -255,6 +256,9 @@ public class ExecutionMethodDialog extends DialogWrapper {
             defaultJson = null;
             preMethodButton = null;
             logDetailCheckBox = null;
+            runtimeTestState = null;
+            jsonContent = null;
+            project = null;
         }
         super.dispose();
     }
