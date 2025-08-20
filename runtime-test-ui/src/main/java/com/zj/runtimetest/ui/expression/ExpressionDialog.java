@@ -20,6 +20,7 @@ import javax.swing.*;
 import java.util.Objects;
 
 /**
+ * 表达式会话框
  * @author arthur_zhou
  */
 @Setter
@@ -30,7 +31,7 @@ public class ExpressionDialog extends DialogWrapper {
 
     private final Project project;
 
-    private boolean disposed = false;
+    private boolean disposed;
 
     private XDebuggerEditorBase expressionEditor;
 

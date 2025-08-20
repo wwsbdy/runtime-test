@@ -7,6 +7,8 @@ import java.lang.instrument.ClassFileTransformer;
 import java.security.ProtectionDomain;
 
 /**
+ * 插桩类
+ * Spring 刷新时，设置上下文
  * @author 19242
  */
 public class SpringRefreshTransformer implements ClassFileTransformer {

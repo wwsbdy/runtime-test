@@ -3,6 +3,7 @@ package com.zj.runtimetest.vo;
 import lombok.Data;
 
 /**
+ * 方法调用结果
  * @author : jie.zhou
  * @date : 2025/8/20
  */

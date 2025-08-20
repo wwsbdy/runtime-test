@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 
 /**
+ * Spring Bean信息
  * @author : jie.zhou
  * @date : 2025/6/30
  */

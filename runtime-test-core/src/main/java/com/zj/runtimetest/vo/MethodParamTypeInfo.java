@@ -6,6 +6,7 @@ import lombok.EqualsAndHashCode;
 import java.lang.reflect.Type;
 
 /**
+ * 方法参数类型信息
  * @author : jie.zhou
  * @date : 2025/7/22
  */

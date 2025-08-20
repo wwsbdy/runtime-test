@@ -12,6 +12,7 @@ import java.util.Date;
 import java.util.Objects;
 
 /**
+ * 反序列化器
  * @author : jie.zhou
  * @date : 2025/7/25
  */

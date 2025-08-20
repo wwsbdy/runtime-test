@@ -8,6 +8,8 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.java.debugger.JavaDebuggerEditorsProvider;
 
 /**
+ * 自定义表达式编辑器
+ * 禁用非公有方法、字段
  * @author : jie.zhou
  * @date : 2025/7/31
  */

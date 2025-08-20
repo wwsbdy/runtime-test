@@ -8,6 +8,7 @@ import java.lang.reflect.Modifier;
 import java.util.Objects;
 
 /**
+ * 创建非 spring bean
  * @author : jie.zhou
  * @date : 2025/7/1
  */

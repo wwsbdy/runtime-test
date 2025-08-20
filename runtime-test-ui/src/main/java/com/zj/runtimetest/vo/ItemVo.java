@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 
 /**
+ * 元素信息和下标
  * @author : jie.zhou
  * @date : 2025/8/6
  */

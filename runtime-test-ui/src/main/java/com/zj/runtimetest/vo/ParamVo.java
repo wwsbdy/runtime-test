@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import java.util.Set;
 
 /**
+ * 参数信息
  * @author : jie.zhou
  * @date : 2025/8/12
  */

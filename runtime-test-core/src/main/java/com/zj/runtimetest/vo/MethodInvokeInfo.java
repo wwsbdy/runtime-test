@@ -1,6 +1,6 @@
 package com.zj.runtimetest.vo;
 
-import com.zj.runtimetest.exp.RuntimeTestExprExecutor;
+import com.zj.runtimetest.utils.ExprExecuteUtil;
 import com.zj.runtimetest.utils.*;
 import lombok.Getter;
 
@@ -11,6 +11,7 @@ import java.lang.reflect.Type;
 import java.util.*;
 
 /**
+ * 方法调用信息
  * @author : jie.zhou
  * @date : 2025/7/1
  */
@@ -136,6 +137,6 @@ public class MethodInvokeInfo {
     }
 
     private Object[] before(ExpressionVo expVo, Object[] args) {
-        return RuntimeTestExprExecutor.evaluate(expVo, parameterList, args);
+        return ExprExecuteUtil.evaluate(expVo, parameterList, args);
     }
 }

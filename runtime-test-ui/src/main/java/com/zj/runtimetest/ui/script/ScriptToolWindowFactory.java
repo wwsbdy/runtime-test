@@ -29,6 +29,7 @@ import java.util.Optional;
 
 
 /**
+ * 脚本工具窗口工厂
  * @author jie.zhou
  */
 public class ScriptToolWindowFactory implements ToolWindowFactory {

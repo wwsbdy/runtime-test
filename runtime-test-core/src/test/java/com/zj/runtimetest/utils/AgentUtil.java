@@ -1,7 +1,6 @@
 package com.zj.runtimetest.utils;
 
 import com.zj.runtimetest.exp.ExpressionExecutor;
-import com.zj.runtimetest.exp.RuntimeTestExprExecutor;
 import com.zj.runtimetest.vo.MethodParamInfo;
 import com.zj.runtimetest.vo.MethodParamTypeInfo;
 import com.zj.runtimetest.vo.RequestInfo;
@@ -79,7 +78,7 @@ public class AgentUtil {
             Class<?> aClass = parameterTypes1[i];
             parameterTypeList.add(new MethodParamTypeInfo(methodParamInfo.getParamName(), methodParamInfo.getParamType(), aClass, argType));
         }
-        return RuntimeTestExprExecutor.getExecutor(requestInfo.getExpVo(), parameterTypeList);
+        return ExprExecuteUtil.getExecutor(requestInfo.getExpVo(), parameterTypeList);
     }
 
 }

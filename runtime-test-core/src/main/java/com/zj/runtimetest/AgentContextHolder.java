@@ -1,6 +1,6 @@
 package com.zj.runtimetest;
 
-import com.zj.runtimetest.exp.RuntimeTestExprExecutor;
+import com.zj.runtimetest.utils.ExprExecuteUtil;
 import com.zj.runtimetest.utils.CacheUtil;
 import com.zj.runtimetest.utils.ClassUtil;
 import com.zj.runtimetest.utils.JsonUtil;
@@ -12,6 +12,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
+ * Spring上下文处理器
  * @author 19242
  */
 public class AgentContextHolder {
@@ -36,7 +37,7 @@ public class AgentContextHolder {
                 || Objects.isNull(methodName) || methodName.isEmpty()) {
             LogUtil.log("[Agent more] script begin.");
             // 通过脚本调用agent的方式，直接运行前置方法
-            RuntimeTestExprExecutor.evaluate(requestInfo.getExpVo(), null, null);
+            ExprExecuteUtil.evaluate(requestInfo.getExpVo(), null, null);
             LogUtil.alwaysLog("[Agent] script execution completed.");
             return;
         }
