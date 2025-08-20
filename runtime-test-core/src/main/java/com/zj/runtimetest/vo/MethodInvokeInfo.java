@@ -1,6 +1,5 @@
 package com.zj.runtimetest.vo;
 
-import com.zj.runtimetest.utils.ExprExecuteUtil;
 import com.zj.runtimetest.utils.*;
 import lombok.Getter;
 
@@ -37,7 +36,10 @@ public class MethodInvokeInfo {
             for (int i = 0; i < parameterTypeList.size(); i++) {
                 MethodParamInfo methodParamInfo = parameterTypeList.get(i);
                 String clsStr = methodParamInfo.getParamType();
-                if (ClassUtil.isPrimitive(clsStr) || clsStr.contains(".")) {
+                if (ClassUtil.isPrimitive(clsStr)
+                        || clsStr.contains(".")
+                        || clsStr.endsWith("...")
+                        || clsStr.endsWith("[]")) {
                     try {
                         paramClazzArr[i] = ClassUtil.getClass(clsStr, beanInfo.getClassLoader());
                     } catch (ClassNotFoundException e) {
@@ -54,7 +56,10 @@ public class MethodInvokeInfo {
         try {
             method = beanInfo.getCls().getDeclaredMethod(requestInfo.getMethodName(), paramClazzArr);
         } catch (NoSuchMethodException e) {
-            errorMsg = "NoSuchMethodException: " + requestInfo.getMethodName();
+            errorMsg = "NoSuchMethodException: "
+                    + requestInfo.getMethodName()
+                    + " in " + requestInfo.getClassName()
+                    + ", params " + Arrays.toString(paramClazzArr);
             return;
         }
         method.setAccessible(true);
@@ -81,14 +86,14 @@ public class MethodInvokeInfo {
 
     public Result invoke(ExpressionVo expVo, String requestJson) throws InvocationTargetException, IllegalAccessException {
         if (Objects.nonNull(errorMsg)) {
-            LogUtil.alwaysLog("[Agent] " + errorMsg);
+            LogUtil.alwaysErr("[Agent] " + errorMsg);
             return Result.FAIL;
         }
         if (Objects.nonNull(bean)) {
             LogUtil.log("[Agent more] Bean from: " + bean);
         }
         if (Objects.isNull(method)) {
-            LogUtil.alwaysLog("[Agent] method is not found.");
+            LogUtil.alwaysErr("[Agent] method is not found.");
             return Result.FAIL;
         }
         if (privateMethodProxyClass) {

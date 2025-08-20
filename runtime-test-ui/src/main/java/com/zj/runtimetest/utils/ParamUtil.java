@@ -42,11 +42,13 @@ public class ParamUtil {
             PsiParameter parameter = Objects.requireNonNull(parameterList.getParameter(i));
             String canonicalText;
             String clsName = parameter.getType().getCanonicalText();
-            if (!ClassUtil.isPrimitive(clsName) && !clsName.contains(".")) {
-                canonicalText = "java.lang.Object";
-            } else {
+            if (ClassUtil.isPrimitive(clsName)
+                    || clsName.contains(".")
+                    || parameter.getType() instanceof PsiArrayType) {
                 // 兼容内部类，用$
                 canonicalText = getJvmQualifiedClassName(parameter.getType());
+            } else {
+                canonicalText = "java.lang.Object";
             }
             parameterTypeList.add(new MethodParamInfo(parameter.getName(), canonicalText));
         }
@@ -297,6 +299,7 @@ public class ParamUtil {
     }
 
     /**
+     * 获取Class的类名
      * 生成 Outer.Inner 这种形式（不带包名）
      */
     public static String getTypeName(PsiClass psiClass) {
