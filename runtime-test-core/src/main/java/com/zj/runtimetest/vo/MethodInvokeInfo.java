@@ -110,7 +110,7 @@ public class MethodInvokeInfo {
     }
 
     private Object[] getArgs(ExpressionVo expVo, String requestJson) {
-        if (parameterList.isEmpty()) {
+        if (Objects.isNull(parameterList) || parameterList.isEmpty()) {
             LogUtil.log("[Agent more] method no params");
             return before(expVo, null);
         }
