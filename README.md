@@ -174,4 +174,10 @@ Notes:<br>
 
 - 非公共方法则跳过代理
 
+### 2.2.*
+
+- Adjusted some logic and error issues
+
+- 调整了一些逻辑和报错问题
+
 [//]: # (version-end)
