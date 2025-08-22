@@ -27,14 +27,8 @@ public class MyDebuggerEditorsProvider extends JavaDebuggerEditorsProvider {
     private void setChecker(PsiFile expressionCodeFragment) {
         if (expressionCodeFragment instanceof JavaCodeFragment) {
             ((JavaCodeFragment) expressionCodeFragment).setVisibilityChecker((psiElement, psiElement1) -> {
-                if (psiElement instanceof PsiMethod) {
-                    if (((PsiMethod) psiElement).hasModifierProperty(PsiModifier.PUBLIC)) {
-                        return JavaCodeFragment.VisibilityChecker.Visibility.VISIBLE;
-                    }
-                    return JavaCodeFragment.VisibilityChecker.Visibility.NOT_VISIBLE;
-                }
-                if (psiElement instanceof PsiField) {
-                    if (((PsiField) psiElement).hasModifierProperty(PsiModifier.PUBLIC)) {
+                if ((psiElement instanceof PsiMethod || psiElement instanceof PsiField || psiElement instanceof PsiClass)) {
+                    if (((PsiModifierListOwner) psiElement).hasModifierProperty(PsiModifier.PUBLIC)) {
                         return JavaCodeFragment.VisibilityChecker.Visibility.VISIBLE;
                     }
                     return JavaCodeFragment.VisibilityChecker.Visibility.NOT_VISIBLE;
