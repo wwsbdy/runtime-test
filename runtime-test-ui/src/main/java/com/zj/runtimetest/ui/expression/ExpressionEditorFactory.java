@@ -13,7 +13,7 @@ import com.intellij.xdebugger.XExpression;
 import com.intellij.xdebugger.XSourcePosition;
 import com.intellij.xdebugger.impl.XSourcePositionImpl;
 import com.intellij.xdebugger.impl.ui.XDebuggerExpressionEditor;
-import com.zj.runtimetest.utils.ParamUtil;
+import com.zj.runtimetest.utils.ClassUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -75,7 +75,12 @@ public class ExpressionEditorFactory {
                 PsiParameter param = parameters[i];
                 PsiType type = param.getType();
                 // 获取完整类型（包含包名）
-                String typeText = ParamUtil.getTypeName(type);
+                String typeText = type.getCanonicalText();
+                if (!ClassUtil.isPrimitive(typeText)
+                        && !typeText.contains(".")
+                        && !(type instanceof PsiArrayType)) {
+                    typeText = "java.lang.Object";
+                }
                 builder.append(typeText).append(" ").append(param.getName());
                 if (i < parameters.length - 1) {
                     builder.append(", ");
