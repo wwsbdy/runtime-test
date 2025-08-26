@@ -52,7 +52,6 @@ public class ExprExecuteUtil {
             Thread.currentThread().setContextClassLoader(RuntimeTestClassLoader.defaultClassLoader());
             return executor.eval(args);
         } catch (Throwable t) {
-            put(key, ExpressionExecutorFactory.ERROR);
             throw new RuntimeException(t);
         } finally {
             Thread.currentThread().setContextClassLoader(contextClassLoader);

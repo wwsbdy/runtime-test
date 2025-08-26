@@ -61,8 +61,6 @@ Notes:<br>
 - 点击ok后跳转指定Run/Debug进程窗口
 - 支持前置表达式
 
-[//]: # (version-start)
-
 ### 1.1.*
 
 - Maintain compatibility with other versions
@@ -172,12 +170,19 @@ Notes:<br>
 
 - Non-public methods are skipped when proxied
 
+
 - 非公共方法则跳过代理
 
 ### 2.2.*
 
 - Adjusted some logic and error issues
 
+
 - 调整了一些逻辑和报错问题
 
-[//]: # (version-end)
+### 2.3.*
+
+- No cache on script error
+
+
+- 脚本报错则不缓存
