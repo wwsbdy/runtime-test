@@ -64,7 +64,7 @@ tasks.publishPlugin {
 }
 
 fun parseChangeNotesFromReadme(): String {
-    val readmePath = rootProject.file("README.md").toPath()
+    val readmePath = rootProject.file("CHANGELOG.md").toPath()
     val lines = Files.readAllLines(readmePath)
 
     data class VersionNotes(val version: String, val blocks: List<List<String>>)
