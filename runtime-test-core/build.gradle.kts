@@ -12,8 +12,7 @@ dependencies {
     implementation("org.ow2.asm:asm:9.7.1")
     implementation("org.ow2.asm:asm-tree:9.7.1")
     implementation("org.ow2.asm:asm-analysis:9.7.1")
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.13.4")
-    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.13.4")
+    implementation("com.google.code.gson:gson:2.10.1")
     implementation("org.eclipse.jdt:ecj:3.20.0")
 }
 
@@ -30,6 +29,8 @@ tasks.shadowJar {
     destinationDirectory.set(distDir)
     archiveFileName.set(agentArchive)
     relocate("org.objectweb.asm", "com.zj.runtimetest.renamed.asm")
+    relocate( "com.google.gson", "com.zj.runtimetest.renamed.gson")
+    relocate("org.eclipse.jdt", "com.zj.runtimetest.renamed.jdt")
     manifest {
         attributes(
             mapOf(

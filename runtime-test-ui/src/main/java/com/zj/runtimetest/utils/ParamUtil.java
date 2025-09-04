@@ -1,6 +1,5 @@
 package com.zj.runtimetest.utils;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.intellij.psi.*;
 import com.intellij.psi.util.PsiUtil;
 import com.zj.runtimetest.utils.json.POJO2JSONParser;
@@ -117,10 +116,10 @@ public class ParamUtil {
         if (Objects.isNull(parameterList) || parameterList.getParametersCount() == 0) {
             return "";
         }
-        ObjectNode objectNode = JsonUtil.objectMapper.createObjectNode();
+        Map<String, Object> objectNode = new LinkedHashMap<>();
         for (int i = 0; i < parameterList.getParametersCount(); i++) {
             PsiParameter parameter = Objects.requireNonNull(parameterList.getParameter(i));
-            objectNode.putPOJO(parameter.getName(), POJO2JSONParser.parseFieldValue(parameter.getType()));
+            objectNode.put(parameter.getName(), POJO2JSONParser.parseFieldValue(parameter.getType()));
         }
         return JsonUtil.toJsonString(objectNode);
     }

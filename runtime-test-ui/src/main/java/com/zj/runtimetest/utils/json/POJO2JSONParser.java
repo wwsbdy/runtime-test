@@ -1,6 +1,5 @@
 package com.zj.runtimetest.utils.json;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.Sets;
 import com.intellij.psi.*;
 import com.intellij.psi.util.PsiUtil;
@@ -33,9 +32,7 @@ public class POJO2JSONParser {
             "java.util.Set",
             "java.util.AbstractSet");
 
-    private static final Set<String> JAVA_OBJECT_TYPES = Sets.newHashSet("com.fasterxml.jackson.databind.JsonNode",
-            "com.fasterxml.jackson.databind.node.ArrayNode",
-            "com.fasterxml.jackson.databind.node.ObjectNode",
+    private static final Set<String> JAVA_OBJECT_TYPES = Sets.newHashSet(
             "java.lang.Boolean",
 //            "java.lang.CharSequence",
             "java.lang.Character",
@@ -56,7 +53,7 @@ public class POJO2JSONParser {
 
 
     private static Object parseClass(PsiClass psiClass, int recursionLevel) {
-        ObjectNode objectNode = JsonUtil.objectMapper.createObjectNode();
+        Map<String, Object> objectNode = new LinkedHashMap<>();
         List<Map.Entry<String, Object>> fields = Arrays.stream(psiClass.getAllFields())
                 .map(field -> parseField(field, recursionLevel))
                 .filter(Objects::nonNull)
@@ -65,7 +62,7 @@ public class POJO2JSONParser {
             return null;
         }
         for (Map.Entry<String, Object> field : fields) {
-            objectNode.putPOJO(JsonUtil.convertName(field.getKey()), field.getValue());
+            objectNode.put(JsonUtil.convertName(field.getKey()), field.getValue());
         }
         return objectNode;
     }
