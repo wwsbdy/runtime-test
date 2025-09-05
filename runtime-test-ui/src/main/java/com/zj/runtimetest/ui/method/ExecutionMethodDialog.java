@@ -18,9 +18,9 @@ import com.zj.runtimetest.ui.expression.ExpressionDialog;
 import com.zj.runtimetest.ui.json.JsonEditorField;
 import com.zj.runtimetest.ui.json.JsonLanguage;
 import com.zj.runtimetest.utils.ExecutorUtil;
-import com.zj.runtimetest.utils.JsonUtil;
 import com.zj.runtimetest.utils.NoticeUtil;
 import com.zj.runtimetest.utils.RunUtil;
+import com.zj.runtimetest.utils.json.JsonUtilV2;
 import com.zj.runtimetest.vo.CacheVo;
 import com.zj.runtimetest.vo.ProcessVo;
 import lombok.Getter;
@@ -197,7 +197,7 @@ public class ExecutionMethodDialog extends DialogWrapper {
         String jsonContentText = jsonContent.getText();
         if (!jsonContentText.isEmpty()) {
             try {
-                Map<String, Object> map = JsonUtil.toMap(jsonContentText);
+                Map<String, Object> map = JsonUtilV2.toMap(jsonContentText);
                 if (map.isEmpty()) {
                     jsonContentText = "";
                 }

@@ -1,8 +1,8 @@
 package com.zj.runtimetest.utils;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.intellij.psi.*;
 import com.intellij.psi.util.PsiUtil;
+import com.zj.runtimetest.utils.json.JsonUtilV2;
 import com.zj.runtimetest.utils.json.POJO2JSONParser;
 import com.zj.runtimetest.vo.MethodParamInfo;
 import com.zj.runtimetest.vo.ParamVo;
@@ -117,12 +117,12 @@ public class ParamUtil {
         if (Objects.isNull(parameterList) || parameterList.getParametersCount() == 0) {
             return "";
         }
-        ObjectNode objectNode = JsonUtil.objectMapper.createObjectNode();
+        Map<String, Object> objectNode = new LinkedHashMap<>();
         for (int i = 0; i < parameterList.getParametersCount(); i++) {
             PsiParameter parameter = Objects.requireNonNull(parameterList.getParameter(i));
-            objectNode.putPOJO(parameter.getName(), POJO2JSONParser.parseFieldValue(parameter.getType()));
+            objectNode.put(parameter.getName(), POJO2JSONParser.parseFieldValue(parameter.getType()));
         }
-        return JsonUtil.toJsonString(objectNode);
+        return JsonUtilV2.toJsonString(objectNode);
     }
 
     private static Set<String> collectImportsFromType(PsiType type) {
@@ -236,7 +236,7 @@ public class ParamUtil {
      */
     public static String getParamName(@NotNull String name) {
         // 1. 首先进行JSON命名转换
-        name = JsonUtil.convertName(name);
+        name = convertName(name);
         // 2. 处理Java关键字冲突
         if (isJavaKeyword(name)) {
             // 关键字处理策略：添加下划线前缀
@@ -318,5 +318,18 @@ public class ParamUtil {
 
     private static boolean isNotJavaLang(String className) {
         return className != null && (!className.startsWith("java.lang.") || !className.matches("^java\\.lang(\\.[A-Za-z0-9]+)?$"));
+    }
+
+    /**
+     * 转换属性名（保持和原Jackson版一致）
+     */
+    public static String convertName(String name) {
+        if (Objects.isNull(name) || name.isEmpty()) {
+            return name;
+        }
+        if (Character.isUpperCase(name.charAt(0))) {
+            name = name.substring(0, 1).toLowerCase() + name.substring(1);
+        }
+        return name;
     }
 }
