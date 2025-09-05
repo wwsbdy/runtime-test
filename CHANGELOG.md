@@ -1,6 +1,6 @@
 [//]: # (version-start)
 
-### 1.1.* - 2.2.*
+### 1.1.* - 2.3.*
 
 - Remove dependency on breakpoints for pre-processing
 - Now supports pre-processing in <b>non-Debug mode</b>
@@ -20,11 +20,11 @@
 - 在前置处理中添加了一些方法
 - 右键方法可快速生成调用脚本（<b>Runtime Test Script</b> 功能）
 
-### 2.3.*
+### 2.4.*
 
-- No cache on script error
+- Solve jackson version incompatibility problem
 
 
-- 脚本报错则不缓存
+- 解决jackson版本不兼容的问题
 
 [//]: # (version-end)

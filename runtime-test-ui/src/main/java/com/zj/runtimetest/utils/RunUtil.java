@@ -7,6 +7,7 @@ import com.sun.tools.attach.AgentInitializationException;
 import com.sun.tools.attach.AgentLoadException;
 import com.sun.tools.attach.VirtualMachine;
 import com.zj.runtimetest.language.PluginBundle;
+import com.zj.runtimetest.utils.json.JsonUtilV2;
 import com.zj.runtimetest.vo.CacheVo;
 
 import java.io.File;
@@ -27,7 +28,7 @@ public class RunUtil {
     public static void run(Project project, CacheVo cache) {
         String coreJarPath = PathManager.getPluginsPath() + File.separator + "runtime-test-ui" + File.separator + "lib" + File.separator + "runtime-test-core.jar";
         String pid = cache.getPid().toString();
-        String requestJson = JsonUtil.toJsonString(cache);
+        String requestJson = JsonUtilV2.toJsonString(cache);
         requestJson = Base64Util.encode(requestJson);
         String jsonPath = project.getBasePath() + "/.idea/runtime-test/RequestInfo.json";
         if (requestJson.length() > 600 && PluginIOUtil.flushFile(jsonPath, requestJson)) {
