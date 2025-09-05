@@ -15,25 +15,23 @@
  * limitations under the License.
  */
 
-package com.zj.runtimetest.utils;
+package com.zj.runtimetest.utils.json;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.json.JsonReadFeature;
 import com.fasterxml.jackson.core.json.JsonWriteFeature;
-import com.fasterxml.jackson.databind.*;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 
-import java.lang.reflect.Type;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.temporal.Temporal;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Json工具类
  * @author 19242
  */
-public class JsonUtil {
+public class JsonUtilV2 {
 
     public static ObjectMapper objectMapper = new ObjectMapper();
 
@@ -56,47 +54,11 @@ public class JsonUtil {
         objectMapper.configure(JsonWriteFeature.ESCAPE_NON_ASCII.mappedFeature(), false);
         // 启用美化输出
         objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
-        JavaTimeModule javaTimeModule = new JavaTimeModule();
-        javaTimeModule.addDeserializer(LocalDateTime.class, Deserializer.LOCAL_DATE_TIME_DESERIALIZER);
-        javaTimeModule.addSerializer(LocalDateTime.class, Serializer.LOCAL_DATE_TIME_SERIALIZER);
-        javaTimeModule.addDeserializer(LocalDate.class, Deserializer.LOCAL_DATE_DESERIALIZER);
-        javaTimeModule.addSerializer(LocalDate.class, Serializer.LOCAL_DATE_SERIALIZER);
-        javaTimeModule.addDeserializer(Date.class, Deserializer.DATE_DESERIALIZER);
-        javaTimeModule.addSerializer(Date.class, Serializer.DATE_SERIALIZER);
-        objectMapper.registerModule(javaTimeModule);
-    }
-
-    @SuppressWarnings("unchecked")
-    public static <T> T toJavaBean(String content, Class<?> clazz) {
-        if (Objects.isNull(content) || content.isEmpty()) {
-            return (T) FiledUtil.getFieldNullValue(clazz);
-        }
-        try {
-            JavaType javaType = JsonUtil.objectMapper.getTypeFactory().constructType(clazz);
-            if (javaType.isTypeOrSubTypeOf(Temporal.class)) {
-                content = "\"" + content + "\"";
-            }
-            return objectMapper.readValue(content, javaType);
-        } catch (Exception e) {
-            throw new IllegalArgumentException(e);
-        }
     }
 
     public static Map<String, Object> toMap(String content) {
         try {
             return objectMapper.readValue(content, StringObjectMap.class);
-        } catch (Exception e) {
-            throw new IllegalArgumentException(e);
-        }
-    }
-
-    public static Object convertValue(Object content, Type type) {
-        if (content == null) {
-            return null;
-        }
-        try {
-            JavaType javaType = JsonUtil.objectMapper.getTypeFactory().constructType(type);
-            return objectMapper.convertValue(content, javaType);
         } catch (Exception e) {
             throw new IllegalArgumentException(e);
         }

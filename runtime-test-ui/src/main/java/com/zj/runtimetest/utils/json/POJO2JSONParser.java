@@ -4,7 +4,7 @@ import com.google.common.collect.Sets;
 import com.intellij.psi.*;
 import com.intellij.psi.util.PsiUtil;
 import com.zj.runtimetest.constant.Constant;
-import com.zj.runtimetest.utils.JsonUtil;
+import com.zj.runtimetest.utils.ParamUtil;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -62,7 +62,7 @@ public class POJO2JSONParser {
             return null;
         }
         for (Map.Entry<String, Object> field : fields) {
-            objectNode.put(JsonUtil.convertName(field.getKey()), field.getValue());
+            objectNode.put(ParamUtil.convertName(field.getKey()), field.getValue());
         }
         return objectNode;
     }

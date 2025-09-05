@@ -22,9 +22,9 @@
 
 ### 2.4.*
 
-- Remove jackson
+- Solve jackson version incompatibility problem
 
 
-- 移除jackson
+- 解决jackson版本不兼容的问题
 
 [//]: # (version-end)
