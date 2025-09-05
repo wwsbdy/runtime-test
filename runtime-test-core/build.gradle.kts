@@ -34,6 +34,7 @@ tasks.shadowJar {
     archiveFileName.set(agentArchive)
     relocate("org.objectweb.asm", "com.zj.runtimetest.renamed.asm")
     relocate( "com.fasterxml.jackson", "com.zj.runtimetest.renamed.jackson")
+    relocate( "org.eclipse.jdt", "com.zj.runtimetest.renamed.jdt")
     manifest {
         attributes(
             mapOf(
