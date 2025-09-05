@@ -10,6 +10,7 @@ subprojects {
         plugin("java")
     }
     repositories {
+        mavenLocal()
         maven("https://maven.aliyun.com/nexus/content/groups/public/")
         maven("https://maven.aliyun.com/repository/public/")
         maven("https://maven.aliyun.com/repository/google/")
