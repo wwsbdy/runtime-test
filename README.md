@@ -186,3 +186,10 @@ Notes:<br>
 
 
 - 脚本报错则不缓存
+
+### 2.4.*
+
+- Solve jackson version incompatibility problem
+
+
+- 解决jackson版本不兼容的问题
