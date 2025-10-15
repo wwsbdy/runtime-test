@@ -156,7 +156,7 @@ public class POJO2JSONParser {
         }
         return !"java.lang.Object".equals(className)
                 && className.startsWith("java.")
-                || className.startsWith("sum.")
+                || className.startsWith("sun.")
                 || JAVA_OBJECT_TYPES.contains(className);
     }
 
